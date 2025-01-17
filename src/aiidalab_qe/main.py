@@ -4,6 +4,7 @@ from pathlib import Path
 
 import solara
 
+from aiida import load_profile
 from aiidalab_qe.components import (
     ParameterConfigurationStep,
     ResourcesSelectionStep,
@@ -12,6 +13,8 @@ from aiidalab_qe.components import (
     SubmissionStep,
     WizardApp,
 )
+
+_ = load_profile()
 
 ROOT = Path(__file__).parent
 
