@@ -18,33 +18,28 @@ def Wizard(
     context: UserContext[ContextType] | None = None,
     defaults: ContextType | None = None,
 ):
-    selected_index, set_selected_index = solara.use_state(t.cast(int, None))
+    selected_index, set_selected_index = solara.use_state(t.cast(int, 0))
     states, set_states = solara.use_state([State.INIT for _ in steps])
-
-    def on_selection(index: int):
-        set_selected_index(index)
 
     def on_state_change(i: int, new_state: State):
         set_states([*states[:i], new_state, *states[i + 1 :]])
         if (
             new_state is State.SUCCESS
-            and selected_index
+            and selected_index is not None
             and selected_index < len(steps) - 1
         ):
             set_selected_index(selected_index + 1)
 
     with ContextProvider(context, defaults):  # mypy: ignore
         with rv.ExpansionPanels(
-            class_="accordion gap-1",
+            class_="accordion gap-2",
             hover=True,
             accordion=True,
             v_model=selected_index,
-            on_v_model=on_selection,
+            on_v_model=lambda i: set_selected_index(i),
         ):
             for i, step in enumerate(steps):
-                with rv.ExpansionPanel(
-                    class_="accordion-item",
-                ):
+                with rv.ExpansionPanel(class_="accordion-item"):
                     with rv.ExpansionPanelHeader(
                         class_="accordion-header align-items-center justify-content-start",
                         style_=f"background-color: {BG_COLORS[states[i]]}",

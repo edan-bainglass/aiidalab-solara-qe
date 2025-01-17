@@ -4,7 +4,7 @@ import solara
 from aiida import load_profile
 
 from aiidalab_qe.common.context import qe_context
-from aiidalab_qe.common.paths import IMAGES, STYLES
+from aiidalab_qe.common.paths import STYLES
 from aiidalab_qe.common.schema import QeAppModel
 from aiidalab_qe.components import (
     App,

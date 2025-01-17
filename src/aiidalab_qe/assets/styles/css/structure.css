@@ -1,0 +1,16 @@
+.weas-widget {
+  width: 100%;
+}
+.weas-widget select {
+  color: unset;
+}
+.weas-widget select option {
+  color: black !important;
+}
+.weas-widget .title {
+  font-size: unset !important;
+}
+.weas-widget > div:first-child > div:first-of-type,
+.weas-widget > div:first-child canvas {
+  width: 100% !important;
+}

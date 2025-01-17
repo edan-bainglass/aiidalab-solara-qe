@@ -13,6 +13,7 @@ def NavItem(label: str = "", icon: str = "", **kwargs):
         color="secondary",
         children=[
             rv.Icon(
+                style_="margin-bottom: 1px;",
                 left=bool(label),
                 children=[f"mdi-{icon}"],
             ),
