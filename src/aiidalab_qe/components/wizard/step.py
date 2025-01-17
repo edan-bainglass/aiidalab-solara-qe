@@ -7,17 +7,21 @@ import solara
 from aiidalab_qe.common.state import State
 
 onStateChange = t.Callable[[State], None]
-QeAppWizardStep = t.Callable[[onStateChange], solara.Element]
-StepProps = tuple[str, QeAppWizardStep]
+WizardStepType = t.Callable[[onStateChange], solara.Element]
+
+
+class StepProps(t.TypedDict):
+    title: str
+    component: WizardStepType
 
 
 @solara.component
 def WizardStep(
-    step: QeAppWizardStep,
+    component: WizardStepType,
     on_state_change: onStateChange,
     confirmable: bool = True,
 ):
-    step(on_state_change)
+    component(on_state_change)
     if confirmable:
         solara.Button(
             label="Confirm",

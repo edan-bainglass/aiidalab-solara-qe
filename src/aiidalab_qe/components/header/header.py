@@ -19,6 +19,6 @@ def Header(title: str, subtitle: str = "", logo: LogoProps | None = None):
         if subtitle:
             rv.Html(
                 tag="h2",
-                class_="lead mx-auto py-2 text-center",
+                class_="lead mx-auto py-2",
                 children=[subtitle],
             )

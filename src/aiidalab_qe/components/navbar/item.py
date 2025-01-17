@@ -1,17 +1,23 @@
 from __future__ import annotations
 
 import solara
+from solara.alias import rv
 
 NavItemProps = dict[str, str]
 
 
 @solara.component
 def NavItem(label: str = "", icon: str = "", **kwargs):
-    solara.Button(
-        class_="btn btn-primary btn-lg m-1 justify-content-start",
-        icon_name=f"mdi-{icon}",
-        outlined=True,
-        label=label,
+    rv.Btn(
+        class_="btn btn-hover m-1 justify-content-start",
+        color="secondary",
+        children=[
+            rv.Icon(
+                left=bool(label),
+                children=[f"mdi-{icon}"],
+            ),
+            label,
+        ],
         **kwargs,
     )
 

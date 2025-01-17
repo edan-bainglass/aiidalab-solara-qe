@@ -9,6 +9,8 @@ repos:
       - id: check-json
       - id: check-yaml
       - id: end-of-file-fixer
+        exclude: |
+          \.css$
       - id: trailing-whitespace
         exclude: miscellaneous/structures/SiO2.xyz
 
