@@ -17,19 +17,12 @@ class StepProps(t.TypedDict):
 
 @solara.component
 def WizardStep(
+    state: State,
     component: WizardStepType,
     on_state_change: onStateChange,
     confirmable: bool = True,
 ):
-    state, set_state = solara.use_state(State.INIT)
-
-    def _on_state_change(new_state: State):
-        on_state_change(new_state)
-
-    solara.use_effect(lambda: _on_state_change(state), [state])
-
-    component(set_state)
-
+    component(on_state_change)
     if confirmable:
         solara.Button(
             label="Confirm",

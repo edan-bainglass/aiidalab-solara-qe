@@ -22,7 +22,7 @@ def StructureSelectionStep(on_state_change: onStateChange):
     structure, set_structure = solara.use_state(t.cast(ase.Atoms, None))
     viewer, set_viewer = solara.use_state(t.cast(WeasWidget, None))
 
-    def on_structure_change(structure: ase.Atoms):
+    def handle_structure(structure: ase.Atoms):
         set_structure(structure)
         if viewer:
             viewer.from_ase(structure)
@@ -48,7 +48,7 @@ def StructureSelectionStep(on_state_change: onStateChange):
             solara.Button(
                 label="Select structure",
                 color="primary",
-                on_click=lambda: on_structure_change(bulk("Si", "diamond", a=5.43)),
+                on_click=lambda: handle_structure(bulk("Si", "diamond", a=5.43)),
             )
             with rv.Row():
                 with rv.Col(lg=12, class_="pb-0"):

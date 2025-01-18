@@ -24,6 +24,7 @@ def Page():
     with solara.Head():
         solara.Title("AiiDAlab QE app")
         solara.Style(STYLES / "main.css")
+
     with App(
         title="The AiiDAlab Quantum ESPRESSO app",
         subtitle="🎉 Happy computing 🎉",

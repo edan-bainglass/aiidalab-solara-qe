@@ -18,17 +18,22 @@ def Wizard(
     context: UserContext[ContextType] | None = None,
     defaults: ContextType | None = None,
 ):
-    selected_index, set_selected_index = solara.use_state(t.cast(int, 0))
+    selected_index, set_selected_index = solara.use_state(t.cast(int, None))
     states, set_states = solara.use_state([State.INIT for _ in steps])
 
-    def on_state_change(i: int, new_state: State):
-        set_states([*states[:i], new_state, *states[i + 1 :]])
+    def handle_state(i: int, new_state: State):
+        new_states = states[:]
+        new_states[i] = new_state
+
         if (
             new_state is State.SUCCESS
             and selected_index is not None
             and selected_index < len(steps) - 1
         ):
+            new_states[i + 1] = State.CONFIGURED
             set_selected_index(selected_index + 1)
+
+        set_states(new_states)
 
     with ContextProvider(context, defaults):  # mypy: ignore
         with rv.ExpansionPanels(
@@ -56,9 +61,8 @@ def Wizard(
                             )
                     with rv.ExpansionPanelContent(class_="accordion-collapse"):
                         WizardStep(
+                            state=states[i],
                             component=step["component"],
-                            on_state_change=lambda state, i=i: on_state_change(
-                                i, state
-                            ),
+                            on_state_change=lambda state, i=i: handle_state(i, state),
                             confirmable=i < len(steps) - 1,
                         )
