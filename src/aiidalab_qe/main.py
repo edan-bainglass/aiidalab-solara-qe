@@ -81,7 +81,12 @@ def Page():
                 },
             ],
             context=qe_context,
-            defaults=QeAppModel(),
+            defaults=QeAppModel(
+                input_structure=None,
+                calculation_parameters={},
+                computational_resources={},
+                process=None,
+            ),
         )
 
 
