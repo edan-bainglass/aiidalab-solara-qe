@@ -18,6 +18,19 @@ dependencies = [
     "weas-widget"
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "pytest-regressions",
+    "pytest-playwright",
+    "pytest-ipywidgets[solara, notebook]",
+    "pre-commit",
+    "sphinx",
+    "sphinx-design",
+    "pydata-sphinx-theme",
+]
+
 [project.urls]
 repository = "https://github.com/edan-bainglass/aiidalab-solara-qe.git"
 
@@ -29,3 +42,6 @@ line-length = 88
 
 [tool.ruff.format]
 quote-style = "double"
+
+[tool.pytest.ini_options]
+addopts = ["--cov=aiidalab_qe", "-sv", "-ra"]
