@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import contextlib
 import typing as t
 
-from pydantic import BaseModel, ConfigDict, Field
-
 from aiida import orm
+from aiida.common.exceptions import NotExistent
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # TODO dynamically "concatenate" announced plugin schemas
 # TODO provide descriptions throughout
@@ -159,3 +160,11 @@ class QeAppModel(BaseModel):
     calculation_parameters: CalculationParametersModel = CalculationParametersModel()
     computational_resources: ComputationalResourcesModel = ComputationalResourcesModel()
     process: t.Optional[orm.ProcessNode] = None
+
+    @field_validator("process", mode="before")
+    @classmethod
+    def load_process(cls, value: orm.ProcessNode | str) -> orm.ProcessNode | None:
+        if isinstance(value, orm.ProcessNode) or value is None:
+            return value
+        with contextlib.suppress(NotExistent):
+            return orm.load_node(value)  # type: ignore

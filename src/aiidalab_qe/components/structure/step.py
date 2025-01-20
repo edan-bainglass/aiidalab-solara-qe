@@ -36,7 +36,7 @@ def StructureSelectionStep(on_state_change: onStateChange):
         [structure],
     )
 
-    solara.use_effect(lambda: not viewer and initialize_viewer(), [])
+    solara.use_effect(initialize_viewer, [])
 
     with solara.Head():
         solara.Style(STYLES / "structure.css")

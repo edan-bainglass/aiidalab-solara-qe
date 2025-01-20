@@ -14,7 +14,7 @@ def NavBar(items: list[NavItemProps]):
         solara.Style(STYLES / "navbar.css")
 
     with rv.Container(
-        class_="d-grid d-md-block mb-3 p-0 justify-content-center text-center"
+        class_="d-grid d-sm-block mb-3 p-0 justify-content-center text-center"
     ):
         for item in items:
             LinkNavItem(**item) if "href" in item else NavItem(**item)

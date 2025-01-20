@@ -9,10 +9,10 @@ LogoProps = dict[str, str]
 
 
 @solara.component
-def Logo(src: Path | str, alt: str = ""):
+def Logo(src: Path | str, alt: str = "", width: int = 100):
     rv.Img(
         class_="d-block mx-auto",
         src=src.as_posix() if isinstance(src, Path) else src,
         alt=alt,
-        width=100,
+        width=width,
     )
