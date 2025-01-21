@@ -1,17 +1,7 @@
-from .app import App
-from .parameters import ParameterConfigurationStep
-from .resources import ResourcesSelectionStep
-from .results import ResultsStep
-from .structure import StructureSelectionStep
-from .submission import SubmissionStep
-from .wizard import Wizard
+from .navbar import QeNavBar
+from .wizard import QeWizard
 
 __all__ = [
-    "App",
-    "ParameterConfigurationStep",
-    "ResourcesSelectionStep",
-    "ResultsStep",
-    "StructureSelectionStep",
-    "SubmissionStep",
-    "Wizard",
+    "QeNavBar",
+    "QeWizard",
 ]

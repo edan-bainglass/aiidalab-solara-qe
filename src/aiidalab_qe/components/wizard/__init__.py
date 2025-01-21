@@ -1,8 +1,5 @@
-from .step import StepProps, WizardStep
-from .wizard import Wizard
+from .wizard import QeWizard
 
 __all__ = [
-    "StepProps",
-    "Wizard",
-    "WizardStep",
+    "QeWizard",
 ]

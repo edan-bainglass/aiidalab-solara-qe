@@ -3,7 +3,7 @@ from __future__ import annotations
 import solara
 from solara.alias import rv
 
-from aiidalab_qe.common.paths import STYLES
+from aiidalab_qe.common.config.paths import STYLES
 
 from .item import LinkNavItem, NavItem, NavItemProps
 

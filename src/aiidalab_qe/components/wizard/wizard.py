@@ -1,68 +1,55 @@
 from __future__ import annotations
 
-import typing as t
-
 import solara
-from reacton.core import UserContext
 from solara.alias import rv
 
-from aiidalab_qe.common.context import ContextProvider, ContextType
-from aiidalab_qe.common.state import BG_COLORS, STATE_ICONS, State
+from aiidalab_qe.common.components import Wizard
+from aiidalab_qe.common.models.schema import QeAppModel, from_process
 
-from .step import StepProps, WizardStep
+from ..parameters import ParametersConfigurationStep
+from ..resources import ResourcesSelectionStep
+from ..results import ResultsStep
+from ..structure import StructureSelectionStep
+from ..submission import SubmissionStep
 
 
 @solara.component
-def Wizard(
-    steps: list[StepProps],
-    context: UserContext[ContextType] | None = None,
-    defaults: ContextType | None = None,
-):
-    selected_index, set_selected_index = solara.use_state(t.cast(int, None))
-    states, set_states = solara.use_state([State.INIT for _ in steps])
+def QeWizard(pk: int | None = None):
+    model = (
+        from_process(pk)
+        if pk
+        else QeAppModel(
+            input_structure=None,
+            calculation_parameters={},
+            computational_resources={},
+            process=None,
+        )
+    )
 
-    def handle_state(i: int, new_state: State):
-        new_states = states[:]
-        new_states[i] = new_state
-
-        if (
-            new_state is State.SUCCESS
-            and selected_index is not None
-            and selected_index < len(steps) - 1
-        ):
-            new_states[i + 1] = State.CONFIGURED
-            set_selected_index(selected_index + 1)
-
-        set_states(new_states)
-
-    with ContextProvider(context, defaults):  # mypy: ignore
-        with rv.ExpansionPanels(
-            class_="accordion gap-2",
-            hover=True,
-            accordion=True,
-            v_model=selected_index,
-            on_v_model=lambda i: set_selected_index(i),
-        ):
-            for i, step in enumerate(steps):
-                with rv.ExpansionPanel(class_="accordion-item"):
-                    with rv.ExpansionPanelHeader(
-                        class_="accordion-header align-items-center justify-content-start",
-                        style_=f"background-color: {BG_COLORS[states[i]]}",
-                    ):
-                        with rv.Container(class_="d-flex p-0"):
-                            rv.Icon(
-                                style_="margin-bottom: 1px; width: 30px;",
-                                left=True,
-                                children=[STATE_ICONS[states[i]]],
-                            )
-                            rv.Text(
-                                class_="align-self-end",
-                                children=[f"Step {i + 1}: {step['title']}"],
-                            )
-                    with rv.ExpansionPanelContent(class_="accordion-collapse"):
-                        WizardStep(
-                            state=states[i],
-                            component=step["component"],
-                            on_state_change=lambda state, i=i: handle_state(i, state),
-                            confirmable=i < len(steps) - 1,
-                        )
+    rv.Html(tag="h1", children=["Workbench"])
+    with rv.Container():
+        Wizard(
+            steps=[
+                {
+                    "title": "Select structure",
+                    "component": StructureSelectionStep,
+                },
+                {
+                    "title": "Configure the workflow",
+                    "component": ParametersConfigurationStep,
+                },
+                {
+                    "title": "Choose computational resources",
+                    "component": ResourcesSelectionStep,
+                },
+                {
+                    "title": "Submit the workflow",
+                    "component": SubmissionStep,
+                },
+                {
+                    "title": "Status & results",
+                    "component": ResultsStep,
+                },
+            ],
+            model=model,
+        )

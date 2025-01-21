@@ -9,16 +9,15 @@ from ase.build import bulk
 from solara.alias import rv
 from weas_widget import WeasWidget
 
-from aiidalab_qe.common.context import qe_context
-from aiidalab_qe.common.paths import STYLES
-from aiidalab_qe.common.state import State
+from aiidalab_qe.common.models.schema import QeAppModel
+from aiidalab_qe.common.config.paths import STYLES
+from aiidalab_qe.common.components.wizard.state import State
 
-from ..wizard.step import onStateChange
+from aiidalab_qe.common.components.wizard.step import onStateChange
 
 
 @solara.component
-def StructureSelectionStep(on_state_change: onStateChange):
-    context = solara.use_context(qe_context)
+def StructureSelectionStep(model: QeAppModel, on_state_change: onStateChange):
     structure, set_structure = solara.use_state(t.cast(ase.Atoms, None))
     viewer, set_viewer = solara.use_state(t.cast(WeasWidget, None))
 
@@ -26,7 +25,7 @@ def StructureSelectionStep(on_state_change: onStateChange):
         set_structure(structure)
         if viewer:
             viewer.from_ase(structure)
-        context.input_structure = orm.StructureData(ase=structure)
+        model.input_structure = orm.StructureData(ase=structure)
 
     def initialize_viewer():
         set_viewer(WeasWidget(viewerStyle={"width": "100%"}))

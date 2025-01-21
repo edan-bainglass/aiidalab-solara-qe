@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import contextlib
 import typing as t
 
 from aiida import orm
 from aiida.common.exceptions import NotExistent
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict
 
 # TODO dynamically "concatenate" announced plugin schemas
 # TODO provide descriptions throughout
@@ -136,7 +135,7 @@ class CodesModel(BaseModel):
 
 
 class ComputationalResourcesModel(BaseModel):
-    global_: CodesModel = Field(alias="global", default=CodesModel())
+    global_: CodesModel = CodesModel()
     # bands: CodesModel
     # pdos: CodesModel
     # xas: CodesModel
@@ -161,10 +160,47 @@ class QeAppModel(BaseModel):
     computational_resources: ComputationalResourcesModel = ComputationalResourcesModel()
     process: t.Optional[orm.ProcessNode] = None
 
-    @field_validator("process", mode="before")
-    @classmethod
-    def load_process(cls, value: orm.ProcessNode | str) -> orm.ProcessNode | None:
-        if isinstance(value, orm.ProcessNode) or value is None:
-            return value
-        with contextlib.suppress(NotExistent):
-            return orm.load_node(value)  # type: ignore
+
+def from_process(pk: int | None) -> QeAppModel:
+    from aiida.orm.utils.serialize import deserialize_unsafe
+
+    try:
+        process = orm.load_node(pk)
+        ui_parameters = deserialize_unsafe(process.base.extras.get("ui_parameters", {}))
+        assert ui_parameters
+    except (NotExistent, AssertionError):
+        return QeAppModel()
+
+    calculation_parameters = _extract_calculation_parameters(ui_parameters)
+    # computational_resources = _extract_computational_resources(ui_parameters)
+
+    return QeAppModel(
+        input_structure=process.inputs.structure,
+        calculation_parameters=calculation_parameters,
+        # computational_resources=computational_resources,
+        process=process,
+    )
+
+
+def _extract_calculation_parameters(parameters: dict) -> CalculationParametersModel:
+    model = CalculationParametersModel()
+
+    workchain_parameters: dict = parameters.get("workchain", {})
+    model.relax_type = workchain_parameters.get("relax_type")
+
+    models = {
+        "basic": BasicModel(),
+        "advanced": AdvancedModel(),
+    }
+
+    # TODO extand models by plugins
+
+    for identifier, model in models.items():
+        if model_parameters := parameters.get(identifier):
+            setattr(model, identifier, model(**model_parameters))
+
+    return model
+
+
+def _extract_computational_resources(parameters: dict) -> ComputationalResourcesModel:
+    return ComputationalResourcesModel(**parameters)

@@ -1,4 +1,10 @@
-.btn:hover {
+.v-btn:hover {
   background-color: #f0f0f0 !important;
   color: #333 !important;
+}
+
+@media (max-width: 800px) {
+  .v-toolbar__title v-text {
+    display: none;
+  }
 }

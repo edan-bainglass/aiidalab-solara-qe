@@ -1,7 +1,7 @@
 import ipyvuetify as v
 import solara
 
-from aiidalab_qe.common.state import BG_COLORS, STATE_ICONS, State
+from aiidalab_qe.common.components.wizard.state import BG_COLORS, STATE_ICONS, State
 from aiidalab_qe.components.wizard import StepProps, Wizard
 
 

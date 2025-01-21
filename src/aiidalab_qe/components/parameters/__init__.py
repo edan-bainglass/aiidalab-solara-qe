@@ -1,5 +1,5 @@
-from .step import ParameterConfigurationStep
+from .step import ParametersConfigurationStep
 
 __all__ = [
-    "ParameterConfigurationStep",
+    "ParametersConfigurationStep",
 ]

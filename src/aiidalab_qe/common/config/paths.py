@@ -1,6 +1,7 @@
 from pathlib import Path
+import aiidalab_qe
 
-ROOT = Path(__file__).parent.parent
+ROOT = Path(aiidalab_qe.__file__).parent
 ASSETS = ROOT / "assets"
 STYLES = ASSETS / "styles/css"
 IMAGES = ASSETS / "images"
