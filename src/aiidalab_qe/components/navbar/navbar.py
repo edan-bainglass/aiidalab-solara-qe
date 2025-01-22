@@ -11,7 +11,7 @@ def QeNavBar():
                 solara.Style(STYLES / "navbar.css")
         with rv.ToolbarTitle():
             with rv.Container(class_="d-flex p-0 align-center"):
-                with solara.Link(""):
+                with solara.Link("aiidalab-qe"):
                     rv.Img(
                         class_="me-3",
                         src="https://aiidalab-qe.readthedocs.io/_images/icon.svg",

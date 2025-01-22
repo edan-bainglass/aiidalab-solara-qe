@@ -10,3 +10,8 @@
 .v-application--wrap > div:nth-child(2) > div:nth-child(2) {
   display: none !important;
 }
+
+.solara-autorouter-content {
+  overflow-y: scroll;
+  height: calc(100vh - 64px - 12px);
+}

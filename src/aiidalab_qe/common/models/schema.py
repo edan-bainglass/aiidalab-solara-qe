@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing as t
 
 from aiida import orm
-from aiida.common.exceptions import NotExistent
+from aiidalab_qe.common.services.aiida import AiiDAService
 from pydantic import BaseModel, ConfigDict
 
 # TODO dynamically "concatenate" announced plugin schemas
@@ -165,10 +165,11 @@ def from_process(pk: int | None) -> QeAppModel:
     from aiida.orm.utils.serialize import deserialize_unsafe
 
     try:
-        process = orm.load_node(pk)
+        process = AiiDAService.load_qe_app_workflow_node(pk)
+        assert process
         ui_parameters = deserialize_unsafe(process.base.extras.get("ui_parameters", {}))
         assert ui_parameters
-    except (NotExistent, AssertionError):
+    except AssertionError:
         return QeAppModel()
 
     calculation_parameters = _extract_calculation_parameters(ui_parameters)

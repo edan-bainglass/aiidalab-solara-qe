@@ -41,12 +41,33 @@ class WorkflowModel:
 def Workbench():
     workflows, set_workflows = solara.use_state([WorkflowModel()])
     active_workflow, set_active_workflow = solara.use_state(t.cast(int, None))
-    input_pk, set_input_pk = solara.use_state(t.cast(int, None))
-    active_dialog, set_active_dialog = solara.use_state(False)
 
     def add_workflow(pk: int | None = None):
         set_workflows([*workflows, WorkflowModel(pk)])
         set_active_workflow(len(workflows))
+
+    with rv.Container(class_="d-none"):
+        with solara.Head():
+            solara.Style(STYLES / "workbench.css")
+
+    WorkbenchControls(add_workflow)
+
+    with Tabs(
+        vertical=True,
+        lazy=True,
+        value=active_workflow,
+        on_value=set_active_workflow,
+    ):
+        for workflow in workflows:
+            with Tab(label=workflow.label):
+                with rv.Container(class_="workbench-body"):
+                    QeWizard(workflow.pk)
+
+
+@solara.component
+def WorkbenchControls(add_workflow):
+    input_pk, set_input_pk = solara.use_state(t.cast(int, None))
+    active_dialog, set_active_dialog = solara.use_state(False)
 
     def prompt_for_pk():
         set_active_dialog(True)
@@ -56,50 +77,35 @@ def Workbench():
         set_input_pk(None)
         set_active_dialog(False)
 
-    with rv.Col(class_="p-0"):
-        with solara.Head():
-            solara.Style(STYLES / "workbench.css")
-
-        with rv.Row(class_="mx-2 my-0"):
-            solara.Button(
-                color="secondary",
-                icon=True,
-                icon_name="mdi-plus-thick",
-                on_click=add_workflow,
-            )
-            solara.Button(
-                color="secondary",
-                icon=True,
-                icon_name="mdi-key-plus",
-                on_click=prompt_for_pk,
-            )
-
-        ConfirmationDialog(
-            active_dialog,
-            title="Enter workflow PK",
-            ok="Submit",
-            on_ok=lambda: on_prompt_submit(),
-            on_cancel=lambda: set_active_dialog(False),
-            children=[
-                rv.Row(
-                    children=[
-                        solara.InputText(
-                            label="PK",
-                            value=input_pk,
-                            on_value=set_input_pk,
-                        )
-                    ]
-                )
-            ],
+    with rv.Row(class_="mx-2 my-0"):
+        solara.Button(
+            color="secondary",
+            icon=True,
+            icon_name="mdi-plus-thick",
+            on_click=add_workflow,
+        )
+        solara.Button(
+            color="secondary",
+            icon=True,
+            icon_name="mdi-key-plus",
+            on_click=prompt_for_pk,
         )
 
-        with Tabs(
-            vertical=True,
-            lazy=True,
-            value=active_workflow,
-            on_value=set_active_workflow,
-        ):
-            for workflow in workflows:
-                with Tab(label=workflow.label):
-                    with rv.Container(class_="workbench-body overflow-y-auto"):
-                        QeWizard(workflow.pk)
+    ConfirmationDialog(
+        active_dialog,
+        title="Enter workflow PK",
+        ok="Submit",
+        on_ok=lambda: on_prompt_submit(),
+        on_cancel=lambda: set_active_dialog(False),
+        children=[
+            rv.Row(
+                children=[
+                    solara.InputText(
+                        label="PK",
+                        value=input_pk,
+                        on_value=set_input_pk,
+                    )
+                ]
+            )
+        ],
+    )
