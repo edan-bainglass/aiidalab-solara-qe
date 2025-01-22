@@ -172,12 +172,12 @@ def from_process(pk: int | None) -> QeAppModel:
         return QeAppModel()
 
     calculation_parameters = _extract_calculation_parameters(ui_parameters)
-    # computational_resources = _extract_computational_resources(ui_parameters)
+    computational_resources = _extract_computational_resources(ui_parameters)
 
     return QeAppModel(
         input_structure=process.inputs.structure,
         calculation_parameters=calculation_parameters,
-        # computational_resources=computational_resources,
+        computational_resources=computational_resources,
         process=process,
     )
 
@@ -203,4 +203,4 @@ def _extract_calculation_parameters(parameters: dict) -> CalculationParametersMo
 
 
 def _extract_computational_resources(parameters: dict) -> ComputationalResourcesModel:
-    return ComputationalResourcesModel(**parameters)
+    return ComputationalResourcesModel(**parameters["codes"])

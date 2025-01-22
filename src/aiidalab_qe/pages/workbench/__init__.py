@@ -9,15 +9,8 @@ __all__ = [
 
 
 @solara.component
-def Layout(children=[]):
+def Layout(children: list[solara.Element]):
     with solara.Sidebar():
-        with rv.ListGroup():
-            with rv.ListItem():
-                solara.Text("1")
-            with rv.ListItem():
-                solara.Text("2")
-            with rv.ListItem():
-                solara.Text("3")
-            with rv.ListItem():
-                solara.Text("4")
+        with rv.ListItem():
+            solara.Text("<pk=93> Calculation 1")
     solara.Div(children=children)

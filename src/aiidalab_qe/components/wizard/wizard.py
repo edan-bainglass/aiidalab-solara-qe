@@ -26,7 +26,8 @@ def QeWizard(pk: int | None = None):
         )
     )
 
-    rv.Html(tag="h1", children=["Workbench"])
+    label = f"Workflow {f'[pk={pk}]' if pk else ''}"
+    rv.Html(tag="h1", children=[label])
     with rv.Container():
         Wizard(
             steps=[
