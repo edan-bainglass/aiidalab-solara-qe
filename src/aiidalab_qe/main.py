@@ -6,6 +6,7 @@ from solara.alias import rv
 from aiidalab_qe.common.config.paths import STYLES
 from aiidalab_qe.components import QeNavBar
 from aiidalab_qe.pages import CalculationHistory, Home, ResourceSetup, Workbench
+# from aiidalab_qe.common.context import workbench_context
 
 
 @solara.component
@@ -16,6 +17,12 @@ def Layout(children=[]):
             solara.Title("AiiDAlab QE app")
             solara.Style(STYLES / "main.css")
     solara.Div(children=children)
+
+
+# @solara.component
+# def WorkbenchWrapper():
+#     workbench_context.provide([])
+#     Workbench()
 
 
 routes = [

@@ -12,6 +12,7 @@ from solara.lab import ConfirmationDialog, Tab, Tabs
 from aiidalab_qe.common.config.paths import STYLES
 from aiidalab_qe.common.services.aiida import AiiDAService
 from aiidalab_qe.components.wizard import QeWizard
+# from aiidalab_qe.common.context import workbench_context
 
 
 class StatusIcon(Enum):
@@ -26,7 +27,6 @@ class StatusIcon(Enum):
 @dataclass
 class WorkflowModel:
     pk: int | None = None
-    status: ProcessState | None = None
 
     @property
     def label(self) -> str:
@@ -36,14 +36,23 @@ class WorkflowModel:
                 return f"{icon} {process.label or 'Workflow'} [pk={self.pk}]"
         return "New workflow"
 
+    @property
+    def status(self) -> ProcessState | None:
+        if self.pk:
+            if process := AiiDAService.load_qe_app_workflow_node(self.pk):
+                return process.process_state
+        return None
+
 
 @solara.component
 def Workbench():
+    # workflows = solara.use_context(workbench_context)
     workflows, set_workflows = solara.use_state([WorkflowModel()])
     active_workflow, set_active_workflow = solara.use_state(t.cast(int, None))
 
     def add_workflow(pk: int | None = None):
-        set_workflows([*workflows, WorkflowModel(pk)])
+        # workflows.append(WorkflowModel(pk))
+        set_workflows([*workflows, WorkflowModel(pk=pk)])
         set_active_workflow(len(workflows))
 
     with rv.Container(class_="d-none"):
