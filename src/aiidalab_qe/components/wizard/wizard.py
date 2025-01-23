@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+from aiidalab_qe.components.wizard.models import WorkflowModel
 import solara
 from solara.alias import rv
 
 from aiidalab_qe.common.components import Wizard
-from aiidalab_qe.common.models.schema import QeAppModel, from_process
 
 from ..parameters import ParametersConfigurationStep
 from ..resources import ResourcesSelectionStep
@@ -14,20 +14,8 @@ from ..submission import SubmissionStep
 
 
 @solara.component
-def QeWizard(pk: int | None = None):
-    model = (
-        from_process(pk)
-        if pk
-        else QeAppModel(
-            input_structure=None,
-            calculation_parameters={},
-            computational_resources={},
-            process=None,
-        )
-    )
-
-    label = f"Workflow {f'[pk={pk}]' if pk else ''}"
-    rv.Html(tag="h1", children=[label])
+def QeWizard(model: WorkflowModel):
+    rv.Html(tag="h2", class_="text-center", children=[model.label])
     with rv.Container():
         Wizard(
             steps=[
