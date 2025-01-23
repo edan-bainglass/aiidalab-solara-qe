@@ -41,6 +41,7 @@ class SystemModel(BaseModel):
     lspinorb: bool = False
     noncolin: bool = False
     nspin: int = 1
+    tot_magnetization: float = 0.0
 
 
 class ControlModel(BaseModel):
@@ -190,15 +191,15 @@ def _extract_calculation_parameters(parameters: dict) -> CalculationParametersMo
     model.relax_type = workchain_parameters.get("relax_type")
 
     models = {
-        "basic": BasicModel(),
-        "advanced": AdvancedModel(),
+        "basic": BasicModel,
+        "advanced": AdvancedModel,
     }
 
     # TODO extand models by plugins
 
-    for identifier, model in models.items():
-        if model_parameters := parameters.get(identifier):
-            setattr(model, identifier, model(**model_parameters))
+    for identifier, sub_model in models.items():
+        if sub_model_parameters := parameters.get(identifier):
+            setattr(model, identifier, sub_model(**sub_model_parameters))
 
     return model
 
