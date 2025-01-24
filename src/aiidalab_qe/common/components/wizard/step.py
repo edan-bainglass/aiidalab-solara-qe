@@ -8,7 +8,13 @@ from aiidalab_qe.common.components.wizard.models import WizardModel
 from aiidalab_qe.common.components.wizard.state import State
 
 onStateChange = t.Callable[[State], None]
-WizardStepType = t.Callable[[WizardModel, onStateChange], solara.Element]
+WizardStepType = t.Callable[
+    [
+        solara.Reactive[WizardModel],
+        onStateChange,
+    ],
+    solara.Element,
+]
 
 
 class StepProps(t.TypedDict):
@@ -20,7 +26,7 @@ class StepProps(t.TypedDict):
 def WizardStep(
     state: State,
     component: WizardStepType,
-    model: WizardModel,
+    model: solara.Reactive[WizardModel],
     on_state_change: onStateChange,
     confirmable: bool = True,
 ):

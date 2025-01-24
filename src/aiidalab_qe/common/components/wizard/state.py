@@ -11,19 +11,19 @@ class State(Enum):
 
 
 STATE_ICONS = {
-    State.INIT: "\u25cb",
-    State.READY: "\u25ce",
-    State.CONFIGURED: "\u25cf",
-    State.ACTIVE: "\u231b",
-    State.SUCCESS: "\u2713",
-    State.FAIL: "\u00d7",
+    "INIT": "\u25cb",
+    "READY": "\u25ce",
+    "CONFIGURED": "\u25cf",
+    "ACTIVE": "\u231b",
+    "SUCCESS": "\u2713",
+    "FAIL": "\u00d7",
 }
 
 BG_COLORS = {
-    State.INIT: "#eee",
-    State.READY: "#fcf8e3",
-    State.CONFIGURED: "#fcf8e3",
-    State.ACTIVE: "#d9edf7",
-    State.SUCCESS: "#dff0d8",
-    State.FAIL: "#f8d7da",
+    "INIT": "#eee",
+    "READY": "#fcf8e3",
+    "CONFIGURED": "#fcf8e3",
+    "ACTIVE": "#d9edf7",
+    "SUCCESS": "#dff0d8",
+    "FAIL": "#f8d7da",
 }

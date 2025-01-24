@@ -3,11 +3,9 @@ from __future__ import annotations
 import typing as t
 
 from aiida.orm import ProcessNode, StructureData
-from solara import Reactive, reactive
+from pydantic import BaseModel, ConfigDict
 
 from aiidalab_qe.common.services.aiida import AiiDAService
-
-from .reactive import ReactiveDataclass
 
 # TODO dynamically "concatenate" announced plugin schemas
 # TODO provide descriptions throughout
@@ -16,165 +14,157 @@ from .reactive import ReactiveDataclass
 # TODO automate and simplify schema API
 
 
-class BasicModel(ReactiveDataclass):
-    protocol: Reactive[
-        t.Literal[
-            "fast",
-            "moderate",
-            "precise",
-        ]
-    ] = reactive("moderate")
-    spin_type: Reactive[
-        t.Literal[
-            "none",
-            "collinear",
-        ]
-    ] = reactive("none")
-    electronic_type: Reactive[
-        t.Literal[
-            "metal",
-            "insulator",
-        ]
-    ] = reactive("metal")
+class ConfiguredBaseModel(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-class SystemModel(ReactiveDataclass):
-    tot_charge: Reactive[float] = reactive(0.0)
+class BasicModel(ConfiguredBaseModel):
+    protocol: t.Literal[
+        "fast",
+        "moderate",
+        "precise",
+    ] = "moderate"
+    spin_type: t.Literal[
+        "none",
+        "collinear",
+    ] = "none"
+    electronic_type: t.Literal[
+        "metal",
+        "insulator",
+    ] = "metal"
+
+
+class SystemModel(ConfiguredBaseModel):
+    tot_charge: float = 0.0
     starting_ns_eigenvalue: list[tuple[int, int, str, int]] = []
-    ecutwfc: Reactive[float] = reactive(0.0)
-    ecutrho: Reactive[float] = reactive(0.0)
-    vdw_corr: Reactive[
-        t.Literal[
-            "none",
-            "dft-d3",
-            "dft-d3bj",
-            "dft-d3m",
-            "dft-d3mbj",
-            "ts-vdw",
-        ]
-    ] = reactive("none")
-    smearing: Reactive[
-        t.Literal[
-            "cold",
-            "gaussian",
-            "fermi-dirac",
-            "methfessel-paxton",
-        ]
-    ] = reactive("cold")
-    degauss: Reactive[float] = reactive(0.0)
-    lspinorb: Reactive[bool] = reactive(False)
-    noncolin: Reactive[bool] = reactive(False)
-    nspin: Reactive[int] = reactive(1)
-    tot_magnetization: Reactive[float] = reactive(0.0)
+    ecutwfc: float = 0.0
+    ecutrho: float = 0.0
+    vdw_corr: t.Literal[
+        "none",
+        "dft-d3",
+        "dft-d3bj",
+        "dft-d3m",
+        "dft-d3mbj",
+        "ts-vdw",
+    ] = "none"
+    smearing: t.Literal[
+        "cold",
+        "gaussian",
+        "fermi-dirac",
+        "methfessel-paxton",
+    ] = "cold"
+    degauss: float = 0.0
+    lspinorb: bool = False
+    noncolin: bool = False
+    nspin: int = 1
+    tot_magnetization: float = 0.0
 
 
-class ControlModel(ReactiveDataclass):
-    forc_conv_thr: Reactive[float] = reactive(0.0)
-    etot_conv_thr: Reactive[float] = reactive(0.0)
+class ControlModel(ConfiguredBaseModel):
+    forc_conv_thr: float = 0.0
+    etot_conv_thr: float = 0.0
 
 
-class ElectronsModel(ReactiveDataclass):
-    conv_thr: Reactive[float] = reactive(0.0)
-    electron_maxstep: Reactive[int] = reactive(80)
+class ElectronsModel(ConfiguredBaseModel):
+    conv_thr: float = 0.0
+    electron_maxstep: int = 80
 
 
-class PwParametersModel(ReactiveDataclass):
+class PwParametersModel(ConfiguredBaseModel):
     SYSTEM: SystemModel = SystemModel()
     CONTROL: ControlModel = ControlModel()
     ELECTRONS: ElectronsModel = ElectronsModel()
 
 
-class PwModel(ReactiveDataclass):
+class PwModel(ConfiguredBaseModel):
     parameters: PwParametersModel = PwParametersModel()
-    pseudos: Reactive[dict[str, str]] = reactive({})
+    pseudos: dict[str, str] = {}
 
 
-class HubbardParametersModel(ReactiveDataclass):
-    hubbard_u: Reactive[dict[str, float]] = reactive({})
+class HubbardParametersModel(ConfiguredBaseModel):
+    hubbard_u: dict[str, float] = {}
 
 
-class AdvancedModel(ReactiveDataclass):
+class AdvancedModel(ConfiguredBaseModel):
     pw: PwModel = PwModel()
-    clean_workdir: Reactive[bool] = reactive(False)
-    kpoints_distance: Reactive[float] = reactive(0.0)
-    optimization_maxsteps: Reactive[int] = reactive(50)
-    pseudo_family: Reactive[str] = reactive("")
+    clean_workdir: bool = False
+    kpoints_distance: float = 0.0
+    optimization_maxsteps: int = 50
+    pseudo_family: str = ""
     hubbard_parameters: HubbardParametersModel = HubbardParametersModel()
-    initial_magnetic_moments: Reactive[dict[str, float]] = reactive({})
+    initial_magnetic_moments: dict[str, float] = {}
 
 
-# class BandsModel(ReactiveDataclass):
-#     projwfc_bands: Reactive[bool | None] = reactive(None)
+# class BandsModel(ConfiguredBaseModel):
+#     projwfc_bands: t.Optional[bool] = None
 
 
-# class PdosModel(ReactiveDataclass):
-#     nscf_kpoints_distance: Reactive[float] = reactive(0.1)
-#     use_pdos_degauss: Reactive[bool] = reactive(False)
-#     pdos_degauss: Reactive[float] = reactive(0.005)
-#     energy_grid_step: Reactive[float] = reactive(0.01)
+# class PdosModel(ConfiguredBaseModel):
+#     nscf_kpoints_distance: float = 0.1
+#     use_pdos_degauss: bool = False
+#     pdos_degauss: float = 0.005
+#     energy_grid_step: float = 0.01
 
 
-# class XasPseudosModel(ReactiveDataclass):
+# class XasPseudosModel(ConfiguredBaseModel):
 #     gipaw: str = ?
 #     core_hole: str = ?
 
 
-# class XasModel(ReactiveDataclass):
+# class XasModel(ConfiguredBaseModel):
 #     elements_list: list[str] = ?
 #     core_hole_treatments: dict[str, str] = ?
 #     pseudo_labels: dict[str, XasPseudosModel] = ?
 #     core_wfc_data_labels: dict[str, str] = ?
-#     supercell_min_parameter: Reactive[float] = ?
+#     supercell_min_parameter: float = ?
 
 
-# class CorrectionEnergyModel(ReactiveDataclass):
-#     exp: Reactive[float] = ?
-#     core: Reactive[float] = ?
+# class CorrectionEnergyModel(ConfiguredBaseModel):
+#     exp: float = ?
+#     core: float = ?
 
 
-# class XpsModel(ReactiveDataclass):
+# class XpsModel(ConfiguredBaseModel):
 #     structure_type: str = ?
 #     pseudo_group: str = ?
 #     correction_energies: dict[str, CorrectionEnergyModel] = ?
 #     core_level_list: list[str] = ?
 
 
-class CodeParallelizationModel(ReactiveDataclass):
-    npools: Reactive[int | None] = reactive(None)
+class CodeParallelizationModel(ConfiguredBaseModel):
+    npools: t.Optional[int] = None
 
 
-class CodeModel(ReactiveDataclass):
+class CodeModel(ConfiguredBaseModel):
     # options: list[list[tuple[str, str]]] = ?
-    code: Reactive[str] = reactive("")
-    nodes: Reactive[int] = reactive(1)
-    cpus: Reactive[int] = reactive(1)
-    ntasks_per_node: Reactive[int] = reactive(1)
-    cpus_per_task: Reactive[int] = reactive(1)
-    max_wallclock_seconds: Reactive[int] = reactive(3600)
+    code: str = ""
+    nodes: int = 1
+    cpus: int = 1
+    ntasks_per_node: int = 1
+    cpus_per_task: int = 1
+    max_wallclock_seconds: int = 3600
     parallelization: CodeParallelizationModel = CodeParallelizationModel()
 
 
-class CodesModel(ReactiveDataclass):
-    override: Reactive[bool | None] = reactive(None)
-    codes: Reactive[dict[str, CodeModel]] = reactive({})
+class CodesModel(ConfiguredBaseModel):
+    override: t.Optional[bool] = None
+    codes: dict[str, CodeModel] = {}
 
 
-class ComputationalResourcesModel(ReactiveDataclass):
+class ComputationalResourcesModel(ConfiguredBaseModel):
     global_: CodesModel = CodesModel()
     # bands: CodesModel
     # pdos: CodesModel
     # xas: CodesModel
 
 
-class CalculationParametersModel(ReactiveDataclass):
-    relax_type: Reactive[
-        t.Literal[
-            "none",
-            "positions",
-            "positions_cell",
-        ]
-    ] = reactive("positions_cell")
-    properties: Reactive[list[str]] = reactive([])
+class CalculationParametersModel(ConfiguredBaseModel):
+    relax_type: t.Literal[
+        "none",
+        "positions",
+        "positions_cell",
+    ] = "positions_cell"
+    properties: list[str] = []
     basic: BasicModel = BasicModel()
     advanced: AdvancedModel = AdvancedModel()
     # bands: BandsModel
@@ -183,11 +173,11 @@ class CalculationParametersModel(ReactiveDataclass):
     # xps: XpsModel
 
 
-class QeAppModel(ReactiveDataclass):
-    input_structure: Reactive[StructureData | None] = reactive(None)
+class QeAppModel(ConfiguredBaseModel):
+    input_structure: t.Optional[StructureData] = None
     calculation_parameters: CalculationParametersModel = CalculationParametersModel()
     computational_resources: ComputationalResourcesModel = ComputationalResourcesModel()
-    process: Reactive[ProcessNode | None] = reactive(None)
+    process: t.Optional[ProcessNode] = None
 
 
 def from_process(pk: int | None) -> QeAppModel:

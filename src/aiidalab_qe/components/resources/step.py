@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import solara
 
-from aiidalab_qe.common.models.schema import QeAppModel
-
 from aiidalab_qe.common.components.wizard.step import onStateChange
+from aiidalab_qe.components.wizard.models import WorkflowModel
 
 
 @solara.component
-def ResourcesSelectionStep(model: QeAppModel, on_state_change: onStateChange):
+def ResourcesSelectionStep(
+    model: solara.Reactive[WorkflowModel],
+    on_state_change: onStateChange,
+):
     pass

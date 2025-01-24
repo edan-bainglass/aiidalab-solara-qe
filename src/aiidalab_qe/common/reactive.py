@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pydantic import ConfigDict
 from pydantic.dataclasses import dataclass
 from solara import Reactive, reactive

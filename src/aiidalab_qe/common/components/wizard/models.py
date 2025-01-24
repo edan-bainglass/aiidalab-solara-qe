@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import typing as t
 
-from solara import Reactive, reactive
+from pydantic import BaseModel
 
-from aiidalab_qe.common.models.reactive import ReactiveDataclass
+from aiidalab_qe.common.components.wizard.state import State
 
-DM = t.TypeVar("DM", bound=ReactiveDataclass)
+DM = t.TypeVar("DM", bound=BaseModel)
 
 
-class WizardModel(ReactiveDataclass, t.Generic[DM]):
-    current_step: Reactive[int | None] = reactive(None)
-    states: Reactive[list[int] | None] = reactive(None)
-    data: DM | None = None
+class WizardModel(BaseModel, t.Generic[DM]):
+    current_step: t.Optional[int] = None
+    states: t.Optional[list[State]] = None
+    data: t.Optional[DM] = None

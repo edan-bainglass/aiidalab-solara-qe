@@ -3,78 +3,94 @@ from __future__ import annotations
 import typing as t
 
 import solara
+from solara import lab
 from solara.alias import rv
-from solara.lab import ConfirmationDialog, Tab, Tabs
 
 from aiidalab_qe.common.config.paths import STYLES
 from aiidalab_qe.components.wizard import QeWizard, WorkflowModel
 
-# from aiidalab_qe.common.context import workbench_context
+workflows = solara.reactive([solara.reactive(WorkflowModel())])
+active_workflow = solara.reactive(t.cast(int, None))
 
 
 @solara.component
 def Workbench():
-    # workflows = solara.use_context(workbench_context)
-    workflows = solara.use_reactive([WorkflowModel()])
-    active_workflow = solara.use_reactive(t.cast(int, None))
-
     def add_workflow(pk: int | None = None):
-        # workflows.append(WorkflowModel(pk))
-        workflows.set([*workflows, WorkflowModel(pk=pk)])
-        active_workflow.set(len(workflows))
+        workflows.set([*workflows.value, solara.reactive(WorkflowModel(pk=pk))])
+        active_workflow.set(len(workflows.value) - 1)
+
+    def remove_workflow(index: int):
+        workflows.set([*workflows.value[:index], *workflows.value[index + 1 :]])
+        active_workflow.set(len(workflows.value) - 1)
 
     with rv.Container(class_="d-none"):
         with solara.Head():
             solara.Style(STYLES / "workbench.css")
 
-    WorkbenchControls(add_workflow)
+    WorkbenchControls(add_workflow=add_workflow)
 
-    with Tabs(
+    with lab.Tabs(
         vertical=True,
         lazy=True,
         value=active_workflow,
     ):
-        for workflow in workflows.value:
-            with Tab(tab_children=[TabHeader(workflow)]):
+        for i, workflow in enumerate(workflows.value):
+            with lab.Tab(
+                tab_children=[
+                    TabHeader(
+                        workflow,
+                        lambda i=i: remove_workflow(i),
+                    )
+                ]
+            ):
                 with rv.Container(class_="workbench-body"):
                     QeWizard(workflow)
 
 
 @solara.component
-def TabHeader(workflow: WorkflowModel):
+def TabHeader(workflow: solara.Reactive[WorkflowModel], remove_workflow):
     with rv.Container(class_="d-flex p-0 align-items-center"):
+        # TODO stop close event propagation to tab selection
+        solara.Button(
+            color="error",
+            icon_name="mdi-close",
+            class_="mr-1 p-0",
+            style_="min-width: unset;",
+            text=True,
+            on_click=remove_workflow,
+        )
         rv.Icon(
-            children=[workflow.status_icon],
+            children=[workflow.value.status_icon],
             class_="mr-1",
         )
         with rv.Col(
             class_="p-1 text-left",
             style_="max-width: 200px; overflow-x: clip; text-overflow: ellipsis;",
         ):
-            if len(workflow.label) > 20:
-                with solara.Tooltip(tooltip=workflow.label):
-                    rv.Text(children=[workflow.label])
+            if len(workflow.value.label) > 20:
+                with solara.Tooltip(tooltip=workflow.value.label):
+                    rv.Text(children=[workflow.value.label])
             else:
-                rv.Text(children=[workflow.label])
-        if workflow.pk.value:
+                rv.Text(children=[workflow.value.label])
+        if workflow.value.pk:
             rv.Text(
-                children=[f"[{workflow.pk.value}]"],
+                children=[f"[{workflow.value.pk}]"],
                 class_="ml-auto",
             )
 
 
 @solara.component
 def WorkbenchControls(add_workflow: t.Callable[[int | None], None]):
-    input_pk = solara.use_reactive(t.cast(int, None))
-    active_dialog = solara.use_reactive(False)
+    input_pk, set_input_pk = solara.use_state(t.cast(int, None))
+    active_dialog, set_active_dialog = solara.use_state(False)
 
     def prompt_for_pk():
-        active_dialog.set(True)
+        set_active_dialog(True)
 
     def on_prompt_submit():
         add_workflow(input_pk)
-        input_pk.set(None)
-        active_dialog.set(False)
+        set_input_pk(0)
+        set_active_dialog(False)
 
     with rv.Row(class_="mx-2 my-0"):
         solara.Button(
@@ -90,16 +106,21 @@ def WorkbenchControls(add_workflow: t.Callable[[int | None], None]):
             on_click=prompt_for_pk,
         )
 
-    ConfirmationDialog(
+    lab.ConfirmationDialog(
         active_dialog,
         title="Enter workflow PK",
         ok="Submit",
         on_ok=lambda: on_prompt_submit(),
-        on_cancel=lambda: active_dialog.set(False),
+        on_cancel=lambda: set_active_dialog(False),
         children=[
             rv.Row(
                 children=[
-                    solara.InputText(label="PK", value=input_pk),
+                    solara.InputInt(
+                        label="PK",
+                        value=input_pk,
+                        on_value=set_input_pk,
+                        autofocus=True,
+                    ),
                 ],
             )
         ],
