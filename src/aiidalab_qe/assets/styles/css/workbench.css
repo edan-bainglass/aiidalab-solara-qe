@@ -5,3 +5,11 @@
 .v-tab {
   justify-content: start;
 }
+
+.v-tab .v-btn.tab-close-button {
+  min-width: unset;
+  height: unset;
+}
+.v-tab .v-btn.tab-close-button:hover {
+  background-color: transparent !important;
+}

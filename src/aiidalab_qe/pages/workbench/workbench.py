@@ -17,11 +17,14 @@ active_workflow = solara.reactive(t.cast(int, None))
 def Workbench():
     def add_workflow(pk: int | None = None):
         workflows.set([*workflows.value, solara.reactive(WorkflowModel(pk=pk))])
-        active_workflow.set(len(workflows.value) - 1)
 
     def remove_workflow(index: int):
         workflows.set([*workflows.value[:index], *workflows.value[index + 1 :]])
-        active_workflow.set(len(workflows.value) - 1)
+
+    solara.use_effect(
+        lambda: active_workflow.set(len(workflows.value) - 1),
+        [workflows.value],
+    )
 
     with rv.Container(class_="d-none"):
         with solara.Head():
@@ -50,12 +53,11 @@ def Workbench():
 @solara.component
 def TabHeader(workflow: solara.Reactive[WorkflowModel], remove_workflow):
     with rv.Container(class_="d-flex p-0 align-items-center"):
-        # TODO stop close event propagation to tab selection
+        # TODO stop close event propagation to tab selection (leads to index out of bound)
         solara.Button(
             color="error",
             icon_name="mdi-close",
-            class_="mr-1 p-0",
-            style_="min-width: unset;",
+            class_="mr-1 p-0 tab-close-button",
             text=True,
             on_click=remove_workflow,
         )
