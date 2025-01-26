@@ -1,11 +1,13 @@
 import solara
 from solara.alias import rv
 
-from aiidalab_qe.common.components import Header, NavBar
+from aiidalab_qe.common.components.header import Header
+from aiidalab_qe.common.components.navbar import NavBar
 
 
 @solara.component
 def Home():
+    print("rendering home page")
     with rv.Container(class_="mt-5"):
         Header(
             title="The AiiDAlab Quantum ESPRESSO app",

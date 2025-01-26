@@ -6,8 +6,7 @@ import ase
 from aiida.engine import ProcessState
 from pydantic import model_validator
 
-from aiidalab_qe.common.components.wizard.models import WizardModel
-from aiidalab_qe.common.components.wizard.state import State
+from aiidalab_qe.common.components.wizard import WizardDataModel
 from aiidalab_qe.common.models.schema import QeAppModel, from_process
 from aiidalab_qe.common.services.aiida import AiiDAService
 
@@ -21,7 +20,7 @@ STATUS_ICONS = {
 }
 
 
-class WorkflowModel(WizardModel[QeAppModel]):
+class WorkflowDataModel(WizardDataModel[QeAppModel]):
     pk: t.Optional[int] = None
 
     @property
@@ -46,20 +45,6 @@ class WorkflowModel(WizardModel[QeAppModel]):
             return self.data.input_structure.get_ase()
 
     @model_validator(mode="after")
-    def _populate_model_from_pk(self):
-        if self.pk:
-            self.data = from_process(self.pk)
-            process = self.data.process
-            if not process.process_state:
-                results_state = State.INIT
-            elif process.is_finished:
-                if process.exit_status == 0:
-                    results_state = State.SUCCESS
-                else:
-                    results_state = State.FAIL
-            else:
-                results_state = State.ACTIVE
-            self.states = [State.SUCCESS] * 4 + [results_state]
-            self.current_step = 0
+    def _from_pk(self):
         self.data = self.data or (from_process(self.pk) if self.pk else QeAppModel())
         return self

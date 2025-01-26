@@ -4,38 +4,39 @@ import typing as t
 
 import solara
 
-from aiidalab_qe.common.components.wizard.models import WizardModel
-from aiidalab_qe.common.components.wizard.state import State
+from .models import WizardDataModel
+from .state import WizardState
 
-onStateChange = t.Callable[[State], None]
+onStateChange = t.Callable[[WizardState], None]
 WizardStepType = t.Callable[
     [
-        solara.Reactive[WizardModel],
+        solara.Reactive[WizardDataModel],
         onStateChange,
     ],
     solara.Element,
 ]
 
 
-class StepProps(t.TypedDict):
+class WizardStepProps(t.TypedDict):
     title: str
     component: WizardStepType
 
 
 @solara.component
 def WizardStep(
-    state: State,
+    state: WizardState,
     component: WizardStepType,
-    model: solara.Reactive[WizardModel],
+    data_model: solara.Reactive[WizardDataModel],
     on_state_change: onStateChange,
     confirmable: bool = True,
 ):
-    component(model, on_state_change)
+    print("rendering wizard step component")
+    component(data_model, on_state_change)
     if confirmable:
         solara.Button(
             label="Confirm",
             color="success",
             icon_name="check",
-            disabled=state is not State.CONFIGURED,
-            on_click=lambda: on_state_change(State.SUCCESS),
+            disabled=state is not WizardState.CONFIGURED,
+            on_click=lambda: on_state_change(WizardState.SUCCESS),
         )

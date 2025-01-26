@@ -3,19 +3,23 @@ from __future__ import annotations
 import solara
 from solara.alias import rv
 
-from aiidalab_qe.common.components import Wizard
-from aiidalab_qe.components.wizard.models import WorkflowModel
+from aiidalab_qe.common.components.wizard import Wizard, WizardModel
 
 from ..parameters import ParametersConfigurationStep
 from ..resources import ResourcesSelectionStep
 from ..results import ResultsStep
 from ..structure import StructureSelectionStep
 from ..submission import SubmissionStep
+from .models import WorkflowDataModel
 
 
 @solara.component
-def QeWizard(model: solara.Reactive[WorkflowModel]):
-    rv.Html(tag="h2", class_="text-center", children=[model.value.label])
+def QeWizard(
+    wizard_model: solara.Reactive[WizardModel],
+    data_model: solara.Reactive[WorkflowDataModel],
+):
+    print("\nrendering qe-wizard component")
+    rv.Html(tag="h2", class_="text-center", children=[data_model.value.label])
     with rv.Container():
         Wizard(
             steps=[
@@ -40,5 +44,6 @@ def QeWizard(model: solara.Reactive[WorkflowModel]):
                     "component": ResultsStep,
                 },
             ],
-            model=model,
+            wizard_model=wizard_model,
+            data_model=data_model,
         )

@@ -6,25 +6,50 @@ import solara
 from solara import lab
 from solara.alias import rv
 
-from aiidalab_qe.common.config.paths import STYLES
-from aiidalab_qe.components.wizard import QeWizard, WorkflowModel
+from aiidalab_qe.common.components.wizard import WizardModel
+from aiidalab_qe.components.wizard import QeWizard
+from aiidalab_qe.components.wizard.models import WorkflowDataModel
+from aiidalab_qe.config.paths import STYLES
 
-workflows = solara.reactive([solara.reactive(WorkflowModel())])
-active_workflow = solara.reactive(t.cast(int, None))
+wizard_models = solara.reactive([solara.reactive(WizardModel())])
+data_models = solara.reactive([solara.reactive(WorkflowDataModel())])
+
+active = solara.reactive(t.cast(int, None))
 
 
 @solara.component
 def Workbench():
+    print("\nrendering workbench page")
+
     def add_workflow(pk: int | None = None):
-        workflows.set([*workflows.value, solara.reactive(WorkflowModel(pk=pk))])
+        wizard_models.set(
+            [
+                *wizard_models.value,
+                solara.reactive(WizardModel(pk=pk)),
+            ],
+        )
+        data_models.set(
+            [
+                *data_models.value,
+                solara.reactive(WorkflowDataModel(pk=pk)),
+            ],
+        )
+        active.set(len(data_models.value) - 1)
 
     def remove_workflow(index: int):
-        workflows.set([*workflows.value[:index], *workflows.value[index + 1 :]])
-
-    solara.use_effect(
-        lambda: active_workflow.set(len(workflows.value) - 1),
-        [workflows.value],
-    )
+        wizard_models.set(
+            [
+                *wizard_models.value[:index],
+                *wizard_models.value[index + 1 :],
+            ],
+        )
+        data_models.set(
+            [
+                *data_models.value[:index],
+                *data_models.value[index + 1 :],
+            ],
+        )
+        active.set(len(data_models.value) - 1)
 
     with rv.Container(class_="d-none"):
         with solara.Head():
@@ -35,23 +60,28 @@ def Workbench():
     with lab.Tabs(
         vertical=True,
         lazy=True,
-        value=active_workflow,
+        value=active,
     ):
-        for i, workflow in enumerate(workflows.value):
+        for i, (data_model, wizard_model) in enumerate(
+            zip(
+                data_models.value,
+                wizard_models.value,
+            )
+        ):
             with lab.Tab(
                 tab_children=[
                     TabHeader(
-                        workflow,
+                        data_model,
                         lambda i=i: remove_workflow(i),
-                    )
-                ]
+                    ),
+                ],
             ):
                 with rv.Container(class_="workbench-body"):
-                    QeWizard(workflow)
+                    QeWizard(wizard_model, data_model)
 
 
 @solara.component
-def TabHeader(workflow: solara.Reactive[WorkflowModel], remove_workflow):
+def TabHeader(workflow: solara.Reactive[WorkflowDataModel], remove_workflow):
     with rv.Container(class_="d-flex p-0 align-items-center"):
         # TODO stop close event propagation to tab selection (leads to index out of bound)
         solara.Button(

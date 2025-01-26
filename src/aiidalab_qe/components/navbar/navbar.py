@@ -1,4 +1,4 @@
-from aiidalab_qe.common.config.paths import STYLES
+from aiidalab_qe.config.paths import STYLES
 import solara
 from solara.alias import rv
 

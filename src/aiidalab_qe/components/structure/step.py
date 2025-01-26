@@ -10,20 +10,21 @@ from solara.alias import rv
 from solara.toestand import Ref
 from weas_widget import WeasWidget
 
-from aiidalab_qe.common.components.wizard.state import State
-from aiidalab_qe.common.components.wizard.step import onStateChange
-from aiidalab_qe.common.config.paths import STYLES
-from aiidalab_qe.components.wizard.models import WorkflowModel
+from aiidalab_qe.common.components.wizard import WizardState, onStateChange
+from aiidalab_qe.config.paths import STYLES
+
+from ..wizard.models import WorkflowDataModel
 
 
 @solara.component
 def StructureSelectionStep(
-    model: solara.Reactive[WorkflowModel],
+    data_model: solara.Reactive[WorkflowDataModel],
     on_state_change: onStateChange,
 ):
-    structure, set_structure = solara.use_state(model.value.get_ase_structure())
+    print("rendering structure-selection-step component")
+    structure, set_structure = solara.use_state(data_model.value.get_ase_structure())
     viewer, set_viewer = solara.use_state(t.cast(WeasWidget, None))
-    input_structure = Ref(model.fields.data.input_structure)
+    input_structure = Ref(data_model.fields.data.input_structure)
 
     def initialize_viewer():
         weas = WeasWidget(viewerStyle={"width": "100%"})
@@ -36,7 +37,7 @@ def StructureSelectionStep(
         if viewer:
             viewer.from_ase(new_structure)
         input_structure.value = orm.StructureData(ase=new_structure)
-        on_state_change(State.CONFIGURED)
+        on_state_change(WizardState.CONFIGURED)
 
     solara.use_effect(initialize_viewer, [])
 

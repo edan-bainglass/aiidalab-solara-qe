@@ -4,34 +4,38 @@ import solara
 from solara.alias import rv
 from solara.toestand import Ref
 
-from aiidalab_qe.common.components.wizard.models import WizardModel
-from aiidalab_qe.common.components.wizard.state import BG_COLORS, STATE_ICONS, State
-
-from .step import StepProps, WizardStep
+from .models import WizardDataModel, WizardModel
+from .state import BG_COLORS, STATE_ICONS, WizardState
+from .step import WizardStep, WizardStepProps
 
 
 @solara.component
-def Wizard(steps: list[StepProps], model: solara.Reactive[WizardModel]):
-    selected_index = Ref(model.fields.current_step)
-    states = Ref(model.fields.states)
+def Wizard(
+    steps: list[WizardStepProps],
+    wizard_model: solara.Reactive[WizardModel],
+    data_model: solara.Reactive[WizardDataModel],
+):
+    print("\nrendering wizard component")
+    selected_index = Ref(wizard_model.fields.current_step)
+    states = Ref(wizard_model.fields.states)
 
-    def update_states(index: int, new_state: State):
+    def update_states(index: int, new_state: WizardState):
         new_states: list = states.value[:]
         new_states[index] = new_state
 
         if (
-            new_state is State.SUCCESS
+            new_state is WizardState.SUCCESS
             and selected_index.value is not None
             and selected_index.value < len(steps) - 1
         ):
-            new_states[index + 1] = State.CONFIGURED
+            new_states[index + 1] = WizardState.CONFIGURED
             selected_index.value += 1
 
         states.value = new_states
 
     def initialize_wizard():
         if not states.value:
-            states.value = [State.READY, *[State.INIT] * (len(steps) - 1)]
+            states.value = [WizardState.READY, *[WizardState.INIT] * (len(steps) - 1)]
 
     solara.use_effect(initialize_wizard, [])
 
@@ -44,7 +48,7 @@ def Wizard(steps: list[StepProps], model: solara.Reactive[WizardModel]):
             hover=True,
             accordion=True,
             v_model=selected_index.value,
-            on_v_model=lambda i: setattr(selected_index, "value", i),
+            on_v_model=lambda i: selected_index.set(i),
         ):
             for i, step in enumerate(steps):
                 with rv.ExpansionPanel(class_="accordion-item"):
@@ -66,7 +70,7 @@ def Wizard(steps: list[StepProps], model: solara.Reactive[WizardModel]):
                         WizardStep(
                             state=states.value[i],
                             component=step["component"],
-                            model=model,
+                            data_model=data_model,
                             on_state_change=lambda state, i=i: update_states(i, state),
                             confirmable=i < len(steps) - 1,
                         )

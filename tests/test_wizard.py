@@ -1,7 +1,11 @@
 import ipyvuetify as v
 import solara
 
-from aiidalab_qe.common.components.wizard.state import BG_COLORS, STATE_ICONS, State
+from aiidalab_qe.common.components.wizard.state import (
+    BG_COLORS,
+    STATE_ICONS,
+    WizardState,
+)
 from aiidalab_qe.components.wizard import StepProps, Wizard
 
 
@@ -17,7 +21,9 @@ class TestWizard:
                 set_thing(new_thing)
 
             solara.use_effect(
-                lambda: on_state_change(State.CONFIGURED if thing else State.READY),
+                lambda: on_state_change(
+                    WizardState.CONFIGURED if thing else WizardState.READY
+                ),
                 [thing],
             )
 
@@ -30,7 +36,7 @@ class TestWizard:
         def SecondStep(set_state):
             solara.Button(
                 label="Step 2 button",
-                on_click=lambda: set_state(State.CONFIGURED),
+                on_click=lambda: set_state(WizardState.CONFIGURED),
             )
 
         self.steps: list[StepProps] = [
@@ -58,7 +64,7 @@ class TestWizard:
         assert len(accordion_steps_locator.widgets) == len(self.steps)
 
         # first step is ready, the rest are init
-        for index, state in enumerate((State.READY, State.INIT)):
+        for index, state in enumerate((WizardState.READY, WizardState.INIT)):
             self._assert_step_state(index, state)
 
         number_of_buttons = len(self.steps) + 1  # first step has a confirm button
@@ -81,13 +87,13 @@ class TestWizard:
         assert confirm_button.disabled
 
         button.click()
-        self._assert_step_state(0, State.CONFIGURED)
+        self._assert_step_state(0, WizardState.CONFIGURED)
         assert not confirm_button.disabled
 
     def test_step_change_on_confirm(self):
         """Test that the wizard step changes on confirm button click."""
-        self._assert_step_state(0, State.READY)
-        self._assert_step_state(1, State.INIT)
+        self._assert_step_state(0, WizardState.READY)
+        self._assert_step_state(1, WizardState.INIT)
 
         confirm_button = next(
             filter(
@@ -98,7 +104,7 @@ class TestWizard:
         )
         confirm_button.click()
 
-        self._assert_step_state(0, State.SUCCESS)
+        self._assert_step_state(0, WizardState.SUCCESS)
 
         # TODO works in the frontend, but not in the test
         # self._assert_step_state(1, State.CONFIGURED)

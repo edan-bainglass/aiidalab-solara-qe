@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class State(Enum):
+class WizardState(Enum):
     FAIL = -1
     INIT = 0
     CONFIGURED = 1
