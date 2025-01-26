@@ -1,9 +1,8 @@
 import solara
-from solara.alias import rv
 
 
 @solara.component
 def CalculationHistory():
     print("\nrendering history page")
-    with rv.Container(class_="mx-5 mt-2"):
-        rv.Html(tag="h1", children=["Calculation history"])
+    with solara.v.Container(class_="mx-5 mt-2"):
+        solara.v.Html(tag="h1", children=["Calculation history"])

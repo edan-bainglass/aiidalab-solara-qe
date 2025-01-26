@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import solara
-from solara.alias import rv
 
 from aiidalab_qe.common.components.wizard import Wizard, WizardModel
 
@@ -19,8 +18,8 @@ def QeWizard(
     data_model: solara.Reactive[QeDataModel],
 ):
     print("\nrendering qe-wizard component")
-    rv.Html(tag="h2", class_="text-center", children=[data_model.value.label])
-    with rv.Container():
+    solara.v.Html(tag="h2", class_="text-center", children=[data_model.value.label])
+    with solara.v.Container():
         Wizard(
             steps=[
                 {

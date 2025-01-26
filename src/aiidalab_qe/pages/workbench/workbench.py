@@ -4,7 +4,6 @@ import typing as t
 
 import solara
 from solara import lab
-from solara.alias import rv
 
 from aiidalab_qe.components.wizard import QeWizard
 from aiidalab_qe.components.wizard.models import QeDataModel, QeWizardModel
@@ -50,7 +49,7 @@ def Workbench():
         )
         active.set(len(data_models.value) - 1)
 
-    with rv.Container(class_="d-none"):
+    with solara.v.Container(class_="d-none"):
         with solara.Head():
             solara.Style(STYLES / "workbench.css")
 
@@ -75,13 +74,13 @@ def Workbench():
                     ),
                 ],
             ):
-                with rv.Container(class_="workbench-body"):
+                with solara.v.Container(class_="workbench-body"):
                     QeWizard(wizard_model, data_model)
 
 
 @solara.component
 def TabHeader(workflow: solara.Reactive[QeDataModel], remove_workflow):
-    with rv.Container(class_="d-flex p-0 align-items-center"):
+    with solara.v.Container(class_="d-flex p-0 align-items-center"):
         # TODO stop close event propagation to tab selection (leads to index out of bound)
         solara.IconButton(
             icon_name="mdi-close",
@@ -89,21 +88,21 @@ def TabHeader(workflow: solara.Reactive[QeDataModel], remove_workflow):
             class_="mr-1",
             on_click=remove_workflow,
         )
-        rv.Icon(
+        solara.v.Icon(
             children=[workflow.value.status_icon],
             class_="mr-1",
         )
-        with rv.Col(
+        with solara.v.Col(
             class_="p-1 text-left",
             style_="max-width: 200px; overflow-x: clip; text-overflow: ellipsis;",
         ):
             if len(workflow.value.label) > 20:
                 with solara.Tooltip(tooltip=workflow.value.label):
-                    rv.Text(children=[workflow.value.label])
+                    solara.v.Text(children=[workflow.value.label])
             else:
-                rv.Text(children=[workflow.value.label])
+                solara.v.Text(children=[workflow.value.label])
         if workflow.value.pk:
-            rv.Text(
+            solara.v.Text(
                 children=[f"[{workflow.value.pk}]"],
                 class_="ml-auto",
             )
@@ -122,7 +121,7 @@ def WorkbenchControls(add_workflow: t.Callable[[int | None], None]):
         set_input_pk(0)
         set_active_dialog(False)
 
-    with rv.Row(class_="mx-2 my-0"):
+    with solara.v.Row(class_="mx-2 my-0"):
         solara.IconButton(
             color="secondary",
             icon_name="mdi-plus-thick",
@@ -141,7 +140,7 @@ def WorkbenchControls(add_workflow: t.Callable[[int | None], None]):
         on_ok=lambda: on_prompt_submit(),
         on_cancel=lambda: set_active_dialog(False),
         children=[
-            rv.Row(
+            solara.v.Row(
                 children=[
                     solara.InputInt(
                         label="PK",

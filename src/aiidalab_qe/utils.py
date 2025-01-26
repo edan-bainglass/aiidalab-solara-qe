@@ -1,6 +1,5 @@
-from aiida_pseudo.groups.family import PseudoPotentialFamily
-
 from aiida import orm
+from aiida_pseudo.groups.family import PseudoPotentialFamily
 
 
 def set_component_resources(component, code_info):

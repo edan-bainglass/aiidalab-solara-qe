@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import solara
-from solara.alias import rv
 
 from aiidalab_qe.config.paths import STYLES
 
@@ -13,7 +12,7 @@ def NavBar(items: list[NavItemProps]):
     with solara.Head():
         solara.Style(STYLES / "navbar.css")
 
-    with rv.Container(
+    with solara.v.Container(
         class_="d-grid d-sm-block mb-3 p-0 justify-content-center text-center"
     ):
         for item in items:

@@ -1,11 +1,11 @@
-from .workbench import Workbench
 from .history import CalculationHistory
-from .resources import ResourceSetup
 from .home import Home
+from .resources import ResourceSetup
+from .workbench import Workbench
 
 __all__ = [
-    "Workbench",
     "CalculationHistory",
-    "ResourceSetup",
     "Home",
+    "ResourceSetup",
+    "Workbench",
 ]

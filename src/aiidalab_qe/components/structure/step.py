@@ -6,7 +6,6 @@ import ase
 import solara
 from aiida import orm
 from ase.build import bulk
-from solara.alias import rv
 from solara.toestand import Ref
 from weas_widget import WeasWidget
 
@@ -45,9 +44,9 @@ def StructureSelectionStep(
     with solara.Head():
         solara.Style(STYLES / "structure.css")
 
-    with rv.Container(class_="p-0"):
+    with solara.v.Container(class_="p-0"):
         if not viewer.value:
-            with rv.Row(class_="text-center"):
+            with solara.v.Row(class_="text-center"):
                 solara.SpinnerSolara()
         else:
             solara.Button(
@@ -55,9 +54,9 @@ def StructureSelectionStep(
                 color="primary",
                 on_click=lambda: update_structure(bulk("Si", "diamond", a=5.43)),
             )
-            with rv.Row():
-                with rv.Col(lg=12, class_="pb-0"):
-                    rv.Container(
+            with solara.v.Row():
+                with solara.v.Col(lg=12, class_="pb-0"):
+                    solara.v.Container(
                         class_="card border-secondary",
                         children=[viewer.value],
                     )

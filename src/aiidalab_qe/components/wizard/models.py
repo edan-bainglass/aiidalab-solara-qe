@@ -39,10 +39,8 @@ class QeWizardModel(WizardModel):
             else:
                 results_state = WizardState.ACTIVE
             self.states = [WizardState.SUCCESS] * 4 + [results_state]
-            self.current_step = len(self.states) - 1
         else:
             self.states = [WizardState.READY, *[WizardState.INIT] * 4]
-            self.current_step = None
         return self
 
 

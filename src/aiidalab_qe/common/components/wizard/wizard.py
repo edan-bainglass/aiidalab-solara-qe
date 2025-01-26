@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import solara
-from solara.alias import rv
 from solara.toestand import Ref
 
 from .models import WizardDataModel, WizardModel
@@ -34,10 +33,10 @@ def Wizard(
         states.value = new_states
 
     if not states.value:
-        with rv.Container(class_="d-flex justify-content-center"):
+        with solara.v.Container(class_="d-flex justify-content-center"):
             solara.SpinnerSolara()
     else:
-        with rv.ExpansionPanels(
+        with solara.v.ExpansionPanels(
             class_="accordion gap-2",
             hover=True,
             accordion=True,
@@ -45,22 +44,22 @@ def Wizard(
             on_v_model=lambda i: selected_index.set(i),
         ):
             for i, step in enumerate(steps):
-                with rv.ExpansionPanel(class_="accordion-item"):
-                    with rv.ExpansionPanelHeader(
+                with solara.v.ExpansionPanel(class_="accordion-item"):
+                    with solara.v.ExpansionPanelHeader(
                         class_="accordion-header align-items-center justify-content-start",
                         style_=f"background-color: {BG_COLORS[states.value[i].name]}",
                     ):
-                        with rv.Container(class_="d-flex p-0"):
-                            rv.Icon(
+                        with solara.v.Container(class_="d-flex p-0"):
+                            solara.v.Icon(
                                 style_="margin-bottom: 1px; width: 30px;",
                                 left=True,
                                 children=[STATE_ICONS[states.value[i].name]],
                             )
-                            rv.Text(
+                            solara.v.Text(
                                 class_="align-self-end",
                                 children=[f"Step {i + 1}: {step['title']}"],
                             )
-                    with rv.ExpansionPanelContent(class_="accordion-collapse"):
+                    with solara.v.ExpansionPanelContent(class_="accordion-collapse"):
                         WizardStep(
                             state=states.value[i],
                             component=step["component"],
