@@ -7,6 +7,8 @@ from aiida.engine import ProcessState
 from pydantic import model_validator
 
 from aiidalab_qe.common.components.wizard import WizardDataModel
+from aiidalab_qe.common.components.wizard.models import WizardModel
+from aiidalab_qe.common.components.wizard.state import WizardState
 from aiidalab_qe.common.models.schema import QeAppModel, from_process
 from aiidalab_qe.common.services.aiida import AiiDAService
 
@@ -20,7 +22,31 @@ STATUS_ICONS = {
 }
 
 
-class WorkflowDataModel(WizardDataModel[QeAppModel]):
+class QeWizardModel(WizardModel):
+    pk: t.Optional[int] = None
+
+    @model_validator(mode="after")
+    def _from_pk(self):
+        if self.pk:
+            process = AiiDAService.load_qe_app_workflow_node(self.pk)
+            if not process.process_state:
+                results_state = WizardState.INIT
+            elif process.is_finished:
+                if process.exit_status == 0:
+                    results_state = WizardState.SUCCESS
+                else:
+                    results_state = WizardState.FAIL
+            else:
+                results_state = WizardState.ACTIVE
+            self.states = [WizardState.SUCCESS] * 4 + [results_state]
+            self.current_step = len(self.states) - 1
+        else:
+            self.states = [WizardState.READY, *[WizardState.INIT] * 4]
+            self.current_step = None
+        return self
+
+
+class QeDataModel(WizardDataModel[QeAppModel]):
     pk: t.Optional[int] = None
 
     @property

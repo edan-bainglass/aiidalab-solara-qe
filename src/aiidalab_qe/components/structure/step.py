@@ -13,29 +13,30 @@ from weas_widget import WeasWidget
 from aiidalab_qe.common.components.wizard import WizardState, onStateChange
 from aiidalab_qe.config.paths import STYLES
 
-from ..wizard.models import WorkflowDataModel
+from ..wizard.models import QeDataModel
+
+viewer = solara.reactive(t.cast(WeasWidget, None))
 
 
 @solara.component
 def StructureSelectionStep(
-    data_model: solara.Reactive[WorkflowDataModel],
+    data_model: solara.Reactive[QeDataModel],
     on_state_change: onStateChange,
 ):
     print("rendering structure-selection-step component")
     structure, set_structure = solara.use_state(data_model.value.get_ase_structure())
-    viewer, set_viewer = solara.use_state(t.cast(WeasWidget, None))
     input_structure = Ref(data_model.fields.data.input_structure)
 
     def initialize_viewer():
         weas = WeasWidget(viewerStyle={"width": "100%"})
         if structure:
             weas.from_ase(structure)
-        set_viewer(weas)
+        viewer.set(weas)
 
     def update_structure(new_structure: ase.Atoms):
         set_structure(new_structure)
-        if viewer:
-            viewer.from_ase(new_structure)
+        if viewer.value:
+            viewer.value.from_ase(new_structure)
         input_structure.value = orm.StructureData(ase=new_structure)
         on_state_change(WizardState.CONFIGURED)
 
@@ -44,9 +45,10 @@ def StructureSelectionStep(
     with solara.Head():
         solara.Style(STYLES / "structure.css")
 
-    with rv.Container(class_=f"p-2 {'text-center' if not viewer else ''}"):
-        if not viewer:
-            solara.SpinnerSolara()
+    with rv.Container(class_="p-0"):
+        if not viewer.value:
+            with rv.Row(class_="text-center"):
+                solara.SpinnerSolara()
         else:
             solara.Button(
                 label="Select structure",
@@ -57,5 +59,5 @@ def StructureSelectionStep(
                 with rv.Col(lg=12, class_="pb-0"):
                     rv.Container(
                         class_="card border-secondary",
-                        children=[viewer],
+                        children=[viewer.value],
                     )

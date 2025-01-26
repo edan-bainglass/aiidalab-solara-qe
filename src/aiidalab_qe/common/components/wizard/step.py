@@ -3,6 +3,7 @@ from __future__ import annotations
 import typing as t
 
 import solara
+from solara.alias import rv
 
 from .models import WizardDataModel
 from .state import WizardState
@@ -29,14 +30,18 @@ def WizardStep(
     data_model: solara.Reactive[WizardDataModel],
     on_state_change: onStateChange,
     confirmable: bool = True,
+    active: bool = False,
 ):
-    print("rendering wizard step component")
-    component(data_model, on_state_change)
-    if confirmable:
-        solara.Button(
-            label="Confirm",
-            color="success",
-            icon_name="check",
-            disabled=state is not WizardState.CONFIGURED,
-            on_click=lambda: on_state_change(WizardState.SUCCESS),
-        )
+    with rv.Container(class_="p-0"):
+        if active:
+            print("\nrendering wizard step component")
+            component(data_model, on_state_change)
+            with rv.Row(class_="mx-0 mt-3"):
+                if confirmable:
+                    solara.Button(
+                        label="Confirm",
+                        color="success",
+                        icon_name="check",
+                        disabled=state is not WizardState.CONFIGURED,
+                        on_click=lambda: on_state_change(WizardState.SUCCESS),
+                    )

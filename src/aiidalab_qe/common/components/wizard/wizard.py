@@ -33,12 +33,6 @@ def Wizard(
 
         states.value = new_states
 
-    def initialize_wizard():
-        if not states.value:
-            states.value = [WizardState.READY, *[WizardState.INIT] * (len(steps) - 1)]
-
-    solara.use_effect(initialize_wizard, [])
-
     if not states.value:
         with rv.Container(class_="d-flex justify-content-center"):
             solara.SpinnerSolara()
@@ -73,4 +67,5 @@ def Wizard(
                             data_model=data_model,
                             on_state_change=lambda state, i=i: update_states(i, state),
                             confirmable=i < len(steps) - 1,
+                            active=selected_index.value == i,
                         )

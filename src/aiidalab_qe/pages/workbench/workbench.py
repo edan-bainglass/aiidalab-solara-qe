@@ -6,13 +6,12 @@ import solara
 from solara import lab
 from solara.alias import rv
 
-from aiidalab_qe.common.components.wizard import WizardModel
 from aiidalab_qe.components.wizard import QeWizard
-from aiidalab_qe.components.wizard.models import WorkflowDataModel
+from aiidalab_qe.components.wizard.models import QeDataModel, QeWizardModel
 from aiidalab_qe.config.paths import STYLES
 
-wizard_models = solara.reactive([solara.reactive(WizardModel())])
-data_models = solara.reactive([solara.reactive(WorkflowDataModel())])
+wizard_models = solara.reactive([solara.reactive(QeWizardModel())])
+data_models = solara.reactive([solara.reactive(QeDataModel())])
 
 active = solara.reactive(t.cast(int, None))
 
@@ -25,13 +24,13 @@ def Workbench():
         wizard_models.set(
             [
                 *wizard_models.value,
-                solara.reactive(WizardModel(pk=pk)),
+                solara.reactive(QeWizardModel(pk=pk)),
             ],
         )
         data_models.set(
             [
                 *data_models.value,
-                solara.reactive(WorkflowDataModel(pk=pk)),
+                solara.reactive(QeDataModel(pk=pk)),
             ],
         )
         active.set(len(data_models.value) - 1)
@@ -81,14 +80,13 @@ def Workbench():
 
 
 @solara.component
-def TabHeader(workflow: solara.Reactive[WorkflowDataModel], remove_workflow):
+def TabHeader(workflow: solara.Reactive[QeDataModel], remove_workflow):
     with rv.Container(class_="d-flex p-0 align-items-center"):
         # TODO stop close event propagation to tab selection (leads to index out of bound)
-        solara.Button(
-            color="error",
+        solara.IconButton(
             icon_name="mdi-close",
-            class_="mr-1 p-0 tab-close-button",
-            text=True,
+            color="error",
+            class_="mr-1",
             on_click=remove_workflow,
         )
         rv.Icon(
@@ -125,15 +123,13 @@ def WorkbenchControls(add_workflow: t.Callable[[int | None], None]):
         set_active_dialog(False)
 
     with rv.Row(class_="mx-2 my-0"):
-        solara.Button(
+        solara.IconButton(
             color="secondary",
-            icon=True,
             icon_name="mdi-plus-thick",
             on_click=add_workflow,
         )
-        solara.Button(
+        solara.IconButton(
             color="secondary",
-            icon=True,
             icon_name="mdi-key-plus",
             on_click=prompt_for_pk,
         )
