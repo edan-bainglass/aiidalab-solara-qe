@@ -4,7 +4,7 @@ from aiidalab_qe.config.paths import STYLES
 
 
 @solara.component
-def QeNavBar():
+def QeNavBar(pages: dict):
     with solara.v.AppBar(color="secondary", dark=True):
         with solara.v.Container(class_="d-none"):
             with solara.Head():
@@ -25,11 +25,6 @@ def QeNavBar():
 
         solara.v.Spacer()
 
-        with solara.Link("aiidalab-qe"):
-            solara.v.Btn(class_="px-2", text=True, children=["home"])
-        with solara.Link("aiidalab-qe/workbench"):
-            solara.v.Btn(class_="px-2", text=True, children=["workbench"])
-        with solara.Link("aiidalab-qe/history"):
-            solara.v.Btn(class_="px-2", text=True, children=["history"])
-        with solara.Link("aiidalab-qe/resources"):
-            solara.v.Btn(class_="px-2", text=True, children=["resources"])
+        for page, props in pages.items():
+            with solara.Link(props["link"]):
+                solara.v.Btn(class_="px-2", text=True, children=[page])

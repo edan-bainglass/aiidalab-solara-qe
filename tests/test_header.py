@@ -1,7 +1,6 @@
-import ipyvuetify as v
 import solara
 
-from aiidalab_qe.components.header import Header
+from aiidalab_qe.common.components.header import Header
 
 
 class TestHeaderWithLogo:
@@ -24,7 +23,7 @@ class TestHeaderWithLogo:
 
     def test_logo_is_rendered(self):
         """Test that the logo is rendered with correct properties."""
-        locator = self.rc.find(v.Img)
+        locator = self.rc.find(solara.v.Img)
         locator.assert_single()
         logo = locator.widget
         assert self.box.children[0] is logo
@@ -33,7 +32,7 @@ class TestHeaderWithLogo:
 
     def test_title_is_rendered(self):
         """Test that the title is rendered with correct properties."""
-        locator = self.rc.find(v.Html, tag="h1")
+        locator = self.rc.find(solara.v.Html, tag="h1")
         locator.assert_single()
         title = locator.widget
         container = self.box.children[1]
@@ -42,7 +41,7 @@ class TestHeaderWithLogo:
 
     def test_subtitle_is_rendered(self):
         """Test that the subtitle is rendered with correct properties."""
-        locator = self.rc.find(v.Html, tag="h2")
+        locator = self.rc.find(solara.v.Html, tag="h2")
         locator.assert_single()
         subtitle = locator.widget
         container = self.box.children[1]

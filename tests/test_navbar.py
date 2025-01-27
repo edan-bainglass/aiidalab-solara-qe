@@ -1,4 +1,3 @@
-import ipyvuetify as v
 import solara
 
 from aiidalab_qe.components.navbar import NavBar
@@ -22,11 +21,11 @@ class TestNavBar:
 
     def test_nav_items_are_rendered(self):
         """Test that the correct number of `NavItem` components are rendered."""
-        assert len(self.rc.find(v.Btn).widgets) == len(self.nav_items)
+        assert len(self.rc.find(solara.v.Btn).widgets) == len(self.nav_items)
 
     def test_nav_item_content(self):
         """Test that NavItem content is rendered correctly."""
-        locator = self.rc.find(v.Btn)
+        locator = self.rc.find(solara.v.Btn)
         for idx, nav_item in enumerate(self.nav_items):
             button = locator.widgets[idx]
             icon = button.children[0]
@@ -36,7 +35,7 @@ class TestNavBar:
 
     def test_link_nav_item_properties(self):
         """Test that `LinkNavItem` is rendered with correct link properties."""
-        locator = self.rc.find(v.Btn, link=True)
+        locator = self.rc.find(solara.v.Btn, link=True)
         locator.assert_single()
         button = locator.widget
         assert button.href == self.nav_items[1]["href"]

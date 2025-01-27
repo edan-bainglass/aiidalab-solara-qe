@@ -1,4 +1,3 @@
-import ipyvuetify as v
 import solara
 
 from aiidalab_qe.common.components.wizard.state import (
@@ -60,7 +59,7 @@ class TestWizard:
 
     def test_initial_step_state(self):
         """Test that the Wizard initializes with all steps in correct states."""
-        accordion_steps_locator = self.rc.find(v.ExpansionPanel)
+        accordion_steps_locator = self.rc.find(solara.v.ExpansionPanel)
         assert len(accordion_steps_locator.widgets) == len(self.steps)
 
         # first step is ready, the rest are init
@@ -68,18 +67,18 @@ class TestWizard:
             self._assert_step_state(index, state)
 
         number_of_buttons = len(self.steps) + 1  # first step has a confirm button
-        assert len(self.rc.find(v.Btn).widgets) == number_of_buttons
+        assert len(self.rc.find(solara.v.Btn).widgets) == number_of_buttons
 
     def test_state_change_on_button_click(self):
         """Test that the state of the wizard step changes on button click."""
-        button_locator = self.rc.find(v.Btn, children=["Step 1 button"])
+        button_locator = self.rc.find(solara.v.Btn, children=["Step 1 button"])
         button_locator.assert_single()
         button = button_locator.widget
 
         confirm_button = next(
             filter(
                 lambda btn: "Confirm" in btn.children,
-                self.rc.find(v.Btn).widgets,
+                self.rc.find(solara.v.Btn).widgets,
             ),
             None,
         )
@@ -98,7 +97,7 @@ class TestWizard:
         confirm_button = next(
             filter(
                 lambda btn: "Confirm" in btn.children,
-                self.rc.find(v.Btn).widgets,
+                self.rc.find(solara.v.Btn).widgets,
             ),
             None,
         )
@@ -110,7 +109,7 @@ class TestWizard:
         # self._assert_step_state(1, State.CONFIGURED)
 
     def _assert_step_state(self, index, state):
-        step = self.rc.find(v.ExpansionPanel).widgets[index]
+        step = self.rc.find(solara.v.ExpansionPanel).widgets[index]
         header = step.children[0]
         container = header.children[0]
         icon = container.children[0]
