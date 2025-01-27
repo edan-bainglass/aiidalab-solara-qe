@@ -14,8 +14,6 @@ from aiidalab_qe.config.paths import STYLES
 
 from ..wizard.models import QeDataModel
 
-viewer = solara.reactive(t.cast(WeasWidget, None))
-
 
 @solara.component
 def StructureSelectionStep(
@@ -23,20 +21,21 @@ def StructureSelectionStep(
     on_state_change: onStateChange,
 ):
     print("rendering structure-selection-step component")
+    viewer, set_viewer = solara.use_state(t.cast(WeasWidget, None))
     structure, set_structure = solara.use_state(data_model.value.get_ase_structure())
     input_structure = Ref(data_model.fields.data.input_structure)
 
     def initialize_viewer():
-        if not viewer.value:
+        if not viewer:
             weas = WeasWidget(viewerStyle={"width": "100%"})
             if structure:
                 weas.from_ase(structure)
-            viewer.set(weas)
+            set_viewer(weas)
 
     def update_structure(new_structure: ase.Atoms):
         set_structure(new_structure)
-        if viewer.value:
-            viewer.value.from_ase(new_structure)
+        if viewer:
+            viewer.from_ase(new_structure)
         input_structure.value = orm.StructureData(ase=new_structure)
         on_state_change(WizardState.CONFIGURED)
 
@@ -46,7 +45,7 @@ def StructureSelectionStep(
         solara.Style(STYLES / "structure.css")
 
     with solara.v.Container(class_="p-0"):
-        if not viewer.value:
+        if not viewer:
             with solara.v.Row(class_="text-center"):
                 solara.SpinnerSolara()
         else:
@@ -58,6 +57,6 @@ def StructureSelectionStep(
             with solara.v.Row():
                 with solara.v.Col(lg=12, class_="pb-0"):
                     solara.v.Container(
-                        class_="card border-secondary",
-                        children=[viewer.value],
+                        class_="card",
+                        children=[viewer],
                     )
