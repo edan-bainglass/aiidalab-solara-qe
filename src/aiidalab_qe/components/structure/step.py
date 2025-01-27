@@ -27,10 +27,11 @@ def StructureSelectionStep(
     input_structure = Ref(data_model.fields.data.input_structure)
 
     def initialize_viewer():
-        weas = WeasWidget(viewerStyle={"width": "100%"})
-        if structure:
-            weas.from_ase(structure)
-        viewer.set(weas)
+        if not viewer.value:
+            weas = WeasWidget(viewerStyle={"width": "100%"})
+            if structure:
+                weas.from_ase(structure)
+            viewer.set(weas)
 
     def update_structure(new_structure: ase.Atoms):
         set_structure(new_structure)

@@ -66,5 +66,4 @@ def Wizard(
                             data_model=data_model,
                             on_state_change=lambda state, i=i: update_states(i, state),
                             confirmable=i < len(steps) - 1,
-                            active=selected_index.value == i,
                         )
