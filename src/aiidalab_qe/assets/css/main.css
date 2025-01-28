@@ -11,6 +11,17 @@
   display: none !important;
 }
 
+.v-sheet {
+  row-gap: unset !important;
+}
+
+.v-expansion-panel {
+  margin-top: 0 !important;
+}
+.v-expansion-panel .v-expansion-panel-content > div {
+  padding: 1em !important;
+}
+
 .solara-autorouter-content {
   overflow-y: scroll;
   height: calc(100vh - 64px - 12px);
