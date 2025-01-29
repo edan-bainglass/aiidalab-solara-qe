@@ -53,29 +53,29 @@ def Workbench():
         with solara.Head():
             solara.Style(STYLES / "workbench.css")
 
-    WorkbenchControls(add_workflow=add_workflow)
-
-    with lab.Tabs(
-        vertical=True,
-        lazy=True,
-        value=active,
-    ):
-        for i, (data_model, wizard_model) in enumerate(
-            zip(
-                data_models.value,
-                wizard_models.value,
-            )
+    with solara.v.Container(class_="workbench"):
+        WorkbenchControls(add_workflow=add_workflow)
+        with lab.Tabs(
+            vertical=True,
+            lazy=True,
+            value=active,
         ):
-            with lab.Tab(
-                tab_children=[
-                    TabHeader(
-                        data_model,
-                        lambda i=i: remove_workflow(i),
-                    ),
-                ],
+            for i, (data_model, wizard_model) in enumerate(
+                zip(
+                    data_models.value,
+                    wizard_models.value,
+                )
             ):
-                with solara.v.Container(class_="workbench-body"):
-                    QeWizard(wizard_model, data_model)
+                with lab.Tab(
+                    tab_children=[
+                        TabHeader(
+                            data_model,
+                            lambda i=i: remove_workflow(i),
+                        ),
+                    ],
+                ):
+                    with solara.v.Container(class_="workbench-body"):
+                        QeWizard(wizard_model, data_model)
 
 
 @solara.component

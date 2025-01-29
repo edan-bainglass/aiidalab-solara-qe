@@ -12,3 +12,16 @@
 .v-application--is-ltr .relaxation-selector .v-btn__content .v-icon--left {
   margin-left: 0;
 }
+
+.basic-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+}
+@media (max-width: 767px) {
+  .basic-settings .protocol-selector {
+    display: flex;
+    flex-direction: column;
+  }
+}

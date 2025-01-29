@@ -93,17 +93,22 @@ def BasicSettings(data_model: solara.Reactive[QeDataModel]):
         REFS["noncolin"].set(spin_orbit.value == "soc")
         REFS["nspin"].set(4 if spin_orbit.value == "soc" else 1)
 
-    def Control(control: str, on_value: t.Callable | None = None):
+    def Control(
+        control: str,
+        on_value: t.Callable | None = None,
+        classes: list[str] | None = None,
+    ):
         with solara.Row(classes=["align-items-center gap-2"]):
             solara.Text(
                 f"{CONTROLS[control]['label']}:",
                 classes=["text-right"],
-                style="width: 150px;",
+                style="width: 140px;",
             )
             with solara.ToggleButtonsSingle(
                 value=REFS[control],
                 on_value=on_value,
                 dense=True,
+                classes=classes or [],
             ):
                 options: dict = CONTROLS[control]["options"]
                 for option, data in options.items():
@@ -114,8 +119,8 @@ def BasicSettings(data_model: solara.Reactive[QeDataModel]):
                         style="width: 100px;",
                     )
 
-    with solara.v.Container(class_="basic-settings d-flex flex-column gap-2"):
+    with solara.v.Container(class_="basic-settings"):
         Control("electronic_type")
         Control("spin_type")
         Control("spin_orbit", on_value=lambda _: update_spin_orbit_parameters())
-        Control("protocol")
+        Control("protocol", classes=["protocol-selector"])

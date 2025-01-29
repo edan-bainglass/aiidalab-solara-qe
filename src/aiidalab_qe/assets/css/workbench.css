@@ -1,15 +1,21 @@
-.workbench-body {
+.workbench {
+  padding: 0;
+}
+.workbench .workbench-body {
   margin-top: 0;
 }
-
-.v-tab {
+@media screen and (max-width: 991px) {
+  .workbench .v-tabs--vertical {
+    flex-direction: column !important;
+  }
+}
+.workbench .v-tab {
   justify-content: start;
 }
-
-.v-tab .v-btn.tab-close-button {
+.workbench .v-tab .v-btn.tab-close-button {
   min-width: unset;
   height: unset;
 }
-.v-tab .v-btn.tab-close-button:hover {
+.workbench .v-tab .v-btn.tab-close-button:hover {
   background-color: transparent !important;
 }
