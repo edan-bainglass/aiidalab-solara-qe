@@ -22,6 +22,10 @@
   padding: 1em !important;
 }
 
+.v-text-field__details {
+  display: none;
+}
+
 .solara-autorouter-content {
   overflow-y: scroll;
   height: calc(100vh - 64px - 12px);

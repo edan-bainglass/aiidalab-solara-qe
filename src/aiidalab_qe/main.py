@@ -49,10 +49,10 @@ routes = [
         children=[
             solara.Route(
                 path="/" if page == "home" else page,
-                component=props["component"],
-                layout=props.get("layout"),
+                component=page_data["component"],
+                layout=page_data.get("layout"),
             )
-            for page, props in pages.items()
+            for page, page_data in pages.items()
         ],
         layout=Layout,
     ),

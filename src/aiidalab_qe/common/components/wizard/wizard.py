@@ -22,13 +22,13 @@ def Wizard(
         new_states: list = states.value[:]
         new_states[index] = new_state
 
-        if (
-            new_state is WizardState.SUCCESS
-            and selected_index.value is not None
-            and selected_index.value < len(steps) - 1
-        ):
-            new_states[index + 1] = WizardState.CONFIGURED
-            selected_index.value += 1
+        if selected_index.value is not None and selected_index.value < len(steps) - 1:
+            if new_state is WizardState.CONFIGURED:
+                next_steps_count = len(new_states) - index - 1
+                new_states[index + 1 :] = [WizardState.INIT] * next_steps_count
+            if new_state is WizardState.SUCCESS:
+                selected_index.value += 1
+                new_states[index + 1] = WizardState.CONFIGURED
 
         states.value = new_states
 

@@ -1,0 +1,14 @@
+.parameters-configuration-step .v-input--selection-controls {
+  margin: 0;
+}
+.parameters-configuration-step .v-input--selection-controls .v-input__slot {
+  margin: 0;
+}
+
+.v-application--is-ltr .relaxation-selector {
+  padding: 0;
+  margin-bottom: 12px;
+}
+.v-application--is-ltr .relaxation-selector .v-btn__content .v-icon--left {
+  margin-left: 0;
+}

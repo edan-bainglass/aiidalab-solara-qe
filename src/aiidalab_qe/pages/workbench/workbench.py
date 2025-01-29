@@ -121,7 +121,7 @@ def WorkbenchControls(add_workflow: t.Callable[[int | None], None]):
         set_input_pk(0)
         set_active_dialog(False)
 
-    with solara.v.Row(class_="mx-2 my-0"):
+    with solara.v.Row(class_="g-0 px-2 pb-2 pt-3"):
         solara.IconButton(
             color="secondary",
             icon_name="mdi-plus-thick",

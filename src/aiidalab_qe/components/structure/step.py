@@ -21,9 +21,9 @@ def StructureSelectionStep(
     on_state_change: onStateChange,
 ):
     print("rendering structure-selection-step component")
+    input_structure = Ref(data_model.fields.data.input_structure)
     viewer, set_viewer = solara.use_state(t.cast(WeasWidget, None))
     structure, set_structure = solara.use_state(data_model.value.get_ase_structure())
-    input_structure = Ref(data_model.fields.data.input_structure)
 
     def initialize_viewer():
         if not viewer:
@@ -37,14 +37,18 @@ def StructureSelectionStep(
         if viewer:
             viewer.from_ase(new_structure)
         input_structure.value = orm.StructureData(ase=new_structure)
-        on_state_change(WizardState.CONFIGURED)
 
     solara.use_effect(initialize_viewer, [])
+
+    solara.use_effect(
+        lambda: input_structure.value and on_state_change(WizardState.CONFIGURED),
+        [input_structure.value],
+    )
 
     with solara.Head():
         solara.Style(STYLES / "structure.css")
 
-    with solara.v.Container(class_="p-0"):
+    with solara.v.Container(class_="structure-selection-step p-0"):
         if not viewer:
             with solara.v.Row(class_="text-center"):
                 solara.SpinnerSolara()

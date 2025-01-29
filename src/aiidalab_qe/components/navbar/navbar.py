@@ -25,6 +25,6 @@ def QeNavBar(pages: dict):
 
         solara.v.Spacer()
 
-        for page, props in pages.items():
-            with solara.Link(props["link"]):
+        for page, page_data in pages.items():
+            with solara.Link(page_data["link"]):
                 solara.v.Btn(class_="px-2", text=True, children=[page])
