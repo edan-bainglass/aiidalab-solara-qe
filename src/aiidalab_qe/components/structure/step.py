@@ -48,19 +48,18 @@ def StructureSelectionStep(
     with solara.Head():
         solara.Style(STYLES / "structure.css")
 
-    with solara.v.Container(class_="structure-selection-step p-0"):
+    with solara.Div(class_="structure-selection-step"):
         if not viewer:
-            with solara.v.Row(class_="text-center"):
+            with solara.Div(class_="spinner"):
                 solara.SpinnerSolara()
         else:
             solara.Button(
                 label="Select structure",
                 color="primary",
+                class_="select-structure-button",
                 on_click=lambda: update_structure(bulk("Si", "diamond", a=5.43)),
             )
-            with solara.v.Row():
-                with solara.v.Col(lg=12, class_="pb-0"):
-                    solara.v.Container(
-                        class_="card",
-                        children=[viewer],
-                    )
+            solara.Div(
+                class_="structure-viewer card",
+                children=[viewer],
+            )

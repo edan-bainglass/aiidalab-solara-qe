@@ -22,9 +22,10 @@ def PropertiesSelector(data_model: solara.Reactive[QeDataModel]):
             else [*filter(lambda p: p != prop, properties.value)]
         )
 
-    for prop, prop_data in PROPERTIES_MAP.items():
-        solara.Checkbox(
-            label=prop_data["label"],
-            value=prop in properties.value,
-            on_value=lambda checked, prop=prop: update_properties(prop, checked),
-        )
+    with solara.Div(class_="properties-selector"):
+        for prop, prop_data in PROPERTIES_MAP.items():
+            solara.Checkbox(
+                label=prop_data["label"],
+                value=prop in properties.value,
+                on_value=lambda checked, prop=prop: update_properties(prop, checked),
+            )

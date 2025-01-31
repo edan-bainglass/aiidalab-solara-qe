@@ -61,10 +61,11 @@ def RelaxationSelector(data_model: solara.Reactive[QeDataModel]):
         [is_relax.value],
     )
 
-    with solara.v.Container(class_="relaxation-selector"):
+    with solara.Div(class_="relaxation-selector"):
         solara.Switch(
             label="Relax structure",
             value=is_relax,
+            classes=["relaxation-switch"],
         )
         if is_relax.value and options.value:
             with solara.ToggleButtonsSingle(

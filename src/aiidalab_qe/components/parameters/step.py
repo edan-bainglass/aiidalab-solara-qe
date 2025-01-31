@@ -39,15 +39,19 @@ def ParametersConfigurationStep(
     with solara.Head():
         solara.Style(STYLES / "parameters.css")
 
-    with solara.v.Container(class_="parameters-configuration-step p-0"):
+    with solara.Div(class_="parameters-configuration-step"):
         RelaxationSelector(data_model)
-        with solara.v.ExpansionPanels(class_="accordion gap-2"):
+        with solara.v.ExpansionPanels(class_="accordion"):
             for step, step_data in SUB_STEPS.items():
                 with solara.v.ExpansionPanel(class_="accordion-item"):
                     with solara.v.ExpansionPanelHeader(
                         class_="accordion-header",
                         style_=f"background-color: {BG_COLORS['INIT']}",
                     ):
-                        solara.Text(f"Step {step}: {step_data['label']}")
+                        with solara.Div(class_="accordion-header-content"):
+                            solara.Text(
+                                f"Step {step}: {step_data['label']}",
+                                classes=["accordion-header-text"],
+                            )
                     with solara.v.ExpansionPanelContent(class_="accordion-collapse"):
                         step_data["component"](data_model)

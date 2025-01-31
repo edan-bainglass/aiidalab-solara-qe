@@ -34,10 +34,10 @@ def WizardStep(
         if state in (WizardState.READY, WizardState.SUCCESS):
             on_state_change(new_state)
 
-    with solara.v.Container(class_="p-0"):
+    with solara.Div(class_="wizard-step"):
         print("\nrendering wizard step component")
         component(data_model, on_state_change_wrapper)
-        with solara.v.Row(class_="mt-3 g-0"):
+        with solara.Div(class_="wizard-step-controls"):
             if confirmable:
                 solara.Button(
                     label="Confirm",

@@ -98,11 +98,10 @@ def BasicSettings(data_model: solara.Reactive[QeDataModel]):
         on_value: t.Callable | None = None,
         classes: list[str] | None = None,
     ):
-        with solara.Row(classes=["align-items-center gap-2"]):
+        with solara.Row(classes=["control"]):
             solara.Text(
                 f"{CONTROLS[control]['label']}:",
-                classes=["text-right"],
-                style="width: 140px;",
+                classes=["control-label"],
             )
             with solara.ToggleButtonsSingle(
                 value=REFS[control],
@@ -119,7 +118,7 @@ def BasicSettings(data_model: solara.Reactive[QeDataModel]):
                         style="width: 100px;",
                     )
 
-    with solara.v.Container(class_="basic-settings"):
+    with solara.Div(class_="basic-settings"):
         Control("electronic_type")
         Control("spin_type")
         Control("spin_orbit", on_value=lambda _: update_spin_orbit_parameters())

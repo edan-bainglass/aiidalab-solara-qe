@@ -1,21 +1,42 @@
 .workbench {
   padding: 0;
 }
-.workbench .workbench-body {
-  margin-top: 0;
+.workbench .controls {
+  padding: 12px 12px 8px;
 }
 @media screen and (max-width: 991px) {
-  .workbench .v-tabs--vertical {
+  .workbench .v-tabs.v-tabs--vertical {
     flex-direction: column !important;
   }
 }
-.workbench .v-tab {
+.workbench .v-tabs .v-tab {
   justify-content: start;
+  padding: 12px;
 }
-.workbench .v-tab .v-btn.tab-close-button {
-  min-width: unset;
-  height: unset;
+.workbench .v-tabs .v-tab .tab-header {
+  display: flex;
+  padding: 0;
+  align-items: center;
 }
-.workbench .v-tab .v-btn.tab-close-button:hover {
-  background-color: transparent !important;
+.workbench .v-tabs .v-tab .tab-header .v-btn.tab-close-button {
+  margin-right: 6px;
+}
+.workbench .v-tabs .v-tab .tab-header .status-icon {
+  margin-right: 4px;
+}
+.workbench .v-tabs .v-tab .tab-header .tab-text {
+  padding: 0 8px;
+  text-align: left;
+  max-width: 200px;
+  overflow-x: clip;
+  text-overflow: ellipsis;
+}
+.workbench .workbench-body {
+  padding: 0 12px;
+}
+.workbench .qe-wizard h2 {
+  text-align: center;
+}
+.workbench .qe-wizard .wizard {
+  padding: 12px;
 }

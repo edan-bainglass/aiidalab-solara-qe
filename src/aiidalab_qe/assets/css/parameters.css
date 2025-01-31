@@ -1,26 +1,45 @@
-.parameters-configuration-step .v-input--selection-controls {
-  margin: 0;
-}
-.parameters-configuration-step .v-input--selection-controls .v-input__slot {
-  margin: 0;
-}
-
-.v-application--is-ltr .relaxation-selector {
-  padding: 0;
+.parameters-configuration-step .relaxation-selector {
   margin-bottom: 12px;
 }
-.v-application--is-ltr .relaxation-selector .v-btn__content .v-icon--left {
+.parameters-configuration-step .relaxation-selector .relaxation-switch {
+  margin-bottom: 12px;
+}
+.parameters-configuration-step
+  .relaxation-selector
+  .v-btn__content
+  .v-icon--left {
   margin-left: 0;
 }
-
-.basic-settings {
+.parameters-configuration-step .properties-selector .v-input {
+  margin-bottom: 12px;
+}
+.parameters-configuration-step .calculation-settings .category-selector {
+  margin-bottom: 12px;
+  max-width: 200px;
+}
+.parameters-configuration-step .calculation-settings .basic-settings {
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding: 0;
 }
+.parameters-configuration-step .calculation-settings .basic-settings .control {
+  align-items: center !important;
+}
+.parameters-configuration-step
+  .calculation-settings
+  .basic-settings
+  .control
+  .control-label {
+  text-align: right;
+  width: 140px;
+}
 @media (max-width: 767px) {
-  .basic-settings .protocol-selector {
+  .parameters-configuration-step
+    .calculation-settings
+    .basic-settings
+    .control
+    .protocol-selector {
     display: flex;
     flex-direction: column;
   }

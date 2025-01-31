@@ -18,12 +18,11 @@ CATEGORIES = {
 def CalculationSettings(data_model: solara.Reactive[QeDataModel]):
     category = solara.use_reactive("basic")
 
-    with solara.v.Row():
-        with solara.v.Col(md=6, lg=4, xl=3):
-            solara.Select(
-                label="Category",
-                values=[*CATEGORIES.keys()],
-                value=category,
-            )
-
-    CATEGORIES[category.value](data_model)
+    with solara.Div(class_="calculation-settings"):
+        solara.Select(
+            label="Category",
+            values=[*CATEGORIES.keys()],
+            value=category,
+            classes=["category-selector"],
+        )
+        CATEGORIES[category.value](data_model)

@@ -18,8 +18,8 @@ def QeWizard(
     data_model: solara.Reactive[QeDataModel],
 ):
     print("\nrendering qe-wizard component")
-    solara.v.Html(tag="h2", class_="text-center", children=[data_model.value.label])
-    with solara.v.Container():
+    with solara.Div(class_="qe-wizard"):
+        solara.HTML("h2", data_model.value.label)
         Wizard(
             steps=[
                 {

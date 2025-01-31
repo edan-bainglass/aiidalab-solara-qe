@@ -1,3 +1,4 @@
+from aiidalab_qe.config.paths import STYLES
 import solara
 
 from aiidalab_qe.common.components.header import Header
@@ -7,7 +8,11 @@ from aiidalab_qe.common.components.navbar import NavBar
 @solara.component
 def Home():
     print("\nrendering home page")
-    with solara.v.Container(class_="mt-5"):
+
+    with solara.Head():
+        solara.Style(STYLES / "home.css")
+
+    with solara.Div(class_="home container"):
         Header(
             title="The AiiDAlab Quantum ESPRESSO app",
             subtitle="🎉 Happy computing 🎉",

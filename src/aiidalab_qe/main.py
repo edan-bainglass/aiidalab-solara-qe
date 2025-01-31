@@ -35,11 +35,10 @@ pages = {
 
 @solara.component
 def Layout(children=[]):
+    with solara.Head():
+        solara.Title("AiiDAlab QE app")
+        solara.Style(STYLES / "main.css")
     QeNavBar(pages)
-    with solara.solara.v.Container(class_="d-none"):
-        with solara.Head():
-            solara.Title("AiiDAlab QE app")
-            solara.Style(STYLES / "main.css")
     solara.Div(children=children)
 
 

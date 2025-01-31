@@ -1,16 +1,22 @@
-.weas-widget {
+.structure-selection-step .select-structure-button {
+  margin-bottom: 12px;
+}
+.structure-selection-step .structure-viewer {
+  padding: 12px;
+}
+.structure-selection-step .structure-viewer .weas-widget {
   width: 100%;
 }
-.weas-widget select {
+.structure-selection-step .structure-viewer .weas-widget select {
   color: unset;
 }
-.weas-widget select option {
+.structure-selection-step .structure-viewer .weas-widget select option {
   color: black !important;
 }
-.weas-widget .title {
+.structure-selection-step .structure-viewer .weas-widget .title {
   font-size: unset !important;
 }
-.weas-widget > div:first-child > div:first-of-type,
-.weas-widget > div:first-child canvas {
+.structure-selection-step .structure-viewer .weas-widget > div:first-child > div:first-of-type,
+.structure-selection-step .structure-viewer .weas-widget > div:first-child canvas {
   width: 100% !important;
 }

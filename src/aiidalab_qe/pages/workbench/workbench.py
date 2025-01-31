@@ -49,11 +49,10 @@ def Workbench():
         )
         active.set(len(data_models.value) - 1)
 
-    with solara.v.Container(class_="d-none"):
-        with solara.Head():
-            solara.Style(STYLES / "workbench.css")
+    with solara.Head():
+        solara.Style(STYLES / "workbench.css")
 
-    with solara.v.Container(class_="workbench"):
+    with solara.Div(class_="workbench"):
         WorkbenchControls(add_workflow=add_workflow)
         with lab.Tabs(
             vertical=True,
@@ -74,38 +73,35 @@ def Workbench():
                         ),
                     ],
                 ):
-                    with solara.v.Container(class_="workbench-body"):
+                    with solara.Div(class_="workbench-body container"):
                         QeWizard(wizard_model, data_model)
 
 
 @solara.component
-def TabHeader(workflow: solara.Reactive[QeDataModel], remove_workflow):
-    with solara.v.Container(class_="d-flex p-0 align-items-center"):
+def TabHeader(
+    workflow: solara.Reactive[QeDataModel],
+    remove_workflow: t.Callable[[int], None],
+):
+    with solara.Div(class_="tab-header"):
         # TODO stop close event propagation to tab selection (leads to index out of bound)
         solara.IconButton(
             icon_name="mdi-close",
             color="error",
-            class_="mr-1",
+            class_="tab-close-button",
             on_click=remove_workflow,
         )
         solara.v.Icon(
             children=[workflow.value.status_icon],
-            class_="mr-1",
+            class_="status-icon",
         )
-        with solara.v.Col(
-            class_="p-1 text-left",
-            style_="max-width: 200px; overflow-x: clip; text-overflow: ellipsis;",
-        ):
+        with solara.Div(class_="tab-text"):
             if len(workflow.value.label) > 20:
-                with solara.Tooltip(tooltip=workflow.value.label):
-                    solara.v.Text(children=[workflow.value.label])
+                with solara.Tooltip(workflow.value.label):
+                    solara.Text(workflow.value.label)
             else:
-                solara.v.Text(children=[workflow.value.label])
+                solara.Text(workflow.value.label)
         if workflow.value.pk:
-            solara.v.Text(
-                children=[f"[{workflow.value.pk}]"],
-                class_="ml-auto",
-            )
+            solara.Text(f"[{workflow.value.pk}]")
 
 
 @solara.component
@@ -121,7 +117,7 @@ def WorkbenchControls(add_workflow: t.Callable[[int | None], None]):
         set_input_pk(0)
         set_active_dialog(False)
 
-    with solara.v.Row(class_="g-0 px-2 pb-2 pt-3"):
+    with solara.Div(class_="controls"):
         solara.IconButton(
             color="secondary",
             icon_name="mdi-plus-thick",
