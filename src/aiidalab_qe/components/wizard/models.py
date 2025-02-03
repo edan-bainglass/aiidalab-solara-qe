@@ -27,8 +27,7 @@ class QeWizardModel(WizardModel):
 
     @model_validator(mode="after")
     def _from_pk(self):
-        if self.pk:
-            process = AiiDAService.load_qe_app_workflow_node(self.pk)
+        if self.pk and (process := AiiDAService.load_qe_app_workflow_node(self.pk)):
             if not process.process_state:
                 results_state = WizardState.INIT
             elif process.is_finished:
@@ -49,19 +48,17 @@ class QeDataModel(WizardDataModel[QeAppModel]):
 
     @property
     def label(self) -> str:
-        if self.pk:
-            if process := AiiDAService.load_qe_app_workflow_node(self.pk):
-                return f"{process.label or 'Workflow'}"
+        if self.pk and (process := AiiDAService.load_qe_app_workflow_node(self.pk)):
+            return f"{process.label or 'Workflow'}"
         return "New workflow"
 
     @property
     def status_icon(self) -> str:
         icon_name = "egg"
-        if self.pk:
-            if process := AiiDAService.load_qe_app_workflow_node(self.pk):
-                if process.is_failed:
-                    icon_name = "close-thick"
-                icon_name = STATUS_ICONS[process.process_state]
+        if self.pk and (process := AiiDAService.load_qe_app_workflow_node(self.pk)):
+            if process.is_failed:
+                icon_name = "close-thick"
+            icon_name = STATUS_ICONS[process.process_state]
         return f"mdi-{icon_name}"
 
     def get_ase_structure(self) -> ase.Atoms | None:
