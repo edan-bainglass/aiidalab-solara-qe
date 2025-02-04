@@ -1,8 +1,8 @@
-from aiidalab_qe.config.paths import STYLES
 import solara
 
 from aiidalab_qe.common.components.header import Header
 from aiidalab_qe.common.components.navbar import NavBar
+from aiidalab_qe.config.paths import STYLES
 
 
 @solara.component

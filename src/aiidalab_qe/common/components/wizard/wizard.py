@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from aiidalab_qe.config.paths import STYLES
 import solara
 from solara.toestand import Ref
+
+from aiidalab_qe.config.paths import STYLES
 
 from .models import WizardDataModel, WizardModel
 from .state import BG_COLORS, STATE_ICONS, WizardState

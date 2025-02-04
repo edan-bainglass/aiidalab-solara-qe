@@ -3,22 +3,16 @@ from __future__ import annotations
 import typing as t
 
 from aiida.orm import ProcessNode, StructureData
-from pydantic import BaseModel, ConfigDict
+from pydantic import ConfigDict, model_validator
 
 from aiidalab_qe.common.services.aiida import AiiDAService
+from aiidalab_qe.plugins.utils import get_plugin_resources, get_plugin_settings
 
-# TODO dynamically "concatenate" announced plugin schemas
-# TODO provide descriptions throughout
-# TODO consider implementing model-level validation
-# TODO consider using the models for UI selector options (dropdowns, toggles, etc.)
-# TODO automate and simplify schema API
+from .codes import ResourcesModel
+from .utils import ConfiguredBaseModel
 
 
-class ConfiguredBaseModel(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-
-class BasicModel(ConfiguredBaseModel):
+class BasicSettingsModel(ConfiguredBaseModel):
     protocol: t.Literal[
         "fast",
         "moderate",
@@ -34,7 +28,7 @@ class BasicModel(ConfiguredBaseModel):
     ] = "metal"
 
 
-class SystemModel(ConfiguredBaseModel):
+class SystemParametersModel(ConfiguredBaseModel):
     tot_charge: float = 0.0
     starting_ns_eigenvalue: list[tuple[int, int, str, int]] = []
     ecutwfc: float = 0.0
@@ -60,20 +54,20 @@ class SystemModel(ConfiguredBaseModel):
     tot_magnetization: float = 0.0
 
 
-class ControlModel(ConfiguredBaseModel):
+class ControlParametersModel(ConfiguredBaseModel):
     forc_conv_thr: float = 0.0
     etot_conv_thr: float = 0.0
 
 
-class ElectronsModel(ConfiguredBaseModel):
+class ElectronsParametersModel(ConfiguredBaseModel):
     conv_thr: float = 0.0
     electron_maxstep: int = 80
 
 
 class PwParametersModel(ConfiguredBaseModel):
-    SYSTEM: SystemModel = SystemModel()
-    CONTROL: ControlModel = ControlModel()
-    ELECTRONS: ElectronsModel = ElectronsModel()
+    SYSTEM: SystemParametersModel = SystemParametersModel()
+    CONTROL: ControlParametersModel = ControlParametersModel()
+    ELECTRONS: ElectronsParametersModel = ElectronsParametersModel()
 
 
 class PwModel(ConfiguredBaseModel):
@@ -85,7 +79,7 @@ class HubbardParametersModel(ConfiguredBaseModel):
     hubbard_u: dict[str, float] = {}
 
 
-class AdvancedModel(ConfiguredBaseModel):
+class AdvancedSettingsModel(ConfiguredBaseModel):
     pw: PwModel = PwModel()
     clean_workdir: bool = False
     kpoints_distance: float = 0.0
@@ -93,10 +87,6 @@ class AdvancedModel(ConfiguredBaseModel):
     pseudo_family: str = ""
     hubbard_parameters: HubbardParametersModel = HubbardParametersModel()
     initial_magnetic_moments: dict[str, float] = {}
-
-
-# class BandsModel(ConfiguredBaseModel):
-#     projwfc_bands: t.Optional[bool] = None
 
 
 # class PdosModel(ConfiguredBaseModel):
@@ -131,46 +121,39 @@ class AdvancedModel(ConfiguredBaseModel):
 #     core_level_list: list[str] = ?
 
 
-class CodeParallelizationModel(ConfiguredBaseModel):
-    npools: t.Optional[int] = None
-
-
-class CodeModel(ConfiguredBaseModel):
-    # options: list[list[tuple[str, str]]] = ?
-    code: str = ""
-    nodes: int = 1
-    cpus: int = 1
-    ntasks_per_node: int = 1
-    cpus_per_task: int = 1
-    max_wallclock_seconds: int = 3600
-    parallelization: CodeParallelizationModel = CodeParallelizationModel()
-
-
-class CodesModel(ConfiguredBaseModel):
-    override: t.Optional[bool] = None
-    codes: dict[str, CodeModel] = {}
-
-
-class ComputationalResourcesModel(ConfiguredBaseModel):
-    global_: CodesModel = CodesModel()
-    # bands: CodesModel
-    # pdos: CodesModel
-    # xas: CodesModel
-
-
 class CalculationParametersModel(ConfiguredBaseModel):
+    model_config = ConfigDict(extra="allow")
+
     relax_type: t.Literal[
         "none",
         "positions",
         "positions_cell",
     ] = "positions_cell"
     properties: list[str] = []
-    basic: BasicModel = BasicModel()
-    advanced: AdvancedModel = AdvancedModel()
-    # bands: BandsModel
-    # pdos: PdosModel
-    # xas: XasModel
-    # xps: XpsModel
+    basic: BasicSettingsModel = BasicSettingsModel()
+    advanced: AdvancedSettingsModel = AdvancedSettingsModel()
+
+    @model_validator(mode="before")
+    @classmethod
+    def _fetch_plugins(cls, data: t.Any) -> t.Any:
+        for plugin, settings in get_plugin_settings().items():
+            if plugin not in data:
+                data[plugin] = settings.model
+                cls.__annotations__[plugin] = settings.model
+        return data
+
+
+class ComputationalResourcesModel(ConfiguredBaseModel):
+    global_: ResourcesModel = ResourcesModel()
+
+    @model_validator(mode="before")
+    @classmethod
+    def _fetch_plugins(cls, data: t.Any) -> t.Any:
+        for plugin, resources in get_plugin_resources().items():
+            if plugin not in data:
+                data[plugin] = resources
+                cls.__annotations__[plugin] = type(resources)
+        return data
 
 
 class QeAppModel(ConfiguredBaseModel):
@@ -209,11 +192,11 @@ def _extract_calculation_parameters(parameters: dict) -> CalculationParametersMo
     model.relax_type = workchain_parameters.get("relax_type")
 
     models = {
-        "basic": BasicModel,
-        "advanced": AdvancedModel,
+        "basic": BasicSettingsModel,
+        "advanced": AdvancedSettingsModel,
     }
 
-    # TODO extand models by plugins
+    # TODO extend models by plugins
 
     for identifier, sub_model in models.items():
         if sub_model_parameters := parameters.get(identifier):
