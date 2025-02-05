@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import typing as t
 
-import ase
 import solara
 from aiida import orm
-from ase.build import bulk
+from ase.build import bulk, molecule
 from solara.toestand import Ref
 from weas_widget import WeasWidget
 
@@ -15,6 +14,12 @@ from aiidalab_qe.config.paths import STYLES
 from ..wizard.models import QeDataModel
 
 
+STRUCTURES = [
+    "Bulk Si",
+    "H2O molecule",
+]
+
+
 @solara.component
 def StructureSelectionStep(
     data_model: solara.Reactive[QeDataModel],
@@ -22,6 +27,7 @@ def StructureSelectionStep(
 ):
     print("rendering structure-selection-step component")
     input_structure = Ref(data_model.fields.data.input_structure)
+    selection = solara.use_reactive(t.cast(str, None))
     viewer, set_viewer = solara.use_state(t.cast(WeasWidget, None))
     structure, set_structure = solara.use_state(data_model.value.get_ase_structure())
 
@@ -32,7 +38,11 @@ def StructureSelectionStep(
                 weas.from_ase(structure)
             set_viewer(weas)
 
-    def update_structure(new_structure: ase.Atoms):
+    def select_structure(selected_structure: str):
+        if selected_structure == "Bulk Si":
+            new_structure = bulk("Si", "diamond", a=5.43)
+        elif selected_structure == "H2O molecule":
+            new_structure = molecule("H2O")
         set_structure(new_structure)
         if viewer:
             viewer.from_ase(new_structure)
@@ -53,11 +63,12 @@ def StructureSelectionStep(
             with solara.Div(class_="spinner"):
                 solara.SpinnerSolara()
         else:
-            solara.Button(
+            solara.Select(
                 label="Select structure",
-                color="primary",
-                class_="select-structure-button",
-                on_click=lambda: update_structure(bulk("Si", "diamond", a=5.43)),
+                value=selection,
+                values=STRUCTURES,
+                on_value=select_structure,
+                classes=["structure-selector"],
             )
             solara.Div(
                 class_="structure-viewer card",

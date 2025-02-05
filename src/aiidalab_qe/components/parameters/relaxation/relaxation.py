@@ -30,26 +30,18 @@ def RelaxationSelector(data_model: solara.Reactive[QeDataModel]):
     input_structure = Ref(data_model.fields.data.input_structure)
     relax_type = Ref(data_model.fields.data.calculation_parameters.relax_type)
     is_relax = solara.use_reactive(relax_type.value not in (None, "none"))
-    options = solara.use_reactive(t.cast(list[str], []))
-
-    OPTIONS = (
-        STRUCTURAL_RELAXATION_OPTIONS
-        if input_structure.value and any(input_structure.value.pbc)
-        else MOLECULAR_RELAXATION_OPTIONS
-    )
+    options = solara.use_reactive(t.cast(dict[str, dict[str, str]], {}))
 
     def set_relaxation_options():
-        old_relax_type = relax_type.value
-        options.set([*OPTIONS.keys()])
-        relax_type.set(old_relax_type)
+        options.set(
+            STRUCTURAL_RELAXATION_OPTIONS
+            if input_structure.value and any(input_structure.value.pbc)
+            else MOLECULAR_RELAXATION_OPTIONS
+        )
+        relax_type.set([*options.value.keys()][-1])
 
     def set_default_relax_type():
-        type_ = data_model.value.data.calculation_parameters.model_fields["relax_type"]
-        relax_type.set(type_.default if is_relax.value else "none")
-
-    def update_relaxation(type_: str):
-        is_relax.set(type_ != "none")
-        relax_type.set(type_)
+        relax_type.set([*options.value.keys()][-1] if is_relax.value else "none")
 
     solara.use_effect(
         set_relaxation_options,
@@ -67,16 +59,20 @@ def RelaxationSelector(data_model: solara.Reactive[QeDataModel]):
             value=is_relax,
             classes=["relaxation-switch"],
         )
-        if is_relax.value and options.value:
-            with solara.ToggleButtonsSingle(
-                value=relax_type.value,
-                on_value=update_relaxation,
-                dense=True,
-            ):
-                for option in options.value:
-                    solara.Button(
-                        label=OPTIONS[option]["label"],
-                        icon_name=OPTIONS[option]["icon"],
-                        tooltip=OPTIONS[option]["description"],  # TODO get this to work
-                        value=option,
-                    )
+        if is_relax.value:
+            if not options.value:
+                with solara.Div(class_="spinner"):
+                    solara.SpinnerSolara()
+            else:
+                print(relax_type.value)
+                with solara.ToggleButtonsSingle(
+                    value=relax_type,
+                    dense=True,
+                ):
+                    for option, props in options.value.items():
+                        solara.Button(
+                            label=props["label"],
+                            icon_name=props["icon"],
+                            tooltip=props["description"],
+                            value=option,
+                        )
