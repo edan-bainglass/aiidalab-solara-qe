@@ -86,7 +86,7 @@ class AdvancedSettingsModel(ConfiguredBaseModel):
     optimization_maxsteps: int = 50
     pseudo_family: str = ""
     hubbard_parameters: HubbardParametersModel = HubbardParametersModel()
-    initial_magnetic_moments: dict[str, float] = {}
+    initial_magnetic_moments: t.Optional[dict[str, float]] = None
 
 
 # class PdosModel(ConfiguredBaseModel):
