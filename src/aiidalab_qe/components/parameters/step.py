@@ -29,6 +29,8 @@ def ParametersConfigurationStep(
     data_model: solara.Reactive[QeDataModel],
     on_state_change: onStateChange,
 ):
+    print("\nrendering parameters-configuration-step component")
+
     calculation_parameters = Ref(data_model.fields.data.calculation_parameters)
 
     solara.use_effect(

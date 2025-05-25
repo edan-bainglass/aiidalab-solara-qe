@@ -13,7 +13,6 @@ from aiidalab_qe.config.paths import STYLES
 
 from ..wizard.models import QeDataModel
 
-
 STRUCTURES = [
     "Bulk Si",
     "H2O molecule",
@@ -25,7 +24,7 @@ def StructureSelectionStep(
     data_model: solara.Reactive[QeDataModel],
     on_state_change: onStateChange,
 ):
-    print("rendering structure-selection-step component")
+    print("\nrendering structure-selection-step component")
     input_structure = Ref(data_model.fields.data.input_structure)
     selection = solara.use_reactive(t.cast(str, None))
     viewer, set_viewer = solara.use_state(t.cast(WeasWidget, None))
@@ -33,7 +32,7 @@ def StructureSelectionStep(
 
     def initialize_viewer():
         if not viewer:
-            weas = WeasWidget(viewerStyle={"width": "100%"})
+            weas: WeasWidget = WeasWidget(viewerStyle={"width": "100%"})
             if structure:
                 weas.from_ase(structure)
             set_viewer(weas)
