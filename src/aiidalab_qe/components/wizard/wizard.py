@@ -2,19 +2,19 @@ from __future__ import annotations
 
 import solara
 
-from aiidalab_qe.common.components.wizard import Wizard, WizardModel
+from aiidalab_qe.common.components.wizard import Wizard
 
 from ..parameters import ParametersConfigurationStep
 from ..resources import ResourcesSelectionStep
 from ..results import ResultsStep
 from ..structure import StructureSelectionStep
 from ..submission import SubmissionStep
-from .models import QeDataModel
+from .models import QeDataModel, QeWizardModel
 
 
 @solara.component
 def QeWizard(
-    wizard_model: solara.Reactive[WizardModel],
+    wizard_model: solara.Reactive[QeWizardModel],
     data_model: solara.Reactive[QeDataModel],
 ):
     print("\nrendering qe-wizard component")
