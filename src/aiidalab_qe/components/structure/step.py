@@ -38,14 +38,6 @@ def StructureSelectionStep(
                 weas.from_ase(structure)
             set_viewer(weas)
 
-    def update_state():
-        if not input_structure.value:
-            on_state_change(WizardState.READY)
-        elif data_model.value.data.process:
-            on_state_change(WizardState.SUCCESS)
-        else:
-            on_state_change(WizardState.CONFIGURED)
-
     def select_structure(selected_structure: str):
         if selected_structure == "Bulk Si":
             new_structure = bulk("Si", "diamond", a=5.43)
@@ -55,6 +47,14 @@ def StructureSelectionStep(
         if viewer:
             viewer.from_ase(new_structure)
         input_structure.value = orm.StructureData(ase=new_structure)
+
+    def update_state():
+        if not input_structure.value:
+            on_state_change(WizardState.READY)
+        elif data_model.value.data.process:
+            on_state_change(WizardState.SUCCESS)
+        else:
+            on_state_change(WizardState.CONFIGURED)
 
     solara.use_effect(initialize_viewer, [])
 

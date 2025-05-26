@@ -17,7 +17,7 @@ active = solara.reactive(t.cast(int, None))
 
 @solara.component
 def Workbench():
-    print("\nrendering workbench page")
+    print("\n" * 5 + "rendering workbench page")
 
     def add_workflow(pk: int | None = None):
         wizard_models.set(
