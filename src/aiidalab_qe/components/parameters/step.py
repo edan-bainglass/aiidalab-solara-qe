@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import solara
-from solara.toestand import Ref
+import solara.toestand
 
 from aiidalab_qe.common.components.wizard.state import BG_COLORS, WizardState
 from aiidalab_qe.common.components.wizard.step import onStateChange
@@ -31,12 +31,19 @@ def ParametersConfigurationStep(
 ):
     print("\nrendering parameters-configuration-step component")
 
-    calculation_parameters = Ref(data_model.fields.data.calculation_parameters)
-
-    solara.use_effect(
-        lambda: on_state_change(WizardState.CONFIGURED),
-        [calculation_parameters.value],
+    calculation_parameters = solara.toestand.Ref(
+        data_model.fields.data.calculation_parameters
     )
+
+    def update_state():
+        if not calculation_parameters.value:
+            on_state_change(WizardState.READY)
+        elif data_model.value.data.process:
+            on_state_change(WizardState.SUCCESS)
+        else:
+            on_state_change(WizardState.CONFIGURED)
+
+    solara.use_effect(update_state, [calculation_parameters.value])
 
     with solara.Head():
         solara.Style(STYLES / "parameters.css")

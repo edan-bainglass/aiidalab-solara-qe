@@ -64,7 +64,6 @@ def RelaxationSelector(data_model: solara.Reactive[QeDataModel]):
                 with solara.Div(class_="spinner"):
                     solara.SpinnerSolara()
             else:
-                print(relax_type.value)
                 with solara.ToggleButtonsSingle(
                     value=relax_type,
                     dense=True,

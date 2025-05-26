@@ -3,9 +3,9 @@ from __future__ import annotations
 import typing as t
 
 import solara
+import solara.toestand
 from aiida import orm
 from ase.build import bulk, molecule
-from solara.toestand import Ref
 from weas_widget import WeasWidget
 
 from aiidalab_qe.common.components.wizard import WizardState, onStateChange
@@ -25,7 +25,8 @@ def StructureSelectionStep(
     on_state_change: onStateChange,
 ):
     print("\nrendering structure-selection-step component")
-    input_structure = Ref(data_model.fields.data.input_structure)
+
+    input_structure = solara.toestand.Ref(data_model.fields.data.input_structure)
     selection = solara.use_reactive(t.cast(str, None))
     viewer, set_viewer = solara.use_state(t.cast(WeasWidget, None))
     structure, set_structure = solara.use_state(data_model.value.get_ase_structure())
@@ -36,6 +37,14 @@ def StructureSelectionStep(
             if structure:
                 weas.from_ase(structure)
             set_viewer(weas)
+
+    def update_state():
+        if not input_structure.value:
+            on_state_change(WizardState.READY)
+        elif data_model.value.data.process:
+            on_state_change(WizardState.SUCCESS)
+        else:
+            on_state_change(WizardState.CONFIGURED)
 
     def select_structure(selected_structure: str):
         if selected_structure == "Bulk Si":
@@ -49,10 +58,7 @@ def StructureSelectionStep(
 
     solara.use_effect(initialize_viewer, [])
 
-    solara.use_effect(
-        lambda: input_structure.value and on_state_change(WizardState.CONFIGURED),
-        [input_structure.value],
-    )
+    solara.use_effect(update_state, [input_structure.value])
 
     with solara.Head():
         solara.Style(STYLES / "structure.css")
