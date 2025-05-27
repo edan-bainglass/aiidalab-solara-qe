@@ -74,12 +74,14 @@ def Wizard(
                         with solara.v.ExpansionPanelContent(
                             class_="accordion-collapse"
                         ):
+                            on_state_change = solara.use_memo(
+                                lambda: lambda state, i=i: update_states(i, state),
+                                dependencies=[],
+                            )
                             WizardStep(
                                 state=states.value[i],
                                 component=step["component"],
                                 data_model=data_model,
-                                on_state_change=lambda state, i=i: update_states(
-                                    i, state
-                                ),
+                                on_state_change=on_state_change,
                                 confirmable=i < len(steps) - 1,
                             )
