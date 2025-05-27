@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing as t
 
 import solara
-from solara import lab
+import solara.lab
 
 from aiidalab_qe.components.wizard import QeWizard
 from aiidalab_qe.components.wizard.models import QeDataModel, QeWizardModel
@@ -54,9 +54,9 @@ def Workbench():
 
     with solara.Div(class_="workbench"):
         WorkbenchControls(add_workflow=add_workflow)
-        with lab.Tabs(
+        with solara.lab.Tabs(
             vertical=True,
-            lazy=True,
+            lazy=False,
             value=active,
         ):
             for i, (data_model, wizard_model) in enumerate(
@@ -65,7 +65,7 @@ def Workbench():
                     wizard_models.value,
                 )
             ):
-                with lab.Tab(
+                with solara.lab.Tab(
                     tab_children=[
                         TabHeader(
                             data_model,
@@ -129,7 +129,7 @@ def WorkbenchControls(add_workflow: t.Callable[[int | None], None]):
             on_click=prompt_for_pk,
         )
 
-    lab.ConfirmationDialog(
+    solara.lab.ConfirmationDialog(
         active_dialog,
         title="Enter workflow PK",
         ok="Submit",
