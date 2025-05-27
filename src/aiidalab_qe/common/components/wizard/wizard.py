@@ -17,6 +17,7 @@ def Wizard(
     data_model: solara.Reactive[WizardDataModel],
 ):
     print("\nrendering wizard component")
+
     selected_index = Ref(wizard_model.fields.current_step)
     states = Ref(wizard_model.fields.states)
 

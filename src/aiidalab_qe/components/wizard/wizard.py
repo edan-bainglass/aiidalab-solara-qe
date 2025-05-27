@@ -11,6 +11,29 @@ from ..structure import StructureSelectionStep
 from ..submission import SubmissionStep
 from .models import QeDataModel, QeWizardModel
 
+QE_WIZARD_STEPS = (
+    {
+        "title": "Select structure",
+        "component": StructureSelectionStep,
+    },
+    {
+        "title": "Configure the workflow",
+        "component": ParametersConfigurationStep,
+    },
+    {
+        "title": "Choose computational resources",
+        "component": ResourcesSelectionStep,
+    },
+    {
+        "title": "Submit the workflow",
+        "component": SubmissionStep,
+    },
+    {
+        "title": "Status & results",
+        "component": ResultsStep,
+    },
+)
+
 
 @solara.component
 def QeWizard(
@@ -20,29 +43,9 @@ def QeWizard(
     print("\nrendering qe-wizard component")
     with solara.Div(class_="qe-wizard"):
         solara.HTML("h2", data_model.value.label)
+
         Wizard(
-            steps=[
-                {
-                    "title": "Select structure",
-                    "component": StructureSelectionStep,
-                },
-                {
-                    "title": "Configure the workflow",
-                    "component": ParametersConfigurationStep,
-                },
-                {
-                    "title": "Choose computational resources",
-                    "component": ResourcesSelectionStep,
-                },
-                {
-                    "title": "Submit the workflow",
-                    "component": SubmissionStep,
-                },
-                {
-                    "title": "Status & results",
-                    "component": ResultsStep,
-                },
-            ],
+            steps=QE_WIZARD_STEPS,
             wizard_model=wizard_model,
             data_model=data_model,
         )
