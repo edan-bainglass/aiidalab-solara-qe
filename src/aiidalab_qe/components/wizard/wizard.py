@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import solara
+import solara.toestand
 
 from aiidalab_qe.common.components.wizard import Wizard
 
@@ -40,12 +41,15 @@ def QeWizard(
     wizard_model: solara.Reactive[QeWizardModel],
     data_model: solara.Reactive[QeDataModel],
 ):
-    print("\nrendering qe-wizard component")
-    with solara.Div(class_="qe-wizard"):
-        solara.HTML("h2", data_model.value.label)
+    print("\nrendering qe-wizard")
 
+    label = solara.toestand.Ref(data_model.fields.label)
+    steps = solara.use_memo(lambda: QE_WIZARD_STEPS, [])
+
+    with solara.Div(class_="qe-wizard"):
+        solara.HTML("h2", label.value)
         Wizard(
-            steps=QE_WIZARD_STEPS,
+            steps=steps,
             wizard_model=wizard_model,
             data_model=data_model,
         )

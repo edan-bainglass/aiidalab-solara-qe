@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import typing as t
 
+import ase
 import solara
 import solara.toestand
 from aiida import orm
@@ -19,6 +20,12 @@ STRUCTURES = [
 ]
 
 
+def get_ase_structure(
+    structure: t.Optional[orm.StructureData],
+) -> t.Optional[ase.Atoms]:
+    return structure.get_ase() if structure else None
+
+
 @solara.component
 def StructureSelectionStep(
     data_model: solara.Reactive[QeDataModel],
@@ -28,30 +35,31 @@ def StructureSelectionStep(
 
     input_structure = solara.toestand.Ref(data_model.fields.data.input_structure)
     selection = solara.use_reactive(t.cast(str, None))
-    viewer, set_viewer = solara.use_state(t.cast(WeasWidget, None))
-    structure, set_structure = solara.use_state(data_model.value.get_ase_structure())
+    viewer = solara.use_reactive(t.cast(WeasWidget, None))
+    structure = solara.use_reactive(get_ase_structure(input_structure.value))
+    process = solara.toestand.Ref(data_model.fields.data.process)
 
     def initialize_viewer():
-        if not viewer:
+        if not viewer.value:
             weas: WeasWidget = WeasWidget(viewerStyle={"width": "100%"})
-            if structure:
-                weas.from_ase(structure)
-            set_viewer(weas)
+            if structure.value:
+                weas.from_ase(structure.value)
+            viewer.set(weas)
 
     def select_structure(selected_structure: str):
         if selected_structure == "Bulk Si":
             new_structure = bulk("Si", "diamond", a=5.43)
         elif selected_structure == "H2O molecule":
             new_structure = molecule("H2O")
-        set_structure(new_structure)
-        if viewer:
-            viewer.from_ase(new_structure)
+        structure.set(new_structure)
+        if viewer.value:
+            viewer.value.from_ase(new_structure)
         input_structure.value = orm.StructureData(ase=new_structure)
 
     def update_state():
         if not input_structure.value:
             on_state_change(WizardState.READY)
-        elif data_model.value.data.process:
+        elif process.value:
             on_state_change(WizardState.SUCCESS)
         else:
             on_state_change(WizardState.CONFIGURED)
@@ -64,7 +72,7 @@ def StructureSelectionStep(
         solara.Style(STYLES / "structure.css")
 
     with solara.Div(class_="structure-selection-step"):
-        if not viewer:
+        if not viewer.value:
             with solara.Div(class_="spinner"):
                 solara.SpinnerSolara()
         else:
@@ -77,5 +85,5 @@ def StructureSelectionStep(
             )
             solara.Div(
                 class_="structure-viewer card",
-                children=[viewer],
+                children=[viewer.value],
             )

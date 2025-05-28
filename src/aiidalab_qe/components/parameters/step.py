@@ -34,11 +34,12 @@ def ParametersConfigurationStep(
     calculation_parameters = solara.toestand.Ref(
         data_model.fields.data.calculation_parameters
     )
+    process = solara.toestand.Ref(data_model.fields.data.process)
 
     def update_state():
         if not calculation_parameters.value:
             on_state_change(WizardState.READY)
-        elif data_model.value.data.process:
+        elif process.value:
             on_state_change(WizardState.SUCCESS)
         else:
             on_state_change(WizardState.CONFIGURED)

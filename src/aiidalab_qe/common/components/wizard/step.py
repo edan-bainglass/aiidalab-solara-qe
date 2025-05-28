@@ -30,11 +30,20 @@ def WizardStep(
     on_state_change: onStateChange,
     confirmable: bool = True,
 ):
-    def update_state(new_state: WizardState):
-        if new_state.value == state.value:
-            return
-        if state in (WizardState.READY, WizardState.SUCCESS):
+    update_state = solara.use_memo(
+        lambda: lambda new_state: (
             on_state_change(new_state)
+            if new_state.value != state.value
+            and state in (WizardState.READY, WizardState.SUCCESS)
+            else None
+        ),
+        [state, on_state_change],
+    )
+
+    confirm_step = solara.use_memo(
+        lambda: lambda: on_state_change(WizardState.SUCCESS),
+        [on_state_change],
+    )
 
     with solara.Div(class_="wizard-step"):
         print("\nrendering wizard step component")
@@ -46,5 +55,5 @@ def WizardStep(
                     color="success",
                     icon_name="check",
                     disabled=state is not WizardState.CONFIGURED,
-                    on_click=lambda: on_state_change(WizardState.SUCCESS),
+                    on_click=confirm_step,
                 )

@@ -82,6 +82,8 @@ def TabHeader(
     workflow: solara.Reactive[QeDataModel],
     remove_workflow: t.Callable[[int], None],
 ):
+    remove_workflow = solara.use_memo(lambda: remove_workflow, [])
+
     with solara.Div(class_="tab-header"):
         # TODO stop close event propagation to tab selection (leads to index out of bound)
         solara.IconButton(
