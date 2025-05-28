@@ -3,8 +3,7 @@ from __future__ import annotations
 import solara
 import solara.toestand
 
-from aiidalab_qe.common.components.wizard.state import BG_COLORS, WizardState
-from aiidalab_qe.common.components.wizard.step import onStateChange
+from aiidalab_qe.common.components.wizard import BG_COLORS, WizardState, onStateChange
 from aiidalab_qe.components.wizard.models import QeDataModel
 from aiidalab_qe.config.paths import STYLES
 
@@ -38,11 +37,13 @@ def ParametersConfigurationStep(
 
     def update_state():
         if not calculation_parameters.value:
-            on_state_change(WizardState.READY)
+            new_state = WizardState.READY
         elif process.value:
-            on_state_change(WizardState.SUCCESS)
+            new_state = WizardState.SUCCESS
         else:
-            on_state_change(WizardState.CONFIGURED)
+            new_state = WizardState.CONFIGURED
+
+        on_state_change(new_state)
 
     solara.use_effect(update_state, [calculation_parameters.value])
 

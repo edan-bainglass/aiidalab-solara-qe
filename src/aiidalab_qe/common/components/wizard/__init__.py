@@ -1,6 +1,6 @@
 from .models import WizardDataModel, WizardModel
 from .state import BG_COLORS, STATE_ICONS, WizardState
-from .step import WizardStep, WizardStepProps, WizardStepType, onStateChange
+from .types import WizardStepProps, WizardStepType, onStateChange
 from .wizard import Wizard
 
 __all__ = [
@@ -9,9 +9,8 @@ __all__ = [
     "BG_COLORS",
     "STATE_ICONS",
     "WizardState",
-    "WizardStepProps",
     "Wizard",
-    "WizardStep",
+    "WizardStepProps",
     "WizardStepType",
     "onStateChange",
 ]

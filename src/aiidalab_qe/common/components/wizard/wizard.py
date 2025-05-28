@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import typing as t
+
 import solara
 from solara.toestand import Ref
 
@@ -7,7 +9,7 @@ from aiidalab_qe.config.paths import STYLES
 
 from .models import WizardDataModel, WizardModel
 from .state import BG_COLORS, STATE_ICONS, WizardState
-from .step import WizardStep, WizardStepProps
+from .types import WizardStepProps
 
 
 @solara.component
@@ -18,10 +20,13 @@ def Wizard(
 ):
     print("\nrendering wizard component")
 
-    selected_index = Ref(wizard_model.fields.current_step)
+    current_step = Ref(wizard_model.fields.current_step)
     states = Ref(wizard_model.fields.states)
 
-    def update_states(index: int, new_state: WizardState):
+    def update_state(index: int, new_state: WizardState):
+        if states.value[index] == new_state:
+            return
+
         new_states: list = states.value[:]
         new_states[index] = new_state
 
@@ -30,16 +35,16 @@ def Wizard(
             new_states[index + 1 :] = [WizardState.INIT] * next_steps_count
 
         def redirect_to_next_step():
-            selected_index.value += 1
+            current_step.value += 1
             new_states[index + 1] = WizardState.CONFIGURED
 
-        if selected_index.value is not None and selected_index.value < len(steps) - 1:
+        if current_step.value is not None and current_step.value < len(steps) - 1:
             if new_state is WizardState.CONFIGURED:
                 reset_subsequent_steps()
             if new_state is WizardState.SUCCESS:
                 redirect_to_next_step()
 
-        states.value = new_states
+        states.set(new_states)
 
     with solara.Head():
         solara.Style(STYLES / "wizard.css")
@@ -53,36 +58,76 @@ def Wizard(
                 class_="accordion",
                 hover=True,
                 accordion=True,
-                v_model=selected_index.value,
-                on_v_model=lambda i: selected_index.set(i),
+                v_model=current_step.value,
+                on_v_model=current_step.set,
             ):
                 for i, step in enumerate(steps):
+                    state = states.value[i]
                     with solara.v.ExpansionPanel(class_="accordion-item"):
                         with solara.v.ExpansionPanelHeader(
                             class_="accordion-header",
-                            style_=f"background-color: {BG_COLORS[states.value[i].name]}",
+                            style_=f"background-color: {BG_COLORS[state.name]}",
                         ):
-                            with solara.Div(class_="accordion-header-content"):
-                                solara.v.Icon(
-                                    class_="accordion-header-icon",
-                                    left=True,
-                                    children=[STATE_ICONS[states.value[i].name]],
-                                )
-                                solara.Text(
-                                    f"Step {i + 1}: {step['title']}",
-                                    classes=["accordion-header-text"],
-                                )
+                            WizardStepHeader(i, step, state)
                         with solara.v.ExpansionPanelContent(
                             class_="accordion-collapse"
                         ):
-                            on_state_change = solara.use_memo(
-                                lambda: lambda state, i=i: update_states(i, state),
-                                dependencies=[],
+                            WizardStepBody(
+                                i,
+                                step,
+                                state,
+                                update_state,
+                                data_model,
+                                i < len(steps) - 1,
                             )
-                            WizardStep(
-                                state=states.value[i],
-                                component=step["component"],
-                                data_model=data_model,
-                                on_state_change=on_state_change,
-                                confirmable=i < len(steps) - 1,
-                            )
+
+
+@solara.component
+def WizardStepHeader(index: int, step: WizardStepProps, state: WizardState):
+    with solara.Div(class_="accordion-header-content"):
+        solara.v.Icon(
+            class_="accordion-header-icon",
+            left=True,
+            children=[STATE_ICONS[state.name]],
+        )
+        solara.Text(
+            f"Step {index + 1}: {step['title']}",
+            classes=["accordion-header-text"],
+        )
+
+
+@solara.component
+def WizardStepBody(
+    index: int,
+    step: WizardStepProps,
+    state: WizardState,
+    on_state_change: t.Callable[[int, WizardState], None],
+    data_model: solara.Reactive[WizardDataModel],
+    confirmable: bool = True,
+):
+    update_state = solara.use_memo(
+        lambda i=index, state=state: lambda new_state: (
+            on_state_change(i, new_state)
+            if state in (WizardState.READY, WizardState.SUCCESS)
+            else None
+        ),
+        [state],
+    )
+
+    confirm_step = solara.use_memo(
+        lambda i=index: lambda: on_state_change(i, WizardState.SUCCESS),
+        [],
+    )
+
+    with solara.Div(class_="wizard-step"):
+        step["component"](data_model, update_state)
+
+    with solara.Div(class_="wizard-step-controls"):
+        if confirmable:
+            solara.Button(
+                label="Confirm",
+                color="success",
+                icon_name="check",
+                disabled=state is not WizardState.CONFIGURED,
+                on_click=confirm_step,
+            )

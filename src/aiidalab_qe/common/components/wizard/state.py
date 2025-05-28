@@ -4,8 +4,8 @@ from enum import Enum
 class WizardState(Enum):
     FAIL = -1
     INIT = 0
-    CONFIGURED = 1
-    READY = 2
+    READY = 1
+    CONFIGURED = 2
     ACTIVE = 3
     SUCCESS = 4
 

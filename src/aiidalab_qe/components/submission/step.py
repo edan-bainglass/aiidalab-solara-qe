@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from aiidalab_qe.config.paths import STYLES
 import solara
 import solara.toestand
 
-from aiidalab_qe.common.components.wizard.state import WizardState
-from aiidalab_qe.common.components.wizard.step import onStateChange
+from aiidalab_qe.common.components.wizard import WizardState, onStateChange
 from aiidalab_qe.components.wizard.models import QeDataModel
+from aiidalab_qe.config.paths import STYLES
 
 
 @solara.component
@@ -20,11 +19,16 @@ def SubmissionStep(
 
     def update_state():
         if not process.value:
-            on_state_change(WizardState.READY)
-        elif data_model.value.data.process:
-            on_state_change(WizardState.SUCCESS)
+            new_state = WizardState.INIT
         else:
-            on_state_change(WizardState.CONFIGURED)
+            if not process.value.is_finished:
+                new_state = WizardState.ACTIVE
+            elif process.value.is_finished_ok:
+                new_state = WizardState.SUCCESS
+            else:
+                new_state = WizardState.FAIL
+
+        on_state_change(new_state)
 
     solara.use_effect(update_state, [process.value])
 

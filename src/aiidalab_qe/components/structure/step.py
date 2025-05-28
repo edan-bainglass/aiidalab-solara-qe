@@ -54,15 +54,17 @@ def StructureSelectionStep(
         structure.set(new_structure)
         if viewer.value:
             viewer.value.from_ase(new_structure)
-        input_structure.value = orm.StructureData(ase=new_structure)
+        input_structure.set(orm.StructureData(ase=new_structure))
 
     def update_state():
         if not input_structure.value:
-            on_state_change(WizardState.READY)
+            new_state = WizardState.READY
         elif process.value:
-            on_state_change(WizardState.SUCCESS)
+            new_state = WizardState.SUCCESS
         else:
-            on_state_change(WizardState.CONFIGURED)
+            new_state = WizardState.CONFIGURED
+
+        on_state_change(new_state)
 
     solara.use_effect(initialize_viewer, [])
 

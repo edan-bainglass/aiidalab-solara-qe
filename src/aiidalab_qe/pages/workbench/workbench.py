@@ -4,6 +4,7 @@ import typing as t
 
 import solara
 import solara.lab
+import solara.toestand
 
 from aiidalab_qe.components.wizard import QeWizard
 from aiidalab_qe.components.wizard.models import QeDataModel, QeWizardModel
@@ -65,12 +66,13 @@ def Workbench():
                     wizard_models.value,
                 )
             ):
+
+                def remove_this_workflow(index: int = i):
+                    remove_workflow(index)
+
                 with solara.lab.Tab(
                     tab_children=[
-                        TabHeader(
-                            data_model,
-                            lambda i=i: remove_workflow(i),
-                        ),
+                        TabHeader(data_model, remove_this_workflow),
                     ],
                 ):
                     with solara.Div(class_="workbench-body container"):
@@ -79,10 +81,12 @@ def Workbench():
 
 @solara.component
 def TabHeader(
-    workflow: solara.Reactive[QeDataModel],
+    data_model: solara.Reactive[QeDataModel],
     remove_workflow: t.Callable[[int], None],
 ):
-    remove_workflow = solara.use_memo(lambda: remove_workflow, [])
+    pk = solara.toestand.Ref(data_model.fields.pk)
+    label = solara.toestand.Ref(data_model.fields.label)
+    status_icon = solara.toestand.Ref(data_model.fields.status_icon)
 
     with solara.Div(class_="tab-header"):
         # TODO stop close event propagation to tab selection (leads to index out of bound)
@@ -90,34 +94,38 @@ def TabHeader(
             icon_name="mdi-close",
             color="error",
             class_="tab-close-button",
-            on_click=remove_workflow,
+            on_click=solara.use_memo(lambda: remove_workflow, []),
         )
         solara.v.Icon(
-            children=[workflow.value.status_icon],
+            children=[status_icon.value],
             class_="status-icon",
         )
         with solara.Div(class_="tab-text"):
-            if len(workflow.value.label) > 20:
-                with solara.Tooltip(workflow.value.label):
-                    solara.Text(workflow.value.label)
+            if len(label.value) > 20:
+                with solara.Tooltip(label.value):
+                    solara.Text(label.value)
             else:
-                solara.Text(workflow.value.label)
-        if workflow.value.pk:
-            solara.Text(f"[{workflow.value.pk}]")
+                solara.Text(label.value)
+        if pk.value:
+            solara.Text(f"[{pk.value}]")
 
 
 @solara.component
 def WorkbenchControls(add_workflow: t.Callable[[int | None], None]):
-    input_pk, set_input_pk = solara.use_state(t.cast(int, None))
-    active_dialog, set_active_dialog = solara.use_state(False)
+    input_pk = solara.use_reactive(t.cast(int, None))
+    active_dialog = solara.use_reactive(False)
 
     def prompt_for_pk():
-        set_active_dialog(True)
+        active_dialog.set(True)
 
-    def on_prompt_submit():
-        add_workflow(input_pk)
-        set_input_pk(0)
-        set_active_dialog(False)
+    def submit_dialog():
+        add_workflow(input_pk.value)
+        input_pk.set(0)
+        active_dialog.set(False)
+
+    def close_dialog():
+        active_dialog.set(False)
+        input_pk.set(0)
 
     with solara.Div(class_="controls"):
         solara.IconButton(
@@ -132,18 +140,17 @@ def WorkbenchControls(add_workflow: t.Callable[[int | None], None]):
         )
 
     solara.lab.ConfirmationDialog(
-        active_dialog,
+        active_dialog.value,
         title="Enter workflow PK",
         ok="Submit",
-        on_ok=lambda: on_prompt_submit(),
-        on_cancel=lambda: set_active_dialog(False),
+        on_ok=submit_dialog,
+        on_cancel=close_dialog,
         children=[
             solara.v.Row(
                 children=[
                     solara.InputInt(
                         label="PK",
                         value=input_pk,
-                        on_value=set_input_pk,
                         autofocus=True,
                     ),
                 ],
