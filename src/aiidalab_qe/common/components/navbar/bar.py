@@ -4,7 +4,8 @@ import solara
 
 from aiidalab_qe.config.paths import STYLES
 
-from .item import LinkNavItem, NavItem, NavItemProps
+from .item import LinkNavItem, NavItem
+from .types import NavItemProps
 
 
 @solara.component

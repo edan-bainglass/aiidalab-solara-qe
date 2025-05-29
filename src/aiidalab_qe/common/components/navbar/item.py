@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import solara
 
-NavItemProps = dict[str, str]
-
 
 @solara.component
 def NavItem(label: str = "", icon: str = "", **kwargs):
