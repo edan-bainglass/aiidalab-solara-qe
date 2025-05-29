@@ -18,37 +18,42 @@ active = solara.reactive(t.cast(int, None))
 
 @solara.component
 def Workbench():
-    print("\n" * 5 + "rendering workbench page")
+    print("\nrendering workbench page")
+
+    # NOTE see https://github.com/widgetti/solara/issues/637
+    batch_context = solara.reacton.core.get_render_context()
 
     def add_workflow(pk: int | None = None):
-        wizard_models.set(
-            [
-                *wizard_models.value,
-                solara.reactive(QeWizardModel(pk=pk)),
-            ],
-        )
-        data_models.set(
-            [
-                *data_models.value,
-                solara.reactive(QeDataModel(pk=pk)),
-            ],
-        )
-        active.set(len(data_models.value) - 1)
+        with batch_context:
+            wizard_models.set(
+                [
+                    *wizard_models.value,
+                    solara.reactive(QeWizardModel(pk=pk)),
+                ],
+            )
+            data_models.set(
+                [
+                    *data_models.value,
+                    solara.reactive(QeDataModel(pk=pk)),
+                ],
+            )
+            active.set(len(data_models.value) - 1)
 
     def remove_workflow(index: int):
-        wizard_models.set(
-            [
-                *wizard_models.value[:index],
-                *wizard_models.value[index + 1 :],
-            ],
-        )
-        data_models.set(
-            [
-                *data_models.value[:index],
-                *data_models.value[index + 1 :],
-            ],
-        )
-        active.set(len(data_models.value) - 1)
+        with batch_context:
+            wizard_models.set(
+                [
+                    *wizard_models.value[:index],
+                    *wizard_models.value[index + 1 :],
+                ],
+            )
+            data_models.set(
+                [
+                    *data_models.value[:index],
+                    *data_models.value[index + 1 :],
+                ],
+            )
+            active.set(len(data_models.value) - 1)
 
     with solara.Head():
         solara.Style(STYLES / "workbench.css")
@@ -115,17 +120,21 @@ def WorkbenchControls(add_workflow: t.Callable[[int | None], None]):
     input_pk = solara.use_reactive(t.cast(int, None))
     active_dialog = solara.use_reactive(False)
 
+    render_context = solara.reacton.core.get_render_context()
+
     def prompt_for_pk():
         active_dialog.set(True)
 
     def submit_dialog():
-        add_workflow(input_pk.value)
-        input_pk.set(0)
-        active_dialog.set(False)
+        with render_context:
+            add_workflow(input_pk.value)
+            input_pk.set(0)
+            active_dialog.set(False)
 
     def close_dialog():
-        active_dialog.set(False)
-        input_pk.set(0)
+        with render_context:
+            active_dialog.set(False)
+            input_pk.set(0)
 
     with solara.Div(class_="controls"):
         solara.IconButton(
