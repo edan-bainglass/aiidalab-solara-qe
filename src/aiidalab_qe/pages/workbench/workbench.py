@@ -10,8 +10,8 @@ from aiidalab_qe.components.wizard import QeWizard
 from aiidalab_qe.components.wizard.models import QeDataModel, QeWizardModel
 from aiidalab_qe.config.paths import STYLES
 
-wizard_models = solara.reactive([solara.reactive(QeWizardModel())])
-data_models = solara.reactive([solara.reactive(QeDataModel())])
+wizard_models = solara.reactive(t.cast(list[solara.Reactive[QeWizardModel]], []))
+data_models = solara.reactive(t.cast(list[solara.Reactive[QeDataModel]], []))
 
 active = solara.reactive(t.cast(int, None))
 
