@@ -24,7 +24,7 @@ def Home():
         NavBar(
             [
                 {
-                    "label": "Getting started",
+                    "label": "Get started",
                     "icon": "rocket",
                 },
                 {
