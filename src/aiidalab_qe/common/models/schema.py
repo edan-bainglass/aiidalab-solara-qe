@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import typing as t
 
+import pydantic as pdt
 from aiida.orm import ProcessNode, StructureData
-from pydantic import ConfigDict, model_validator
 
 from aiidalab_qe.common.services.aiida import AiiDAService
 from aiidalab_qe.plugins.utils import get_plugin_resources, get_plugin_settings
@@ -122,7 +122,7 @@ class AdvancedSettingsModel(ConfiguredBaseModel):
 
 
 class CalculationParametersModel(ConfiguredBaseModel):
-    model_config = ConfigDict(extra="allow")
+    model_config = pdt.ConfigDict(extra="allow")
 
     relax_type: t.Literal[
         "none",
@@ -133,7 +133,7 @@ class CalculationParametersModel(ConfiguredBaseModel):
     basic: BasicSettingsModel = BasicSettingsModel()
     advanced: AdvancedSettingsModel = AdvancedSettingsModel()
 
-    @model_validator(mode="before")
+    @pdt.model_validator(mode="before")
     @classmethod
     def _fetch_plugins(cls, data: t.Any) -> t.Any:
         for plugin, settings in get_plugin_settings().items():
@@ -146,7 +146,7 @@ class CalculationParametersModel(ConfiguredBaseModel):
 class ComputationalResourcesModel(ConfiguredBaseModel):
     global_: ResourcesModel = ResourcesModel()
 
-    @model_validator(mode="before")
+    @pdt.model_validator(mode="before")
     @classmethod
     def _fetch_plugins(cls, data: t.Any) -> t.Any:
         for plugin, resources in get_plugin_resources().items():

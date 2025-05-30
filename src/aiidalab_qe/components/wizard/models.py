@@ -3,8 +3,8 @@ from __future__ import annotations
 import typing as t
 
 import ase
+import pydantic as pdt
 from aiida.engine import ProcessState
-from pydantic import model_validator
 
 from aiidalab_qe.common.components.wizard import WizardDataModel
 from aiidalab_qe.common.components.wizard.models import WizardModel
@@ -25,7 +25,7 @@ STATUS_ICONS = {
 class QeWizardModel(WizardModel):
     pk: t.Optional[int] = None
 
-    @model_validator(mode="after")
+    @pdt.model_validator(mode="after")
     def _from_pk(self):
         if self.pk and (process := AiiDAService.load_qe_app_workflow_node(self.pk)):
             if not process.process_state:
@@ -65,7 +65,7 @@ class QeDataModel(WizardDataModel[QeAppModel]):
         if self.data.input_structure:
             return self.data.input_structure.get_ase()
 
-    @model_validator(mode="after")
+    @pdt.model_validator(mode="after")
     def _from_pk(self):
         self.data = self.data or (from_process(self.pk) if self.pk else QeAppModel())
         return self

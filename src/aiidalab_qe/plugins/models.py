@@ -1,15 +1,15 @@
 import typing as t
 
 import solara
-from pydantic import BaseModel
+import pydantic as pdt
 
 from aiidalab_qe.common.models.codes import ResourcesModel
 
-PluginSettingsComponent = t.Callable[[BaseModel], solara.Element]
+PluginSettingsComponent = t.Callable[[pdt.BaseModel], solara.Element]
 
 
-class PluginSettingsModel(BaseModel):
-    model: BaseModel
+class PluginSettingsModel(pdt.BaseModel):
+    model: pdt.BaseModel
     component: PluginSettingsComponent
 
 

@@ -1,14 +1,14 @@
 import typing as t
 
-from pydantic import Field
+import pydantic as pdt
 
 from .utils import ConfiguredBaseModel
 
 
 class CodeModel(ConfiguredBaseModel):
-    name: str = Field(exclude=True, default="")
-    description: str = Field(exclude=True, default="")
-    default_calcjob_plugin: str = Field(exclude=True, default="")
+    name: str = pdt.Field(exclude=True, default="")
+    description: str = pdt.Field(exclude=True, default="")
+    default_calcjob_plugin: str = pdt.Field(exclude=True, default="")
 
     code: str = ""
     nodes: int = 1
