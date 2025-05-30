@@ -41,8 +41,6 @@ def QeWizard(
     wizard_model: solara.Reactive[QeWizardModel],
     data_model: solara.Reactive[QeDataModel],
 ):
-    print("\nrendering qe-wizard")
-
     label = solara.toestand.Ref(data_model.fields.label)
 
     with solara.Div(class_="qe-wizard"):
