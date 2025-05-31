@@ -4,18 +4,18 @@ import solara
 import solara.toestand
 
 from aiidalab_qe.common.components.wizard import WizardState, onStateChange
-from aiidalab_qe.components.wizard.models import QeDataModel
+from aiidalab_qe.components.wizard.models import QeWizardModel
 from aiidalab_qe.config.paths import STYLES
 
 
 @solara.component
 def SubmissionStep(
-    data_model: solara.Reactive[QeDataModel],
+    model: solara.Reactive[QeWizardModel],
     on_state_change: onStateChange,
 ):
     print("\nrendering submission-step component")
 
-    process = solara.toestand.Ref(data_model.fields.data.process)
+    process = solara.toestand.Ref(model.fields.data.process)
 
     def update_state():
         if not process.value:

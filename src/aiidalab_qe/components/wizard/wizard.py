@@ -10,7 +10,7 @@ from ..resources import ResourcesSelectionStep
 from ..results import ResultsStep
 from ..structure import StructureSelectionStep
 from ..submission import SubmissionStep
-from .models import QeDataModel, QeWizardModel
+from .models import QeWizardModel
 
 QE_WIZARD_STEPS = (
     {
@@ -37,16 +37,12 @@ QE_WIZARD_STEPS = (
 
 
 @solara.component
-def QeWizard(
-    wizard_model: solara.Reactive[QeWizardModel],
-    data_model: solara.Reactive[QeDataModel],
-):
-    label = solara.toestand.Ref(data_model.fields.label)
+def QeWizard(model: solara.Reactive[QeWizardModel]):
+    label = solara.toestand.Ref(model.fields.label)
 
     with solara.Div(class_="qe-wizard"):
         solara.HTML("h2", label.value)
         Wizard(
             steps=QE_WIZARD_STEPS,
-            wizard_model=wizard_model,
-            data_model=data_model,
+            model=model,
         )

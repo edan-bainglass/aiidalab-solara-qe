@@ -7,7 +7,7 @@ from solara.toestand import Ref
 
 from aiidalab_qe.config.paths import STYLES
 
-from .models import WizardDataModel, WizardModel
+from .models import WizardModel
 from .state import BG_COLORS, STATE_ICONS, WizardState
 from .types import WizardStepProps
 
@@ -15,36 +15,38 @@ from .types import WizardStepProps
 @solara.component
 def Wizard(
     steps: list[WizardStepProps],
-    wizard_model: solara.Reactive[WizardModel],
-    data_model: solara.Reactive[WizardDataModel],
+    model: solara.Reactive[WizardModel],
 ):
     print("\nrendering wizard component")
 
-    current_step = Ref(wizard_model.fields.current_step)
-    states = Ref(wizard_model.fields.states)
+    current_step = Ref(model.fields.current_step)
+    states = Ref(model.fields.states)
+
+    render_context = solara.reacton.core.get_render_context()
 
     def update_state(index: int, new_state: WizardState):
-        if states.value[index] == new_state:
-            return
+        with render_context:
+            if states.value[index] == new_state:
+                return
 
-        new_states: list = states.value[:]
-        new_states[index] = new_state
+            new_states: list = states.value[:]
+            new_states[index] = new_state
 
-        def reset_subsequent_steps():
-            next_steps_count = len(new_states) - index - 1
-            new_states[index + 1 :] = [WizardState.INIT] * next_steps_count
+            def reset_subsequent_steps():
+                next_steps_count = len(new_states) - index - 1
+                new_states[index + 1 :] = [WizardState.INIT] * next_steps_count
 
-        def redirect_to_next_step():
-            current_step.value += 1
-            new_states[index + 1] = WizardState.CONFIGURED
+            def redirect_to_next_step():
+                current_step.value += 1
+                new_states[index + 1] = WizardState.CONFIGURED
 
-        if current_step.value is not None and current_step.value < len(steps) - 1:
-            if new_state is WizardState.CONFIGURED:
-                reset_subsequent_steps()
-            if new_state is WizardState.SUCCESS:
-                redirect_to_next_step()
+            if current_step.value is not None and current_step.value < len(steps) - 1:
+                if new_state is WizardState.CONFIGURED:
+                    reset_subsequent_steps()
+                if new_state is WizardState.SUCCESS:
+                    redirect_to_next_step()
 
-        states.set(new_states)
+            states.set(new_states)
 
     with solara.Head():
         solara.Style(STYLES / "wizard.css")
@@ -77,7 +79,7 @@ def Wizard(
                                 step,
                                 state,
                                 update_state,
-                                data_model,
+                                model,
                                 i < len(steps) - 1,
                             )
 
@@ -102,7 +104,7 @@ def WizardStepBody(
     step: WizardStepProps,
     state: WizardState,
     on_state_change: t.Callable[[int, WizardState], None],
-    data_model: solara.Reactive[WizardDataModel],
+    model: solara.Reactive[WizardModel],
     confirmable: bool = True,
 ):
     update_state = solara.use_memo(
@@ -120,7 +122,7 @@ def WizardStepBody(
     )
 
     with solara.Div(class_="wizard-step"):
-        step["component"](data_model, update_state)
+        step["component"](model, update_state)
 
     with solara.Div(class_="wizard-step-controls"):
         if confirmable:

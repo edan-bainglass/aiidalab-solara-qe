@@ -5,7 +5,7 @@ import typing as t
 import solara
 from solara.toestand import Ref
 
-from aiidalab_qe.components.wizard.models import QeDataModel
+from aiidalab_qe.components.wizard.models import QeWizardModel
 
 CONTROLS = {
     "electronic_type": {
@@ -68,8 +68,8 @@ CONTROLS = {
 
 
 @solara.component
-def BasicSettings(data_model: solara.Reactive[QeDataModel]):
-    calculation_parameters = data_model.fields.data.calculation_parameters
+def BasicSettings(model: solara.Reactive[QeWizardModel]):
+    calculation_parameters = model.fields.data.calculation_parameters
     basic_settings = calculation_parameters.basic
     system_settings = calculation_parameters.advanced.pw.parameters.SYSTEM
 

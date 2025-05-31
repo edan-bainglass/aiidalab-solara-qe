@@ -6,7 +6,6 @@ import ase
 import pydantic as pdt
 from aiida.engine import ProcessState
 
-from aiidalab_qe.common.components.wizard import WizardDataModel
 from aiidalab_qe.common.components.wizard.models import WizardModel
 from aiidalab_qe.common.components.wizard.state import WizardState
 from aiidalab_qe.common.models.schema import QeAppModel, from_process
@@ -22,7 +21,7 @@ STATUS_ICONS = {
 }
 
 
-class QeWizardModel(WizardModel):
+class QeWizardModel(WizardModel[QeAppModel]):
     pk: t.Optional[int] = None
 
     @pdt.model_validator(mode="after")
@@ -40,11 +39,8 @@ class QeWizardModel(WizardModel):
             self.states = [WizardState.SUCCESS] * 4 + [results_state]
         else:
             self.states = [WizardState.READY, *[WizardState.INIT] * 4]
+        self.data = self.data or (from_process(self.pk) if self.pk else QeAppModel())
         return self
-
-
-class QeDataModel(WizardDataModel[QeAppModel]):
-    pk: t.Optional[int] = None
 
     @property
     def label(self) -> str:
@@ -64,8 +60,3 @@ class QeDataModel(WizardDataModel[QeAppModel]):
     def get_ase_structure(self) -> ase.Atoms | None:
         if self.data.input_structure:
             return self.data.input_structure.get_ase()
-
-    @pdt.model_validator(mode="after")
-    def _from_pk(self):
-        self.data = self.data or (from_process(self.pk) if self.pk else QeAppModel())
-        return self

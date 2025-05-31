@@ -1,0 +1,39 @@
+import typing as t
+
+import solara
+
+from aiidalab_qe.components.wizard.models import QeWizardModel
+
+
+class WizardStore:
+    def __init__(self):
+        self.wizards = solara.reactive(
+            t.cast(dict[str, solara.Reactive[QeWizardModel]], {})
+        )
+        self.active = solara.reactive(t.cast(int, None))
+
+    def add_wizard(self, pk: int | None = None):
+        wizard = solara.reactive(QeWizardModel(pk=pk))
+        new_uid = wizard.value.uid
+        self.wizards.set({**self.wizards.value, new_uid: wizard})
+        self.active.set(len(self.wizards.value) - 1)
+
+    def remove_wizard(self, uid: str):
+        wizards = self.wizards.value.copy()
+        keys = list(wizards.keys())
+
+        if uid not in wizards:
+            return
+
+        idx = keys.index(uid)
+        del wizards[uid]
+        self.wizards.set(wizards)
+
+        remaining = list(wizards.keys())
+
+        if not remaining:
+            self.active.set(None)
+        elif idx < len(remaining):
+            self.active.set(idx)
+        else:
+            self.active.set(len(remaining) - 1)

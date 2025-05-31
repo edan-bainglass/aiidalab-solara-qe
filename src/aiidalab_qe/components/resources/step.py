@@ -4,21 +4,21 @@ import solara
 import solara.toestand
 
 from aiidalab_qe.common.components.wizard import WizardState, onStateChange
-from aiidalab_qe.components.wizard.models import QeDataModel
+from aiidalab_qe.components.wizard.models import QeWizardModel
 from aiidalab_qe.config.paths import STYLES
 
 
 @solara.component
 def ResourcesSelectionStep(
-    data_model: solara.Reactive[QeDataModel],
+    model: solara.Reactive[QeWizardModel],
     on_state_change: onStateChange,
 ):
     print("\nrendering computational-resources-step component")
 
     computational_resources = solara.toestand.Ref(
-        data_model.fields.data.computational_resources
+        model.fields.data.computational_resources
     )
-    process = solara.toestand.Ref(data_model.fields.data.process)
+    process = solara.toestand.Ref(model.fields.data.process)
 
     def update_state():
         if not computational_resources.value:

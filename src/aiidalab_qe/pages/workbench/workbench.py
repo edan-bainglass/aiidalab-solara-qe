@@ -7,53 +7,27 @@ import solara.lab
 import solara.toestand
 
 from aiidalab_qe.components.wizard import QeWizard
-from aiidalab_qe.components.wizard.models import QeDataModel, QeWizardModel
+from aiidalab_qe.components.wizard.models import QeWizardModel
+from aiidalab_qe.components.wizard.store import WizardStore
 from aiidalab_qe.config.paths import STYLES
 
-wizard_models = solara.reactive(t.cast(list[solara.Reactive[QeWizardModel]], []))
-data_models = solara.reactive(t.cast(list[solara.Reactive[QeDataModel]], []))
-
-active = solara.reactive(t.cast(int, None))
+wizard_store = WizardStore()
 
 
 @solara.component
-def Workbench():
+def Workbench(store: WizardStore = wizard_store):
     print("\nrendering workbench page")
 
-    # NOTE see https://github.com/widgetti/solara/issues/637
-    batch_context = solara.reacton.core.get_render_context()
-
     def add_workflow(pk: int | None = None):
-        with batch_context:
-            wizard_models.set(
-                [
-                    *wizard_models.value,
-                    solara.reactive(QeWizardModel(pk=pk)),
-                ],
-            )
-            data_models.set(
-                [
-                    *data_models.value,
-                    solara.reactive(QeDataModel(pk=pk)),
-                ],
-            )
-            active.set(len(data_models.value) - 1)
+        store.add_wizard(pk)
 
-    def remove_workflow(index: int):
-        with batch_context:
-            wizard_models.set(
-                [
-                    *wizard_models.value[:index],
-                    *wizard_models.value[index + 1 :],
-                ],
-            )
-            data_models.set(
-                [
-                    *data_models.value[:index],
-                    *data_models.value[index + 1 :],
-                ],
-            )
-            active.set(len(data_models.value) - 1)
+    def remove_workflow(uid: str):
+        store.remove_wizard(uid)
+
+    wizard_entries = solara.use_memo(
+        lambda: list(store.wizards.value.items()),
+        [store.wizards.value],
+    )
 
     with solara.Head():
         solara.Style(STYLES / "workbench.css")
@@ -63,35 +37,33 @@ def Workbench():
         with solara.lab.Tabs(
             vertical=True,
             lazy=False,
-            value=active,
+            value=store.active,
         ):
-            for i, (data_model, wizard_model) in enumerate(
-                zip(
-                    data_models.value,
-                    wizard_models.value,
-                )
-            ):
+            for uid, wizard_model in wizard_entries:
 
-                def remove_this_workflow(index: int = i):
-                    remove_workflow(index)
+                def remove_this_workflow(this_uid: str = uid):
+                    remove_workflow(this_uid)
 
                 with solara.lab.Tab(
                     tab_children=[
-                        TabHeader(data_model, remove_this_workflow),
+                        TabHeader(
+                            wizard_model,
+                            remove_this_workflow,
+                        ),
                     ],
                 ):
                     with solara.Div(class_="workbench-body container"):
-                        QeWizard(wizard_model, data_model)
+                        QeWizard(wizard_model).key(uid)
 
 
 @solara.component
 def TabHeader(
-    data_model: solara.Reactive[QeDataModel],
+    model: solara.Reactive[QeWizardModel],
     remove_workflow: t.Callable[[int], None],
 ):
-    pk = solara.toestand.Ref(data_model.fields.pk)
-    label = solara.toestand.Ref(data_model.fields.label)
-    status_icon = solara.toestand.Ref(data_model.fields.status_icon)
+    pk = solara.toestand.Ref(model.fields.pk)
+    label = solara.toestand.Ref(model.fields.label)
+    status_icon = solara.toestand.Ref(model.fields.status_icon)
 
     with solara.Div(class_="tab-header"):
         # TODO stop close event propagation to tab selection (leads to index out of bound)
@@ -99,7 +71,7 @@ def TabHeader(
             icon_name="mdi-close",
             color="error",
             class_="tab-close-button",
-            on_click=solara.use_memo(lambda: remove_workflow, []),
+            on_click=remove_workflow,
         )
         solara.v.Icon(
             children=[status_icon.value],

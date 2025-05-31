@@ -3,7 +3,7 @@ from __future__ import annotations
 import solara
 import solara.toestand
 
-from aiidalab_qe.components.wizard.models import QeDataModel
+from aiidalab_qe.components.wizard.models import QeWizardModel
 from aiidalab_qe.plugins.utils import get_plugin_settings
 
 from .advanced import AdvancedSettings
@@ -29,9 +29,9 @@ CATEGORIES = {
 
 
 @solara.component
-def CalculationSettings(data_model: solara.Reactive[QeDataModel]):
+def CalculationSettings(model: solara.Reactive[QeWizardModel]):
     calculation_parameters = solara.toestand.Ref(
-        data_model.fields.data.calculation_parameters
+        model.fields.data.calculation_parameters
     )
     category = solara.use_reactive("basic")
 
@@ -50,4 +50,4 @@ def CalculationSettings(data_model: solara.Reactive[QeDataModel]):
             value=category,
             classes=["category-selector"],
         )
-        CATEGORIES[category.value](data_model)
+        CATEGORIES[category.value](model)
