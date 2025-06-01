@@ -24,11 +24,6 @@ def Workbench(store: WizardStore = wizard_store):
     def remove_workflow(uid: str):
         store.remove_wizard(uid)
 
-    wizard_entries = solara.use_memo(
-        lambda: list(store.wizards.value.items()),
-        [store.wizards.value],
-    )
-
     with solara.Head():
         solara.Style(STYLES / "workbench.css")
 
@@ -39,7 +34,7 @@ def Workbench(store: WizardStore = wizard_store):
             lazy=False,
             value=store.active,
         ):
-            for uid, wizard_model in wizard_entries:
+            for uid, wizard_model in store.wizards.value.items():
 
                 def remove_this_workflow(this_uid: str = uid):
                     remove_workflow(this_uid)
@@ -52,39 +47,9 @@ def Workbench(store: WizardStore = wizard_store):
                         ),
                     ],
                 ):
-                    with solara.Div(class_="workbench-body container"):
-                        QeWizard(wizard_model).key(uid)
-
-
-@solara.component
-def TabHeader(
-    model: solara.Reactive[QeWizardModel],
-    remove_workflow: t.Callable[[int], None],
-):
-    pk = solara.toestand.Ref(model.fields.pk)
-    label = solara.toestand.Ref(model.fields.label)
-    status_icon = solara.toestand.Ref(model.fields.status_icon)
-
-    with solara.Div(class_="tab-header"):
-        # TODO stop close event propagation to tab selection (leads to index out of bound)
-        solara.IconButton(
-            icon_name="mdi-close",
-            color="error",
-            class_="tab-close-button",
-            on_click=remove_workflow,
-        )
-        solara.v.Icon(
-            children=[status_icon.value],
-            class_="status-icon",
-        )
-        with solara.Div(class_="tab-text"):
-            if len(label.value) > 20:
-                with solara.Tooltip(label.value):
-                    solara.Text(label.value)
-            else:
-                solara.Text(label.value)
-        if pk.value:
-            solara.Text(f"[{pk.value}]")
+                    # NOTE: key prevents unnecessary rendering but breaks reactiveness
+                    # see https://github.com/widgetti/solara/issues/1060
+                    TabBody(wizard_model)  # .key(uid)
 
 
 @solara.component
@@ -138,3 +103,40 @@ def WorkbenchControls(add_workflow: t.Callable[[int | None], None]):
             )
         ],
     )
+
+
+@solara.component
+def TabHeader(
+    model: solara.Reactive[QeWizardModel],
+    remove_workflow: t.Callable[[str], None],
+):
+    pk = solara.toestand.Ref(model.fields.pk)
+    label = solara.toestand.Ref(model.fields.label)
+    status_icon = solara.toestand.Ref(model.fields.status_icon)
+
+    with solara.Div(class_="tab-header"):
+        # TODO stop close event propagation to tab selection (leads to index out of bound)
+        solara.IconButton(
+            icon_name="mdi-close",
+            color="error",
+            class_="tab-close-button",
+            on_click=remove_workflow,
+        )
+        solara.v.Icon(
+            children=[status_icon.value],
+            class_="status-icon",
+        )
+        with solara.Div(class_="tab-text"):
+            if len(label.value) > 20:
+                with solara.Tooltip(label.value):
+                    solara.Text(label.value)
+            else:
+                solara.Text(label.value)
+        if pk.value:
+            solara.Text(f"[{pk.value}]")
+
+
+@solara.component
+def TabBody(model: solara.Reactive[QeWizardModel]):
+    with solara.Div(class_="workbench-body container"):
+        QeWizard(model)

@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing as t
 
 import solara
-from solara.toestand import Ref
+import solara.toestand
 
 from aiidalab_qe.config.paths import STYLES
 
@@ -19,8 +19,8 @@ def Wizard(
 ):
     print("\nrendering wizard component")
 
-    current_step = Ref(model.fields.current_step)
-    states = Ref(model.fields.states)
+    current_step = solara.toestand.Ref(model.fields.current_step)
+    states = solara.toestand.Ref(model.fields.states)
 
     render_context = solara.reacton.core.get_render_context()
 

@@ -21,17 +21,10 @@ class WizardStore:
     def remove_wizard(self, uid: str):
         wizards = self.wizards.value.copy()
         keys = list(wizards.keys())
-
-        if uid not in wizards:
-            return
-
         idx = keys.index(uid)
         del wizards[uid]
         self.wizards.set(wizards)
-
-        remaining = list(wizards.keys())
-
-        if not remaining:
+        if not (remaining := list(wizards.keys())):
             self.active.set(None)
         elif idx < len(remaining):
             self.active.set(idx)
