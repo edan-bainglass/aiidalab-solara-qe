@@ -9,24 +9,6 @@ from aiidalab_qe.components.resources.resource import ResourceCard
 from aiidalab_qe.components.wizard.models import QeWizardModel
 from aiidalab_qe.config.paths import STYLES
 from aiidalab_qe.plugins.models import PluginResourcesModel
-from aiidalab_qe.plugins.utils import get_plugin_resources
-
-plugin_entries = {
-    plugin: resources.codes
-    for (
-        plugin,
-        resources,
-    ) in get_plugin_resources().items()
-}
-
-BUILTIN_CATEGORIES = {
-    "global": "",
-}
-
-CATEGORIES = {
-    **BUILTIN_CATEGORIES,
-    **plugin_entries,
-}
 
 
 @solara.component
@@ -36,9 +18,11 @@ def ResourcesSelectionStep(
 ):
     print("\nrendering computational-resources-step component")
 
+    calculation_parameters = model.fields.data.calculation_parameters
+    properties = solara.toestand.Ref(calculation_parameters.properties)
     resources = solara.toestand.Ref(model.fields.data.computational_resources)
     process = solara.toestand.Ref(model.fields.data.process)
-    category = solara.use_reactive("global")
+    active = solara.toestand.Ref(resources.fields.active)
 
     def update_state():
         if not resources.value:
@@ -49,6 +33,11 @@ def ResourcesSelectionStep(
             new_state = WizardState.CONFIGURED
 
         on_state_change(new_state)
+
+    solara.use_effect(
+        lambda: active.set("global" if not properties.value else active.value),
+        [properties.value],
+    )
 
     solara.use_effect(
         update_state,
@@ -63,16 +52,16 @@ def ResourcesSelectionStep(
             with solara.Column():
                 solara.Select(
                     label="Category",
-                    values=list(CATEGORIES.keys()),
-                    value=category,
+                    values=["global", *list(properties.value)],
+                    value=active,
                 )
 
         global_resources = solara.toestand.Ref(resources.fields.global_)
 
-        if category.value == "global":
+        if active.value == "global":
             ResourcesPanel(global_resources)
         else:
-            plugin_fields = resources.fields.plugins[category.value]
+            plugin_fields = resources.fields.plugins[active.value]
             plugin_resources = solara.toestand.Ref(plugin_fields)
             PluginResourcesPanel(plugin_resources, global_resources)
 

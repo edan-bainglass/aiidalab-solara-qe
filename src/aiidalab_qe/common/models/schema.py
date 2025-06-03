@@ -145,6 +145,7 @@ class CalculationParametersModel(ConfiguredBaseModel):
 
 
 class ComputationalResourcesModel(ConfiguredBaseModel):
+    active: str = "global"
     global_: ResourcesModel = ResourcesModel(
         codes={
             "pw": PwCodeModel(
