@@ -23,15 +23,18 @@ def ResourceCard(model: solara.Reactive[CodeModel], label: str):
         ]
 
     with solara.Div(class_="col-12 col-md-6 col-xl-4 p-0"):
-        with solara.Card(margin=0):
-            solara.HTML("h4", label)
-            solara.Select(
-                label="Code",
-                values=get_codes_by_entry_point(),
-                value=code_ref,
-            )
-            solara.InputInt(label="Nodes", value=nodes)
-            solara.InputInt(label="CPUs", value=cpus)
-            solara.InputInt(label="Tasks per node", value=ntasks)
-            solara.InputInt(label="CPUs per task", value=cpus_task)
-            solara.InputInt(label="Wallclock time (s)", value=wallclock)
+        with solara.v.Card(class_="m-0"):
+            with solara.v.CardTitle(class_="pb-0"):
+                solara.HTML("h5", label)
+            with solara.v.CardText():
+                solara.Select(
+                    label="Code",
+                    values=get_codes_by_entry_point(),
+                    value=code_ref,
+                )
+                solara.InputInt(label="Nodes", value=nodes)
+                solara.InputInt(label="CPUs", value=cpus)
+                solara.InputInt(label="Tasks per node", value=ntasks)
+                solara.InputInt(label="CPUs per task", value=cpus_task)
+                solara.InputInt(label="Wallclock time (s)", value=wallclock)
+                solara.v.Input()

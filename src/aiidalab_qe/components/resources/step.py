@@ -68,16 +68,17 @@ def ResourcesSelectionStep(
                 )
 
         global_resources = solara.toestand.Ref(resources.fields.global_)
-        plugin_resources = solara.toestand.Ref(resources.fields.plugins[category.value])
 
         if category.value == "global":
-            GlobalResourcesPanel(global_resources)
+            ResourcesPanel(global_resources)
         else:
+            plugin_fields = resources.fields.plugins[category.value]
+            plugin_resources = solara.toestand.Ref(plugin_fields)
             PluginResourcesPanel(plugin_resources, global_resources)
 
 
 @solara.component
-def GlobalResourcesPanel(model: solara.Reactive[ResourcesModel]):
+def ResourcesPanel(model: solara.Reactive[ResourcesModel]):
     with solara.Div(class_="row g-0 row-gap-3 column-gap-3"):
         for code_key in model.value.codes:
             code_model = solara.toestand.Ref(model.fields.codes[code_key])
@@ -110,14 +111,9 @@ def PluginResourcesPanel(
 
     solara.Checkbox(
         style="margin-bottom: 1rem;",
-        label="Override global codes",
+        label="Override global resources",
         value=override.value,
         on_value=lambda _: on_override_toggle(),
     )
-    with solara.Div(class_="row g-0 row-gap-3 column-gap-3"):
-        for code_key in model.value.codes:
-            code_model = solara.toestand.Ref(model.fields.codes[code_key])
-            ResourceCard(
-                code_model,
-                label=f"{code_model.value.name} ({code_key})",
-            )
+    if override.value:
+        ResourcesPanel(model)
