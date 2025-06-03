@@ -28,6 +28,10 @@ QE_WIZARD_STEPS = (
     {
         "title": "Submit the workflow",
         "component": SubmissionStep,
+        "confirm_button_props": {
+            "label": "Submit",
+            "icon": "mdi-rocket",
+        },
     },
     {
         "title": "Status & results",

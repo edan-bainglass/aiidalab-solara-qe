@@ -127,9 +127,9 @@ def WizardStepBody(
     with solara.Div(class_="wizard-step-controls"):
         if confirmable:
             solara.Button(
-                label="Confirm",
+                label=step.get("confirm_button_props", {}).get("label", "Confirm"),
                 color="success",
-                icon_name="check",
+                icon_name=step.get("confirm_button_props", {}).get("icon", "check"),
                 disabled=state is not WizardState.CONFIGURED,
                 on_click=confirm_step,
             )
