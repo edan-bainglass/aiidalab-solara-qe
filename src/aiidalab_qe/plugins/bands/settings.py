@@ -10,12 +10,13 @@ from aiidalab_qe.common.components.html import Paragraph
 from .model import BandsSettingsModel as Model
 
 if t.TYPE_CHECKING:
-    from aiidalab_qe.components.wizard.models import QeDataModel
+    from aiidalab_qe.components.wizard.models import QeWizardModel
 
 
 @solara.component
-def BandStructureSettings(data_model: solara.Reactive[QeDataModel]):
-    bands_settings: Model = data_model.fields.data.calculation_parameters.bands
+def BandStructureSettings(model: solara.Reactive[QeWizardModel]):
+    calculation_parameters = model.fields.data.calculation_parameters
+    bands_settings: Model = calculation_parameters.plugins["bands"].model  # type: ignore
     projwfc_bands = Ref(bands_settings.projwfc_bands)
 
     with solara.Div(class_="band-structure-settings"):

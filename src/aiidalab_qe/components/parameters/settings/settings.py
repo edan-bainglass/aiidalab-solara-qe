@@ -36,18 +36,19 @@ def CalculationSettings(model: solara.Reactive[QeWizardModel]):
     category = solara.use_reactive("basic")
 
     with solara.Div(class_="calculation-settings"):
-        solara.Select(
-            label="Category",
-            values=[
-                category
-                for category in CATEGORIES
-                if category
-                in {
-                    *calculation_parameters.value.properties,
-                    *BUILTIN_CATEGORIES,
-                }
-            ],
-            value=category,
-            classes=["category-selector"],
-        )
+        with solara.Row(classes=["mb-2"]):
+            with solara.Column():
+                solara.Select(
+                    label="Category",
+                    values=[
+                        category
+                        for category in CATEGORIES
+                        if category
+                        in {
+                            *calculation_parameters.value.properties,
+                            *BUILTIN_CATEGORIES,
+                        }
+                    ],
+                    value=category,
+                )
         CATEGORIES[category.value](model)

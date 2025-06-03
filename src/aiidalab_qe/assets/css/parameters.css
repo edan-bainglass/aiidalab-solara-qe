@@ -13,10 +13,6 @@
 .parameters-configuration-step .properties-selector .v-input {
   margin-bottom: 12px;
 }
-.parameters-configuration-step .calculation-settings .category-selector {
-  margin-bottom: 12px;
-  max-width: 200px;
-}
 .parameters-configuration-step .calculation-settings .basic-settings {
   display: flex;
   flex-direction: column;

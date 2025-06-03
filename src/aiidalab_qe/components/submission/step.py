@@ -16,6 +16,8 @@ def SubmissionStep(
     print("\nrendering submission-step component")
 
     process = solara.toestand.Ref(model.fields.data.process)
+    label = solara.use_reactive("")
+    description = solara.use_reactive("")
 
     def update_state():
         if not process.value:
@@ -36,4 +38,16 @@ def SubmissionStep(
         solara.Style(STYLES / "submission.css")
 
     with solara.Div(class_="submission-step"):
-        solara.Text("placeholder for workflow submission")
+        with solara.Row():
+            with solara.Column(classes=["col-6", "p-0"]):
+                solara.InputText(
+                    label="Label",
+                    value=label,
+                    style="margin-bottom: 0.5rem;",
+                )
+                solara.InputTextArea(
+                    label="Description",
+                    value=description,
+                    auto_grow=True,
+                    rows=3,
+                )

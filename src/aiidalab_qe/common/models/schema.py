@@ -6,9 +6,10 @@ import pydantic as pdt
 from aiida.orm import ProcessNode, StructureData
 
 from aiidalab_qe.common.services.aiida import AiiDAService
+from aiidalab_qe.plugins.models import PluginResourcesModel, PluginSettingsModel
 from aiidalab_qe.plugins.utils import get_plugin_resources, get_plugin_settings
 
-from .codes import ResourcesModel
+from .codes import PwCodeModel, ResourcesModel
 from .utils import ConfiguredBaseModel
 
 
@@ -122,8 +123,6 @@ class AdvancedSettingsModel(ConfiguredBaseModel):
 
 
 class CalculationParametersModel(ConfiguredBaseModel):
-    model_config = pdt.ConfigDict(extra="allow")
-
     relax_type: t.Literal[
         "none",
         "positions",
@@ -132,27 +131,39 @@ class CalculationParametersModel(ConfiguredBaseModel):
     properties: list[str] = []
     basic: BasicSettingsModel = BasicSettingsModel()
     advanced: AdvancedSettingsModel = AdvancedSettingsModel()
+    plugins: dict[str, PluginSettingsModel] = {}
 
     @pdt.model_validator(mode="before")
     @classmethod
     def _fetch_plugins(cls, data: t.Any) -> t.Any:
+        plugin_data = data.get("plugins", {})
         for plugin, settings in get_plugin_settings().items():
-            if plugin not in data:
-                data[plugin] = settings.model
-                cls.__annotations__[plugin] = settings.model
+            if plugin not in plugin_data:
+                plugin_data[plugin] = settings
+        data["plugins"] = plugin_data
         return data
 
 
 class ComputationalResourcesModel(ConfiguredBaseModel):
-    global_: ResourcesModel = ResourcesModel()
+    global_: ResourcesModel = ResourcesModel(
+        codes={
+            "pw": PwCodeModel(
+                name="pw.x",
+                description="pw.x",
+                default_calcjob_plugin="quantumespresso.pw",
+            )
+        }
+    )
+    plugins: dict[str, PluginResourcesModel] = {}
 
     @pdt.model_validator(mode="before")
     @classmethod
     def _fetch_plugins(cls, data: t.Any) -> t.Any:
+        plugin_data = data.get("plugins", {})
         for plugin, resources in get_plugin_resources().items():
-            if plugin not in data:
-                data[plugin] = resources
-                cls.__annotations__[plugin] = type(resources)
+            if plugin not in plugin_data:
+                plugin_data[plugin] = resources
+        data["plugins"] = plugin_data
         return data
 
 

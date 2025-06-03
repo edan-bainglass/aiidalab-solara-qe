@@ -52,11 +52,19 @@
   display: flex;
   align-items: center;
 }
-.accordion .accordion-item .accordion-header .accordion-header-content .accordion-header-icon {
+.accordion
+  .accordion-item
+  .accordion-header
+  .accordion-header-content
+  .accordion-header-icon {
   width: 20px;
   margin-right: 12px;
   font-family: monospace;
 }
-.accordion .accordion-item .accordion-header .accordion-header-content .accordion-header-text {
+.accordion
+  .accordion-item
+  .accordion-header
+  .accordion-header-content
+  .accordion-header-text {
   margin-bottom: -2px;
 }
