@@ -4,7 +4,7 @@ import solara
 import solara.toestand
 
 from aiidalab_qe.common.components.wizard import WizardState, onStateChange
-from aiidalab_qe.common.models.codes import ResourcesModel
+from aiidalab_qe.common.models.codes import CodeModel
 from aiidalab_qe.components.resources.resource import ResourceCard
 from aiidalab_qe.components.wizard.models import QeWizardModel
 from aiidalab_qe.config.paths import STYLES
@@ -24,6 +24,8 @@ def ResourcesSelectionStep(
     process = solara.toestand.Ref(model.fields.data.process)
     active = solara.toestand.Ref(resources.fields.active)
 
+    global_codes = solara.toestand.Ref(resources.fields.global_.codes)
+
     def update_state():
         if not resources.value:
             new_state = WizardState.READY
@@ -34,8 +36,25 @@ def ResourcesSelectionStep(
 
         on_state_change(new_state)
 
+    def build_global_codes():
+        codes = {
+            "pw": resources.value.global_.codes["pw"],
+        }
+
+        for prop in properties.value:
+            if prop == "relax":
+                continue
+
+            plugin_codes = resources.value.plugins[prop].codes
+            for code_key, code_model in plugin_codes.items():
+                if code_key not in codes:
+                    codes[code_key] = code_model.model_copy()
+
+        global_codes.set(codes)
+        active.set("global")
+
     solara.use_effect(
-        lambda: active.set("global" if not properties.value else active.value),
+        build_global_codes,
         [properties.value],
     )
 
@@ -56,32 +75,28 @@ def ResourcesSelectionStep(
                     value=active,
                 )
 
-        global_resources = solara.toestand.Ref(resources.fields.global_)
-
         if active.value == "global":
-            ResourcesPanel(global_resources)
+            ResourcesPanel(global_codes)
         else:
             plugin_fields = resources.fields.plugins[active.value]
-            plugin_resources = solara.toestand.Ref(plugin_fields)
-            PluginResourcesPanel(plugin_resources, global_resources)
+            this_plugin_resources = solara.toestand.Ref(plugin_fields)
+            PluginResourcesPanel(this_plugin_resources, global_codes)
 
 
 @solara.component
-def ResourcesPanel(model: solara.Reactive[ResourcesModel]):
+def ResourcesPanel(codes: solara.Reactive[dict[str, CodeModel]]):
     with solara.Div(class_="row g-0 row-gap-3 column-gap-3"):
-        for code_key in model.value.codes:
-            code_model = solara.toestand.Ref(model.fields.codes[code_key])
-            ResourceCard(
-                code_model,
-                label=f"{code_model.value.name} ({code_key})",
-            )
+        for code_key in codes.value:
+            code_model = solara.toestand.Ref(codes.fields[code_key])
+            ResourceCard(code_model)
 
 
 @solara.component
 def PluginResourcesPanel(
     model: solara.Reactive[PluginResourcesModel],
-    global_model: solara.Reactive[ResourcesModel],
+    global_codes: solara.Reactive[dict[str, CodeModel]],
 ):
+    codes = solara.toestand.Ref(model.fields.codes)
     override = solara.toestand.Ref(model.fields.override)
 
     def on_override_toggle():
@@ -89,8 +104,8 @@ def PluginResourcesPanel(
             model.value.model_copy(
                 update={
                     "codes": {
-                        **model.value.codes.copy(),
-                        **global_model.value.codes.copy(),
+                        **codes.value.copy(),
+                        **global_codes.value.copy(),
                     },
                 }
             )
@@ -104,4 +119,4 @@ def PluginResourcesPanel(
         on_value=lambda _: on_override_toggle(),
     )
     if override.value:
-        ResourcesPanel(model)
+        ResourcesPanel(codes)

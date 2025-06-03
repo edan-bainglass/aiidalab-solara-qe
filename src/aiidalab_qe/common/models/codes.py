@@ -23,6 +23,10 @@ class CodeParallelizationModel(ConfiguredBaseModel):
 
 
 class PwCodeModel(CodeModel):
+    name: str = "pw.x"
+    description: str = "Plane-wave self-consistent field (SCF) code"
+    default_calcjob_plugin: str = "quantumespresso.pw"
+
     parallelization: CodeParallelizationModel = CodeParallelizationModel()
 
 

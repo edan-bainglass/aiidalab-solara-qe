@@ -6,7 +6,7 @@ from aiidalab_qe.common.models.codes import CodeModel
 
 
 @solara.component
-def ResourceCard(model: solara.Reactive[CodeModel], label: str):
+def ResourceCard(model: solara.Reactive[CodeModel]):
     code_ref = solara.toestand.Ref(model.fields.code)
     nodes = solara.toestand.Ref(model.fields.nodes)
     cpus = solara.toestand.Ref(model.fields.cpus)
@@ -25,7 +25,10 @@ def ResourceCard(model: solara.Reactive[CodeModel], label: str):
     with solara.Div(class_="col-12 col-md-6 col-xl-4 p-0"):
         with solara.v.Card(class_="m-0"):
             with solara.v.CardTitle(class_="pb-0"):
-                solara.HTML("h5", label)
+                solara.Text(model.value.name)
+                if description := model.value.description:
+                    with solara.Tooltip(description):
+                        solara.v.Icon(children=["mdi-information"], class_="ml-2")
             with solara.v.CardText():
                 solara.Select(
                     label="Code",

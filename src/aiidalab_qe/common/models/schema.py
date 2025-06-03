@@ -148,11 +148,7 @@ class ComputationalResourcesModel(ConfiguredBaseModel):
     active: str = "global"
     global_: ResourcesModel = ResourcesModel(
         codes={
-            "pw": PwCodeModel(
-                name="pw.x",
-                description="pw.x",
-                default_calcjob_plugin="quantumespresso.pw",
-            )
+            "pw": PwCodeModel(),
         }
     )
     plugins: dict[str, PluginResourcesModel] = {}

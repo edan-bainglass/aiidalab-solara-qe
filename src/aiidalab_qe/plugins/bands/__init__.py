@@ -12,14 +12,10 @@ bands = {
     ),
     "resources": PluginResourcesModel(
         codes={
-            "pw": PwCodeModel(
-                name="pw.x",
-                description="pw.x",
-                default_calcjob_plugin="quantumespresso.pw",
-            ),
+            "pw": PwCodeModel(),
             "projwfc_bands": CodeModel(
                 name="projwfc.x",
-                description="projwfc.x",
+                description="Projector wavefunction code for band structure calculations",
                 default_calcjob_plugin="quantumespresso.projwfc",
             ),
         },
