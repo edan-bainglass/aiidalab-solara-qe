@@ -85,18 +85,17 @@ def PluginResourcesPanel(
     override = solara.toestand.Ref(model.fields.override)
 
     def on_override_toggle():
-        override.set(not override.value)
-        if not override.value:
-            model.set(
-                model.value.model_copy(
-                    update={
-                        "codes": {
-                            **model.value.codes.copy(),
-                            **global_model.value.codes.copy(),
-                        },
-                    }
-                )
+        model.set(
+            model.value.model_copy(
+                update={
+                    "codes": {
+                        **model.value.codes.copy(),
+                        **global_model.value.codes.copy(),
+                    },
+                }
             )
+        )
+        override.set(not override.value)
 
     solara.Checkbox(
         style="margin-bottom: 1rem;",
