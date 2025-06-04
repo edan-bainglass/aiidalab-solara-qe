@@ -16,8 +16,8 @@ def SubmissionStep(
     print("\nrendering submission-step component")
 
     process = solara.toestand.Ref(model.fields.data.process)
-    label = solara.use_reactive("")
-    description = solara.use_reactive("")
+    label = solara.toestand.Ref(model.fields.data.label)
+    description = solara.toestand.Ref(model.fields.data.description)
 
     def update_state():
         if not process.value:

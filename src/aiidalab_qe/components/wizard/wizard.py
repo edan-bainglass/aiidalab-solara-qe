@@ -42,7 +42,7 @@ QE_WIZARD_STEPS = (
 
 @solara.component
 def QeWizard(model: solara.Reactive[QeWizardModel]):
-    label = solara.toestand.Ref(model.fields.label)
+    label = solara.toestand.Ref(model.fields.data.label)
 
     with solara.Div(class_="qe-wizard"):
         solara.HTML("h2", label.value)

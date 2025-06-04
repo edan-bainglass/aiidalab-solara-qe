@@ -43,12 +43,6 @@ class QeWizardModel(WizardModel[QeAppModel]):
         return self
 
     @property
-    def label(self) -> str:
-        if self.pk and (process := AiiDAService.load_qe_app_workflow_node(self.pk)):
-            return f"{process.label or 'Workflow'}"
-        return "New workflow"
-
-    @property
     def status_icon(self) -> str:
         icon_name = "egg"
         if self.pk and (process := AiiDAService.load_qe_app_workflow_node(self.pk)):

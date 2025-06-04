@@ -164,6 +164,8 @@ class ComputationalResourcesModel(ConfiguredBaseModel):
 
 
 class QeAppModel(ConfiguredBaseModel):
+    label: str = "New workflow"
+    description: str = ""
     input_structure: t.Optional[StructureData] = None
     properties: list[str] = []
     calculation_parameters: CalculationParametersModel = CalculationParametersModel()
@@ -187,6 +189,8 @@ def from_process(pk: int | None) -> QeAppModel:
     computational_resources = _extract_computational_resources(ui_parameters)
 
     return QeAppModel(
+        label=process.label or "New workflow",
+        description=process.description or "",
         input_structure=process.inputs.structure,
         properties=process.inputs.properties.get_list(),
         calculation_parameters=calculation_parameters,

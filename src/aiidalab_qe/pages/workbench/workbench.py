@@ -111,7 +111,7 @@ def TabHeader(
     remove_workflow: t.Callable[[str], None],
 ):
     pk = solara.toestand.Ref(model.fields.pk)
-    label = solara.toestand.Ref(model.fields.label)
+    label = solara.toestand.Ref(model.fields.data.label)
     status_icon = solara.toestand.Ref(model.fields.status_icon)
 
     with solara.Div(class_="tab-header"):
