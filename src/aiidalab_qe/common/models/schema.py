@@ -16,9 +16,9 @@ from .utils import ConfiguredBaseModel
 class BasicSettingsModel(ConfiguredBaseModel):
     protocol: t.Literal[
         "fast",
-        "moderate",
-        "precise",
-    ] = "moderate"
+        "balanced",
+        "stringent",
+    ] = "balanced"
     spin_type: t.Literal[
         "none",
         "collinear",

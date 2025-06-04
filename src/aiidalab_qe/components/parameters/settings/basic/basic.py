@@ -54,12 +54,12 @@ CONTROLS = {
                 "label": "Fast",
                 "description": "Reduced accuracy for quick results",
             },
-            "moderate": {
-                "label": "Moderate",
+            "balanced": {
+                "label": "Balanced",
                 "description": "Balanced accuracy and performance",
             },
-            "precise": {
-                "label": "Precise",
+            "stringent": {
+                "label": "Stringent",
                 "description": "High accuracy for demanding calculations",
             },
         },
