@@ -30,9 +30,7 @@ CATEGORIES = {
 
 @solara.component
 def CalculationSettings(model: solara.Reactive[QeWizardModel]):
-    calculation_parameters = solara.toestand.Ref(
-        model.fields.data.calculation_parameters
-    )
+    properties = solara.toestand.Ref(model.fields.data.properties)
     category = solara.use_reactive("basic")
 
     with solara.Div(class_="calculation-settings"):
@@ -45,7 +43,7 @@ def CalculationSettings(model: solara.Reactive[QeWizardModel]):
                         for category in CATEGORIES
                         if category
                         in {
-                            *calculation_parameters.value.properties,
+                            *properties.value,
                             *BUILTIN_CATEGORIES,
                         }
                     ],

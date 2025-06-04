@@ -128,7 +128,6 @@ class CalculationParametersModel(ConfiguredBaseModel):
         "positions",
         "positions_cell",
     ] = "positions_cell"
-    properties: list[str] = []
     basic: BasicSettingsModel = BasicSettingsModel()
     advanced: AdvancedSettingsModel = AdvancedSettingsModel()
     plugins: dict[str, PluginSettingsModel] = {}
@@ -166,6 +165,7 @@ class ComputationalResourcesModel(ConfiguredBaseModel):
 
 class QeAppModel(ConfiguredBaseModel):
     input_structure: t.Optional[StructureData] = None
+    properties: list[str] = []
     calculation_parameters: CalculationParametersModel = CalculationParametersModel()
     computational_resources: ComputationalResourcesModel = ComputationalResourcesModel()
     process: t.Optional[ProcessNode] = None
@@ -179,7 +179,8 @@ def from_process(pk: int | None) -> QeAppModel:
         assert process
         ui_parameters = deserialize_unsafe(process.base.extras.get("ui_parameters", {}))
         assert ui_parameters
-    except AssertionError:
+    except AssertionError as err:
+        print(f"Error loading process with pk={pk}: {err}")
         return QeAppModel()
 
     calculation_parameters = _extract_calculation_parameters(ui_parameters)
@@ -187,6 +188,7 @@ def from_process(pk: int | None) -> QeAppModel:
 
     return QeAppModel(
         input_structure=process.inputs.structure,
+        properties=process.inputs.properties.get_list(),
         calculation_parameters=calculation_parameters,
         computational_resources=computational_resources,
         process=process,

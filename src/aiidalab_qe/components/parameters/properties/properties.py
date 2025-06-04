@@ -11,7 +11,7 @@ PROPERTY_TITLES = get_plugin_titles()
 
 @solara.component
 def PropertiesSelector(model: solara.Reactive[QeWizardModel]):
-    properties = Ref(model.fields.data.calculation_parameters.properties)
+    properties = Ref(model.fields.data.properties)
 
     def update_properties(prop: str, checked: bool):
         properties.set(

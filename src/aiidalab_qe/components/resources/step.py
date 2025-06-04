@@ -18,8 +18,7 @@ def ResourcesSelectionStep(
 ):
     print("\nrendering computational-resources-step component")
 
-    calculation_parameters = model.fields.data.calculation_parameters
-    properties = solara.toestand.Ref(calculation_parameters.properties)
+    properties = solara.toestand.Ref(model.fields.data.properties)
     resources = solara.toestand.Ref(model.fields.data.computational_resources)
     process = solara.toestand.Ref(model.fields.data.process)
     active = solara.toestand.Ref(resources.fields.active)
@@ -37,15 +36,17 @@ def ResourcesSelectionStep(
         on_state_change(new_state)
 
     def build_global_codes():
+        plugin_resources = resources.value.plugins
+
         codes = {
             "pw": resources.value.global_.codes["pw"],
         }
 
         for prop in properties.value:
-            if prop == "relax":
+            if prop == "relax" or prop not in plugin_resources:
                 continue
 
-            plugin_codes = resources.value.plugins[prop].codes
+            plugin_codes = plugin_resources[prop].codes
             for code_key, code_model in plugin_codes.items():
                 if code_key not in codes:
                     codes[code_key] = code_model.model_copy()
