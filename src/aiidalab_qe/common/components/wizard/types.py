@@ -15,12 +15,7 @@ WizardStepType = t.Callable[
 ]
 
 
-class WizardStepConfirmButtonProps(t.TypedDict):
-    label: str
-    icon: str
-
-
 class WizardStepProps(t.TypedDict):
     title: str
     component: WizardStepType
-    confirm_button_props: WizardStepConfirmButtonProps
+    is_submission_step: bool

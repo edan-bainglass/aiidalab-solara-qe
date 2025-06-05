@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import json
 
 from aiida import load_profile, orm
 from aiida.common.exceptions import NotExistent
@@ -18,6 +19,14 @@ class AiiDAService:
                 and process.process_label == "QeAppWorkChain"
             ):
                 return process
+
+    @staticmethod
+    def submit(data: dict):
+        label = data.pop("label", "Untitled Workflow")
+        description = data.pop("description", "No description provided")
+        print(f"Submitting {label} ({description}) with the following inputs:")
+        print(json.dumps(data, indent=2))
+
     @staticmethod
     def load_code(code: str) -> orm.Code | None:
         try:

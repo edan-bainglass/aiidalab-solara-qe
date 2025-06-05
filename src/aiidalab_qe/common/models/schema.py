@@ -172,6 +172,42 @@ class QeAppModel(ConfiguredBaseModel):
     computational_resources: ComputationalResourcesModel = ComputationalResourcesModel()
     process: t.Optional[ProcessNode] = None
 
+    def to_legacy_parameters(self) -> dict:
+        return {
+            "workchain": {
+                "protocol": self.calculation_parameters.basic.protocol,
+                "spin_type": self.calculation_parameters.basic.spin_type,
+                "electronic_type": self.calculation_parameters.basic.electronic_type,
+                "relax_type": self.calculation_parameters.relax_type,
+                "properties": self.properties,
+            },
+            "advanced": {
+                **self.calculation_parameters.advanced.model_dump(exclude_unset=True),
+            },
+            **{
+                plugin: settings.model.model_dump(exclude_unset=True)
+                for plugin, settings in self.calculation_parameters.plugins.items()
+            },
+            "codes": {
+                "global": {
+                    "codes": {
+                        f"quantumespresso__{code.get_suffix()}": code.get_model_state()
+                        for code in self.computational_resources.global_.codes.values()
+                    }
+                },
+                **{
+                    plugin: {
+                        "override": resources.override,
+                        "codes": {
+                            code_key: code_model.get_model_state()
+                            for code_key, code_model in resources.codes.items()
+                        },
+                    }
+                    for plugin, resources in self.computational_resources.plugins.items()
+                },
+            },
+        }
+
     @classmethod
     def from_process(cls, pk: int | None) -> QeAppModel:
         from aiida.orm.utils.serialize import deserialize_unsafe

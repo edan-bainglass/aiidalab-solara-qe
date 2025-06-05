@@ -16,6 +16,7 @@ from .types import WizardStepProps
 def Wizard(
     steps: list[WizardStepProps],
     model: solara.Reactive[WizardModel],
+    submit_callback: t.Callable[[WizardModel], None] = None,
 ):
     print("\nrendering wizard component")
 
@@ -81,6 +82,7 @@ def Wizard(
                                 update_state,
                                 model,
                                 i < len(steps) - 1,
+                                submit_callback=submit_callback,
                             )
 
 
@@ -106,6 +108,7 @@ def WizardStepBody(
     on_state_change: t.Callable[[int, WizardState], None],
     model: solara.Reactive[WizardModel],
     confirmable: bool = True,
+    submit_callback: t.Callable[[WizardModel], None] = None,
 ):
     update_state = solara.use_memo(
         lambda i=index, state=state: lambda new_state: (
@@ -126,10 +129,19 @@ def WizardStepBody(
 
     with solara.Div(class_="wizard-step-controls"):
         if confirmable:
-            solara.Button(
-                label=step.get("confirm_button_props", {}).get("label", "Confirm"),
-                color="success",
-                icon_name=step.get("confirm_button_props", {}).get("icon", "check"),
-                disabled=state is not WizardState.CONFIGURED,
-                on_click=confirm_step,
-            )
+            if step.get("is_submission_step", False):
+                solara.Button(
+                    label="Submit",
+                    color="success",
+                    icon_name="mdi-rocket",
+                    # disabled=state is not WizardState.CONFIGURED,
+                    on_click=submit_callback,
+                )
+            else:
+                solara.Button(
+                    label="Confirm",
+                    color="success",
+                    icon_name="check",
+                    # disabled=state is not WizardState.CONFIGURED,
+                    on_click=confirm_step,
+                )
