@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing as t
 
 import solara
-from solara.toestand import Ref
+import solara.toestand
 
 from aiidalab_qe.common.components.html import Paragraph
 
@@ -17,7 +17,7 @@ if t.TYPE_CHECKING:
 def BandStructureSettings(model: solara.Reactive[QeWizardModel]):
     calculation_parameters = model.fields.data.calculation_parameters
     bands_settings: Model = calculation_parameters.plugins["bands"].model  # type: ignore
-    projwfc_bands = Ref(bands_settings.projwfc_bands)
+    projwfc_bands = solara.toestand.Ref(bands_settings.projwfc_bands)
 
     with solara.Div(class_="band-structure-settings"):
         with solara.Div(class_="plugin-info"):
