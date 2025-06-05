@@ -15,7 +15,7 @@ bands = {
             "pw": PwCodeModel(),
             "projwfc_bands": CodeModel(
                 name="projwfc.x",
-                description="Projector wavefunction code for band structure calculations",
+                description="Projector wavefunction code for band structures",
                 default_calcjob_plugin="quantumespresso.projwfc",
             ),
         },

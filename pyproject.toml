@@ -37,6 +37,7 @@ repository = "https://github.com/edan-bainglass/aiidalab-solara-qe.git"
 
 [project.entry-points."aiidalab_qe.properties"]
 bands = "aiidalab_qe.plugins.bands:bands"
+pdos = "aiidalab_qe.plugins.pdos:pdos"
 
 [tool.flit.module]
 name = "aiidalab_qe"

@@ -36,3 +36,31 @@ def enable_pencil_decomposition(component):
 def fetch_pseudo_family_by_label(label) -> PseudoPotentialFamily:
     """Fetch the pseudo family by label."""
     return orm.Group.collection.get(label=label)  # type: ignore
+
+
+def create_kpoints_from_distance(structure, distance, force_parity) -> list[int]:
+    from aiida.orm import KpointsData
+    from numpy import linalg
+
+    epsilon = 1e-5
+
+    kpoints = KpointsData()
+    kpoints.set_cell_from_structure(structure)
+    kpoints.set_kpoints_mesh_from_density(
+        distance,
+        force_parity=force_parity,
+    )
+
+    lengths_vector = [linalg.norm(vector) for vector in structure.cell]
+    lengths_kpoint = kpoints.get_kpoints_mesh()[0]
+
+    is_symmetric_cell = all(
+        abs(length - lengths_vector[0]) < epsilon for length in lengths_vector
+    )
+    is_symmetric_mesh = all(length == lengths_kpoint[0] for length in lengths_kpoint)
+
+    if is_symmetric_cell and not is_symmetric_mesh:
+        nkpoints = max(lengths_kpoint)
+        kpoints.set_kpoints_mesh([nkpoints, nkpoints, nkpoints])
+
+    return kpoints.get_kpoints_mesh()[0]
