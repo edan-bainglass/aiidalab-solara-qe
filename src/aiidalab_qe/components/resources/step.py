@@ -72,7 +72,7 @@ def ResourcesSelectionStep(
             with solara.Column():
                 solara.Select(
                     label="Category",
-                    values=["global", *list(properties.value)],
+                    values=["global", *[p for p in properties.value if p != "relax"]],
                     value=active,
                 )
 
