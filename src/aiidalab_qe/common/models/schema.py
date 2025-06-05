@@ -90,38 +90,6 @@ class AdvancedSettingsModel(ConfiguredBaseModel):
     initial_magnetic_moments: t.Optional[dict[str, float]] = None
 
 
-# class PdosModel(ConfiguredBaseModel):
-#     nscf_kpoints_distance: float = 0.1
-#     use_pdos_degauss: bool = False
-#     pdos_degauss: float = 0.005
-#     energy_grid_step: float = 0.01
-
-
-# class XasPseudosModel(ConfiguredBaseModel):
-#     gipaw: str = ?
-#     core_hole: str = ?
-
-
-# class XasModel(ConfiguredBaseModel):
-#     elements_list: list[str] = ?
-#     core_hole_treatments: dict[str, str] = ?
-#     pseudo_labels: dict[str, XasPseudosModel] = ?
-#     core_wfc_data_labels: dict[str, str] = ?
-#     supercell_min_parameter: float = ?
-
-
-# class CorrectionEnergyModel(ConfiguredBaseModel):
-#     exp: float = ?
-#     core: float = ?
-
-
-# class XpsModel(ConfiguredBaseModel):
-#     structure_type: str = ?
-#     pseudo_group: str = ?
-#     correction_energies: dict[str, CorrectionEnergyModel] = ?
-#     core_level_list: list[str] = ?
-
-
 class CalculationParametersModel(ConfiguredBaseModel):
     relax_type: t.Literal[
         "none",
