@@ -9,7 +9,7 @@ from aiidalab_qe.common.services.aiida import AiiDAService
 from aiidalab_qe.plugins.models import PluginResourcesModel, PluginSettingsModel
 from aiidalab_qe.plugins.utils import get_plugin_resources, get_plugin_settings
 
-from .codes import PwCodeModel, ResourcesModel
+from .codes import CodeModel, PwCodeModel, ResourcesModel
 from .utils import ConfiguredBaseModel
 
 
@@ -172,52 +172,80 @@ class QeAppModel(ConfiguredBaseModel):
     computational_resources: ComputationalResourcesModel = ComputationalResourcesModel()
     process: t.Optional[ProcessNode] = None
 
+    @classmethod
+    def from_process(cls, pk: int | None) -> QeAppModel:
+        from aiida.orm.utils.serialize import deserialize_unsafe
 
-def from_process(pk: int | None) -> QeAppModel:
-    from aiida.orm.utils.serialize import deserialize_unsafe
+        ui_parameters: dict[str, t.Any]
 
-    try:
-        process = AiiDAService.load_qe_app_workflow_node(pk)
-        assert process
-        ui_parameters = deserialize_unsafe(process.base.extras.get("ui_parameters", {}))
-        assert ui_parameters
-    except AssertionError as err:
-        print(f"Error loading process with pk={pk}: {err}")
-        return QeAppModel()
+        try:
+            process = AiiDAService.load_qe_app_workflow_node(pk)
+            assert process
+            ui_parameters = deserialize_unsafe(
+                process.base.extras.get("ui_parameters", {})
+            )
+            assert ui_parameters
+        except AssertionError as err:
+            print(f"Error loading process with pk={pk}: {err}")
+            return QeAppModel()
 
-    calculation_parameters = _extract_calculation_parameters(ui_parameters)
-    computational_resources = _extract_computational_resources(ui_parameters)
+        properties = ui_parameters.get("workchain", {}).pop("properties", [])
+        codes = ui_parameters.pop("codes", {})
+        calculation_parameters = _extract_calculation_parameters(ui_parameters)
+        computational_resources = _extract_computational_resources(codes)
 
-    return QeAppModel(
-        label=process.label or "New workflow",
-        description=process.description or "",
-        input_structure=process.inputs.structure,
-        properties=process.inputs.properties.get_list(),
-        calculation_parameters=calculation_parameters,
-        computational_resources=computational_resources,
-        process=process,
-    )
+        return cls(
+            label=process.label or "New workflow",
+            description=process.description or "",
+            input_structure=process.inputs.structure,
+            properties=properties,
+            calculation_parameters=calculation_parameters,
+            computational_resources=computational_resources,
+            process=process,
+        )
 
 
 def _extract_calculation_parameters(parameters: dict) -> CalculationParametersModel:
     model = CalculationParametersModel()
 
-    workchain_parameters: dict = parameters.get("workchain", {})
-    model.relax_type = workchain_parameters.get("relax_type")
-
-    models = {
-        "basic": BasicSettingsModel,
-        "advanced": AdvancedSettingsModel,
+    workchain_parameters: dict = parameters.pop("workchain", {})
+    model.relax_type = workchain_parameters.pop("relax_type")
+    model.basic = BasicSettingsModel(**workchain_parameters)
+    model.advanced = AdvancedSettingsModel(**parameters.pop("advanced", {}))
+    model.plugins = {
+        plugin: PluginSettingsModel(**settings)
+        for plugin, settings in parameters.items()
     }
-
-    # TODO extend models by plugins
-
-    for identifier, sub_model in models.items():
-        if sub_model_parameters := parameters.get(identifier):
-            setattr(model, identifier, sub_model(**sub_model_parameters))
-
     return model
 
 
-def _extract_computational_resources(parameters: dict) -> ComputationalResourcesModel:
-    return ComputationalResourcesModel(**parameters["codes"])
+CodesParams = dict[str, dict[str, dict[str, t.Any]]]
+
+
+def _extract_computational_resources(codes: CodesParams) -> ComputationalResourcesModel:
+    computational_resources = ComputationalResourcesModel()
+    global_codes = {
+        code_key.strip("quantumespresso__"): PwCodeModel(**code_model)
+        if code_key.endswith("pw")
+        else CodeModel(**code_model)
+        for code_key, code_model in codes.pop("global", {}).get("codes", {}).items()
+    }
+    computational_resources.global_ = ResourcesModel(
+        codes=global_codes
+        or {
+            "pw": PwCodeModel(),
+        }
+    )
+    computational_resources.plugins = {
+        plugin: PluginResourcesModel(
+            override=resources.get("override", False),
+            codes={
+                code_key: PwCodeModel(**code_model)
+                if code_key == "pw"
+                else CodeModel(**code_model)
+                for code_key, code_model in resources.get("codes", {}).items()
+            },
+        )
+        for plugin, resources in codes.items()
+    }
+    return computational_resources

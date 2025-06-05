@@ -8,7 +8,7 @@ from aiida.engine import ProcessState
 
 from aiidalab_qe.common.components.wizard.models import WizardModel
 from aiidalab_qe.common.components.wizard.state import WizardState
-from aiidalab_qe.common.models.schema import QeAppModel, from_process
+from aiidalab_qe.common.models.schema import QeAppModel
 from aiidalab_qe.common.services.aiida import AiiDAService
 
 STATUS_ICONS = {
@@ -39,7 +39,9 @@ class QeWizardModel(WizardModel[QeAppModel]):
             self.states = [WizardState.SUCCESS] * 4 + [results_state]
         else:
             self.states = [WizardState.READY, *[WizardState.INIT] * 4]
-        self.data = self.data or (from_process(self.pk) if self.pk else QeAppModel())
+        self.data = self.data or (
+            QeAppModel.from_process(self.pk) if self.pk else QeAppModel()
+        )
         return self
 
     @property

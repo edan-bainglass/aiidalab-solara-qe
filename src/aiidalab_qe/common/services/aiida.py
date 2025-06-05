@@ -18,3 +18,10 @@ class AiiDAService:
                 and process.process_label == "QeAppWorkChain"
             ):
                 return process
+    @staticmethod
+    def load_code(code: str) -> orm.Code | None:
+        try:
+            return orm.load_code(code)
+        except NotExistent:
+            raise ValueError(f"Code '{code}' does not exist in AiiDA.")
+        return None
