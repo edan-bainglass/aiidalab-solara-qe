@@ -41,7 +41,7 @@ def StructureSelectionStep(
 
     def initialize_viewer():
         if not viewer.value:
-            weas: WeasWidget = WeasWidget(viewerStyle={"width": "100%"})
+            weas: WeasWidget = WeasWidget()
             if structure.value:
                 weas.from_ase(structure.value)
             viewer.set(weas)
