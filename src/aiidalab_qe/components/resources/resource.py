@@ -13,14 +13,23 @@ def ResourceCard(model: solara.Reactive[CodeModel]):
     ntasks = solara.toestand.Ref(model.fields.ntasks_per_node)
     cpus_task = solara.toestand.Ref(model.fields.cpus_per_task)
     wallclock = solara.toestand.Ref(model.fields.max_wallclock_seconds)
+    code_options = solara.use_reactive([])
 
-    def get_codes_by_entry_point() -> list[str]:
+    def initialize_code_selector():
         codes: list[orm.Code] = orm.Code.collection.all()
-        return [
-            code.full_label
-            for code in codes
-            if code.default_calc_job_plugin == model.value.default_calcjob_plugin
-        ]
+        code_options.set(
+            [
+                code.full_label
+                for code in codes
+                if code.default_calc_job_plugin == model.value.default_calcjob_plugin
+            ]
+        )
+        if not code_ref.value:
+            code_ref.set(code_options.value[0])
+
+    solara.use_effect(
+        initialize_code_selector,
+    )
 
     with solara.Div(class_="col-12 col-md-6 col-xl-4 p-0"):
         with solara.v.Card(class_="m-0"):
@@ -32,7 +41,7 @@ def ResourceCard(model: solara.Reactive[CodeModel]):
             with solara.v.CardText():
                 solara.Select(
                     label="Code",
-                    values=get_codes_by_entry_point(),
+                    values=code_options.value,
                     value=code_ref,
                 )
                 solara.InputInt(label="Nodes", value=nodes)
@@ -40,4 +49,3 @@ def ResourceCard(model: solara.Reactive[CodeModel]):
                 solara.InputInt(label="Tasks per node", value=ntasks)
                 solara.InputInt(label="CPUs per task", value=cpus_task)
                 solara.InputInt(label="Wallclock time (s)", value=wallclock)
-                solara.v.Input()
