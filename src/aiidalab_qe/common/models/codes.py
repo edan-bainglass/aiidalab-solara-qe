@@ -8,9 +8,9 @@ from .utils import ConfiguredBaseModel
 
 
 class CodeModel(ConfiguredBaseModel):
-    name: str = pdt.Field(exclude=True, default="")
-    description: str = pdt.Field(exclude=True, default="")
-    default_calcjob_plugin: str = pdt.Field(exclude=True, default="")
+    name: str = pdt.Field("", exclude=True)
+    description: str = pdt.Field("", exclude=True)
+    default_calcjob_plugin: str = pdt.Field("", exclude=True)
 
     code: str = ""
     nodes: int = 1
@@ -68,4 +68,4 @@ class PwCodeModel(CodeModel):
 
 
 class ResourcesModel(ConfiguredBaseModel):
-    codes: dict[str, CodeModel] = {}
+    codes: dict[str, CodeModel] = pdt.Field(default_factory=dict)

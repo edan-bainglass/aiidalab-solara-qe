@@ -31,7 +31,7 @@ class BasicSettingsModel(ConfiguredBaseModel):
 
 class SystemParametersModel(ConfiguredBaseModel):
     tot_charge: float = 0.0
-    starting_ns_eigenvalue: list[tuple[int, int, str, int]] = []
+    starting_ns_eigenvalue: t.Optional[list[tuple[int, int, str, int]]] = None
     ecutwfc: float = 0.0
     ecutrho: float = 0.0
     vdw_corr: t.Literal[
@@ -73,11 +73,11 @@ class PwParametersModel(ConfiguredBaseModel):
 
 class PwModel(ConfiguredBaseModel):
     parameters: PwParametersModel = PwParametersModel()
-    pseudos: dict[str, str] = {}
+    pseudos: dict[str, str] = pdt.Field(default_factory=dict)
 
 
 class HubbardParametersModel(ConfiguredBaseModel):
-    hubbard_u: dict[str, float] = {}
+    hubbard_u: dict[str, float] = pdt.Field(default_factory=dict)
 
 
 class AdvancedSettingsModel(ConfiguredBaseModel):
@@ -98,7 +98,7 @@ class CalculationParametersModel(ConfiguredBaseModel):
     ] = "positions_cell"
     basic: BasicSettingsModel = BasicSettingsModel()
     advanced: AdvancedSettingsModel = AdvancedSettingsModel()
-    plugins: dict[str, PluginSettingsModel] = {}
+    plugins: dict[str, PluginSettingsModel] = pdt.Field(default_factory=dict)
 
     @pdt.model_validator(mode="before")
     @classmethod
@@ -118,7 +118,7 @@ class ComputationalResourcesModel(ConfiguredBaseModel):
             "pw": PwCodeModel(),
         }
     )
-    plugins: dict[str, PluginResourcesModel] = {}
+    plugins: dict[str, PluginResourcesModel] = pdt.Field(default_factory=dict)
 
     @pdt.model_validator(mode="before")
     @classmethod
@@ -135,7 +135,7 @@ class QeAppModel(ConfiguredBaseModel):
     label: str = "New workflow"
     description: str = ""
     input_structure: t.Optional[StructureData] = None
-    properties: list[str] = []
+    properties: list[str] = pdt.Field(default_factory=list)
     calculation_parameters: CalculationParametersModel = CalculationParametersModel()
     computational_resources: ComputationalResourcesModel = ComputationalResourcesModel()
     process: t.Optional[ProcessNode] = None
