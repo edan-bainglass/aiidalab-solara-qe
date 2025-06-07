@@ -37,12 +37,8 @@ class CodeModel(ConfiguredBaseModel):
 
     def get_model_state(self) -> dict[str, t.Any]:
         return {
+            **self.model_dump(exclude_none=True),
             "code": self.code_uuid,
-            "nodes": self.nodes,
-            "cpus": self.cpus,
-            "ntasks_per_node": self.ntasks_per_node,
-            "cpus_per_task": self.cpus_per_task,
-            "max_wallclock_seconds": self.max_wallclock_seconds,
         }
 
     def get_suffix(self) -> str:
