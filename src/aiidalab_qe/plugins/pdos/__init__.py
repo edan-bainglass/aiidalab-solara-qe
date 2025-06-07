@@ -20,7 +20,7 @@ pdos = {
             ),
             "projwfc": CodeModel(
                 name="projwfc.x",
-                description="Projector wavefunction code for density of states",
+                description="Projector wavefunction code",
                 default_calcjob_plugin="quantumespresso.projwfc",
             ),
         },
