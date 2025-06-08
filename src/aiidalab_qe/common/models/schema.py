@@ -9,7 +9,7 @@ from aiidalab_qe.common.services.aiida import AiiDAService
 from aiidalab_qe.plugins.models import PluginResourcesModel, PluginSettingsModel
 from aiidalab_qe.plugins.utils import get_plugin_resources, get_plugin_settings
 
-from .codes import CodeModel, PwCodeModel, ResourcesModel
+from .codes import CodeModelFactory, PwCodeModel, ResourcesModel
 from .utils import ConfiguredBaseModel
 
 
@@ -102,7 +102,7 @@ class CalculationParametersModel(ConfiguredBaseModel):
 
     @pdt.model_validator(mode="before")
     @classmethod
-    def _fetch_plugins(cls, data: t.Any) -> t.Any:
+    def _fetch_plugins(cls, data: dict[str, t.Any]) -> t.Any:
         plugin_data = data.get("plugins", {})
         for plugin, settings in get_plugin_settings().items():
             if plugin not in plugin_data:
@@ -119,15 +119,21 @@ class ComputationalResourcesModel(ConfiguredBaseModel):
         }
     )
     plugins: dict[str, PluginResourcesModel] = pdt.Field(default_factory=dict)
+    plugin_mapping: dict[str, str] = pdt.Field(default_factory=dict, exclude=True)
 
     @pdt.model_validator(mode="before")
     @classmethod
-    def _fetch_plugins(cls, data: t.Any) -> t.Any:
-        plugin_data = data.get("plugins", {})
+    def _fetch_plugins(cls, data: dict[str, t.Any]) -> t.Any:
+        plugins = data.get("plugins", {})
+        mapping = data.get("plugin_mapping", {})
         for plugin, resources in get_plugin_resources().items():
-            if plugin not in plugin_data:
-                plugin_data[plugin] = resources
-        data["plugins"] = plugin_data
+            if plugin not in plugins:
+                plugins[plugin] = resources
+                for code, model in resources.codes.items():
+                    if code not in mapping:
+                        mapping[code] = model.default_calcjob_plugin.split(".")[-1]
+        data["plugin_mapping"] = mapping
+        data["plugins"] = plugins
         return data
 
 
@@ -141,43 +147,53 @@ class QeAppModel(ConfiguredBaseModel):
     process: t.Optional[ProcessNode] = None
 
     def to_legacy_parameters(self) -> dict:
+        parameters = self.calculation_parameters
+        resources = self.computational_resources
         return {
             "workchain": {
-                "protocol": self.calculation_parameters.basic.protocol,
-                "spin_type": self.calculation_parameters.basic.spin_type,
-                "electronic_type": self.calculation_parameters.basic.electronic_type,
-                "relax_type": self.calculation_parameters.relax_type,
-                "properties": self.properties,
+                "protocol": parameters.basic.protocol,
+                "spin_type": parameters.basic.spin_type,
+                "electronic_type": parameters.basic.electronic_type,
+                "relax_type": parameters.relax_type,
+                "properties": ["relax", *self.properties],
             },
             "advanced": {
-                **self.calculation_parameters.advanced.model_dump(exclude_unset=True),
+                **parameters.advanced.model_dump(exclude_none=True),
             },
             **{
-                plugin: settings.model.model_dump(exclude_unset=True)
-                for plugin, settings in self.calculation_parameters.plugins.items()
+                plugin: settings.model.model_dump(exclude_none=True)
+                for plugin, settings in parameters.plugins.items()
+                if plugin in self.properties
             },
             "codes": {
                 "global": {
                     "codes": {
                         f"quantumespresso__{code.get_suffix()}": code.get_model_state()
-                        for code in self.computational_resources.global_.codes.values()
+                        for code in resources.global_.codes.values()
                     }
                 },
                 **{
                     plugin: {
-                        "override": resources.override,
-                        "codes": {
-                            code_key: code_model.get_model_state()
-                            for code_key, code_model in resources.codes.items()
+                        "override": plugin_resources.override,
+                        **{
+                            "codes": {
+                                code: model.get_model_state()
+                                if plugin_resources.override
+                                else resources.global_.codes.get(
+                                    resources.plugin_mapping[code]
+                                ).get_model_state()
+                                for code, model in plugin_resources.codes.items()
+                            }
                         },
                     }
-                    for plugin, resources in self.computational_resources.plugins.items()
+                    for plugin, plugin_resources in resources.plugins.items()
+                    if plugin in self.properties
                 },
             },
         }
 
     @classmethod
-    def from_process(cls, pk: int | None) -> QeAppModel:
+    def from_process(cls, pk: int | None, lock: bool = True) -> QeAppModel:
         from aiida.orm.utils.serialize import deserialize_unsafe
 
         ui_parameters: dict[str, t.Any]
@@ -211,14 +227,17 @@ class QeAppModel(ConfiguredBaseModel):
 
 def _extract_calculation_parameters(parameters: dict) -> CalculationParametersModel:
     model = CalculationParametersModel()
-
     workchain_parameters: dict = parameters.pop("workchain", {})
     model.relax_type = workchain_parameters.pop("relax_type")
     model.basic = BasicSettingsModel(**workchain_parameters)
     model.advanced = AdvancedSettingsModel(**parameters.pop("advanced", {}))
+    plugins = get_plugin_settings()
     model.plugins = {
-        plugin: PluginSettingsModel(**settings)
-        for plugin, settings in parameters.items()
+        plugin: PluginSettingsModel(
+            model=plugins[plugin].model.model_validate(data),
+            component=plugins[plugin].component,
+        )
+        for plugin, data in parameters.items()
     }
     return model
 
@@ -229,9 +248,9 @@ CodesParams = dict[str, dict[str, dict[str, t.Any]]]
 def _extract_computational_resources(codes: CodesParams) -> ComputationalResourcesModel:
     computational_resources = ComputationalResourcesModel()
     global_codes = {
-        code_key.strip("quantumespresso__"): PwCodeModel(**code_model)
-        if code_key.endswith("pw")
-        else CodeModel(**code_model)
+        (
+            key := code_key.replace("quantumespresso__", "")
+        ): CodeModelFactory.from_serialized(key, code_model)
         for code_key, code_model in codes.pop("global", {}).get("codes", {}).items()
     }
     computational_resources.global_ = ResourcesModel(
@@ -240,16 +259,18 @@ def _extract_computational_resources(codes: CodesParams) -> ComputationalResourc
             "pw": PwCodeModel(),
         }
     )
+    plugin_resources = get_plugin_resources()
     computational_resources.plugins = {
-        plugin: PluginResourcesModel(
-            override=resources.get("override", False),
-            codes={
-                code_key: PwCodeModel(**code_model)
-                if code_key == "pw"
-                else CodeModel(**code_model)
-                for code_key, code_model in resources.get("codes", {}).items()
-            },
+        plugin: plugin_resources[plugin].model_validate(
+            {
+                "override": resources.get("override", False),
+                "codes": {
+                    code: plugin_resources[plugin].codes[code].update_and_validate(data)
+                    for code, data in resources.get("codes", {}).items()
+                },
+            }
         )
         for plugin, resources in codes.items()
+        if plugin in plugin_resources
     }
     return computational_resources

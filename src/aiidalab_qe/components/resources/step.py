@@ -36,10 +36,13 @@ def ResourcesSelectionStep(
         on_state_change(new_state)
 
     def build_global_codes():
-        plugin_resources = resources.value.plugins
+        # TODO possible optimization; consider building once and toggling (in)active
 
+        plugin_resources = resources.value.plugins
+        plugin_mapping = resources.value.plugin_mapping
+        pw_code = resources.value.global_.codes["pw"]
         codes = {
-            "pw": resources.value.global_.codes["pw"],
+            "pw": pw_code,
         }
 
         for prop in properties.value:
@@ -48,8 +51,8 @@ def ResourcesSelectionStep(
 
             plugin_codes = plugin_resources[prop].codes
             for code_key, code_model in plugin_codes.items():
-                if code_key not in codes:
-                    codes[code_key] = code_model.model_copy()
+                if (global_key := plugin_mapping[code_key]) not in codes:
+                    codes[global_key] = code_model.model_copy()
 
         global_codes.set(codes)
         active.set("global")
@@ -97,20 +100,28 @@ def PluginResourcesPanel(
     model: solara.Reactive[PluginResourcesModel],
     global_codes: solara.Reactive[dict[str, CodeModel]],
 ):
-    codes = solara.toestand.Ref(model.fields.codes)
+    plugin_codes = solara.toestand.Ref(model.fields.codes)
     override = solara.toestand.Ref(model.fields.override)
 
-    def on_override_toggle():
+    def reset_codes_to_global():
+        global_plugin_codes = {
+            code_key: code_model.model_copy()
+            for code_key, code_model in global_codes.value.items()
+            if code_key in plugin_codes.value
+        }
         model.set(
             model.value.model_copy(
                 update={
                     "codes": {
-                        **codes.value.copy(),
-                        **global_codes.value.copy(),
+                        **plugin_codes.value,
+                        **global_plugin_codes,
                     },
                 }
             )
         )
+
+    def on_override_toggle():
+        reset_codes_to_global()
         override.set(not override.value)
 
     solara.Checkbox(
@@ -120,4 +131,4 @@ def PluginResourcesPanel(
         on_value=lambda _: on_override_toggle(),
     )
     if override.value:
-        ResourcesPanel(codes)
+        ResourcesPanel(plugin_codes)

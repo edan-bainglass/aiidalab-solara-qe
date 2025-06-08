@@ -23,7 +23,8 @@ class CodeModel(ConfiguredBaseModel):
     def code_uuid(self) -> str:
         try:
             return AiiDAService.load_code(self.code).uuid
-        except Exception:
+        except Exception as err:
+            print(f"Error loading code: {err}")
             return ""
 
     @pdt.field_validator("code")
@@ -44,23 +45,51 @@ class CodeModel(ConfiguredBaseModel):
     def get_suffix(self) -> str:
         return self.default_calcjob_plugin.split(".")[-1]
 
+    def update_and_validate(self, data: dict[str, t.Any]) -> "CodeModel":
+        """Update the model with validated data.
+
+        Parameters
+        ----------
+        `data` : `dict[str, t.Any]`
+            The data to update the model with.
+
+        Returns
+        -------
+        `CodeModel`
+            A new instance of the model with updated and validated data.
+        """
+        return self.model_copy(
+            update=self.model_validate(
+                self.model_copy(update=data).model_dump()
+            ).model_dump()
+        )
+
 
 class CodeParallelizationModel(ConfiguredBaseModel):
     npools: t.Optional[int] = None
 
 
 class PwCodeModel(CodeModel):
-    name: str = "pw.x"
-    description: str = "Plane-wave self-consistent field (SCF) code"
-    default_calcjob_plugin: str = "quantumespresso.pw"
-
     parallelization: CodeParallelizationModel = CodeParallelizationModel()
+
+    def __init__(self, **data: t.Any):
+        super().__init__(**data)
+        self.name = "pw.x"
+        self.description = "Plane-wave self-consistent field (SCF) code"
+        self.default_calcjob_plugin = "quantumespresso.pw"
 
     def get_model_state(self) -> dict[str, t.Any]:
         return {
             **super().get_model_state(),
-            "parallelization": self.parallelization.model_dump(exclude_unset=True),
+            "parallelization": self.parallelization.model_dump(exclude_none=True),
         }
+
+
+class CodeModelFactory:
+    @staticmethod
+    def from_serialized(code_key: str, serialized: dict) -> CodeModel:
+        code_model_class = PwCodeModel if code_key == "pw" else CodeModel
+        return code_model_class(**serialized)
 
 
 class ResourcesModel(ConfiguredBaseModel):
