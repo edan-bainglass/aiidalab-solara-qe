@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import typing as t
 
-import ase
 import solara
 import solara.toestand
 from aiida import orm
 from ase.build import bulk, molecule
-from weas_widget import WeasWidget
 
 from aiidalab_qe.common.components.wizard import WizardState, onStateChange
+from aiidalab_qe.common.hooks import use_weas
 from aiidalab_qe.config.paths import STYLES
 
 from ..wizard.models import QeWizardModel
@@ -20,12 +19,6 @@ STRUCTURES = [
 ]
 
 
-def get_ase_structure(
-    structure: t.Optional[orm.StructureData],
-) -> t.Optional[ase.Atoms]:
-    return structure.get_ase() if structure else None
-
-
 @solara.component
 def StructureSelectionStep(
     model: solara.Reactive[QeWizardModel],
@@ -33,25 +26,16 @@ def StructureSelectionStep(
 ):
     print("\nrendering structure-selection-step component")
 
+    process = solara.toestand.Ref(model.fields.data.process)
     input_structure = solara.toestand.Ref(model.fields.data.input_structure)
     selection = solara.use_reactive(t.cast(str, None))
-    viewer = solara.use_reactive(t.cast(WeasWidget, None))
-    structure = solara.use_reactive(get_ase_structure(input_structure.value))
-    process = solara.toestand.Ref(model.fields.data.process)
-
-    def initialize_viewer():
-        if not viewer.value:
-            weas: WeasWidget = WeasWidget()
-            if structure.value:
-                weas.from_ase(structure.value)
-            viewer.set(weas)
+    viewer = use_weas(input_structure.value)
 
     def select_structure(selected_structure: str):
         if selected_structure == "Bulk Si":
             new_structure = bulk("Si", "diamond", a=5.43)
         elif selected_structure == "H2O molecule":
             new_structure = molecule("H2O")
-        structure.set(new_structure)
         if viewer.value:
             viewer.value.from_ase(new_structure)
         input_structure.set(orm.StructureData(ase=new_structure))
@@ -66,9 +50,10 @@ def StructureSelectionStep(
 
         on_state_change(new_state)
 
-    solara.use_effect(initialize_viewer, [])
-
-    solara.use_effect(update_state, [input_structure.value])
+    solara.use_effect(
+        update_state,
+        [input_structure.value],
+    )
 
     with solara.Head():
         solara.Style(STYLES / "structure.css")

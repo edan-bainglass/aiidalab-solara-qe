@@ -2,26 +2,22 @@
   max-width: 200px;
   margin-bottom: 12px;
 }
-.structure-selection-step .structure-viewer {
+.structure-viewer {
   padding: 12px;
 }
-.structure-selection-step .structure-viewer .weas-widget {
+.structure-viewer .weas-widget {
   width: 100%;
 }
-.structure-selection-step .structure-viewer .weas-widget select {
+.structure-viewer .weas-widget select {
   color: unset;
 }
-.structure-selection-step .structure-viewer .weas-widget select option {
+.structure-viewer .weas-widget select option {
   color: black !important;
 }
-.structure-selection-step .structure-viewer .weas-widget .title {
+.structure-viewer .weas-widget .title {
   font-size: unset !important;
 }
-.structure-selection-step
-  .structure-viewer
-  .weas-widget
-  > div:first-child
-  > div:first-of-type,
+.structure-viewer .weas-widget > div:first-child > div:first-of-type,
 .structure-selection-step
   .structure-viewer
   .weas-widget
