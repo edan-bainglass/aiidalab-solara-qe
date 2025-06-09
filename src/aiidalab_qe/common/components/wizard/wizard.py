@@ -134,7 +134,7 @@ def WizardStepBody(
                     label="Submit",
                     color="success",
                     icon_name="mdi-rocket",
-                    # disabled=state is not WizardState.CONFIGURED,
+                    disabled=state is not WizardState.CONFIGURED,
                     on_click=submit_callback,
                 )
             else:
@@ -142,6 +142,6 @@ def WizardStepBody(
                     label="Confirm",
                     color="success",
                     icon_name="check",
-                    # disabled=state is not WizardState.CONFIGURED,
+                    disabled=state is not WizardState.CONFIGURED,
                     on_click=confirm_step,
                 )
