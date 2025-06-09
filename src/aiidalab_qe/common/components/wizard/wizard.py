@@ -124,24 +124,25 @@ def WizardStepBody(
         [],
     )
 
-    with solara.Div(class_="wizard-step"):
-        step["component"](model, update_state)
+    with solara.Div(class_="wizard-step-body"):
+        with solara.Div(class_="wizard-step"):
+            step["component"](model, update_state)
 
-    with solara.Div(class_="wizard-step-controls"):
         if confirmable:
-            if step.get("is_submission_step", False):
-                solara.Button(
-                    label="Submit",
-                    color="success",
-                    icon_name="mdi-rocket",
-                    disabled=state is not WizardState.CONFIGURED,
-                    on_click=submit_callback,
-                )
-            else:
-                solara.Button(
-                    label="Confirm",
-                    color="success",
-                    icon_name="check",
-                    disabled=state is not WizardState.CONFIGURED,
-                    on_click=confirm_step,
-                )
+            with solara.Div(class_="wizard-step-controls"):
+                if step.get("is_submission_step", False):
+                    solara.Button(
+                        label="Submit",
+                        color="success",
+                        icon_name="mdi-rocket",
+                        disabled=state is not WizardState.CONFIGURED,
+                        on_click=submit_callback,
+                    )
+                else:
+                    solara.Button(
+                        label="Confirm",
+                        color="success",
+                        icon_name="check",
+                        disabled=state is not WizardState.CONFIGURED,
+                        on_click=confirm_step,
+                    )

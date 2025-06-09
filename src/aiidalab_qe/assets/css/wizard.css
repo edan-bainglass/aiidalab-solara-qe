@@ -1,3 +1,5 @@
-.wizard .wizard-step-controls {
-  margin-top: 12px;
+.wizard .wizard-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
