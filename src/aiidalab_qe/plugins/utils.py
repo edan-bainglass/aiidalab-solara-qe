@@ -2,9 +2,14 @@ from __future__ import annotations
 
 import typing as t
 
+from aiida.engine import WorkChain
 from importlib_metadata import EntryPoint, entry_points
 
-from aiidalab_qe.plugins.models import PluginResourcesModel, PluginSettingsModel
+from aiidalab_qe.plugins.models import (
+    PluginResourcesModel,
+    PluginResultsComponent,
+    PluginSettingsModel,
+)
 
 
 def print_error(entry_point, e):
@@ -57,5 +62,9 @@ def get_plugin_resources() -> dict[str, PluginResourcesModel]:
     return get_plugin_attribute("resources")
 
 
-def get_plugin_workchains() -> dict:
+def get_plugin_workchains() -> dict[str, WorkChain]:
     return get_plugin_attribute("workchain")
+
+
+def get_plugin_results() -> dict[str, PluginResultsComponent]:
+    return get_plugin_attribute("results")
