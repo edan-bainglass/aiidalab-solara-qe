@@ -266,7 +266,10 @@ def _extract_computational_resources(codes: CodesParams) -> ComputationalResourc
                 "override": resources.get("override", False),
                 "codes": {
                     code: plugin_resources[plugin].codes[code].update_and_validate(data)
-                    for code, data in resources.get("codes", {}).items()
+                    for code, data in sorted(
+                        resources.get("codes", {}).items(),
+                        key=lambda item: item[0] != "pw",  # False < True
+                    )
                 },
             }
         )
