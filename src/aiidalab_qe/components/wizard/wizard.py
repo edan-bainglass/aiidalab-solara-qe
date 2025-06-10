@@ -43,7 +43,11 @@ def QeWizard(model: solara.Reactive[QeWizardModel]):
     label = solara.toestand.Ref(model.fields.data.label)
 
     def submit_workflow():
-        inputs = model.value.data.to_legacy_parameters()
+        inputs = {
+            "label": model.value.data.label,
+            "description": model.value.data.description,
+            **model.value.data.to_legacy_parameters(),
+        }
         AiiDAService.submit(inputs)
 
     with solara.Div(class_="qe-wizard"):
