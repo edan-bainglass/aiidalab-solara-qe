@@ -2,26 +2,3 @@
   max-width: 200px;
   margin-bottom: 12px;
 }
-.structure-viewer {
-  padding: 12px;
-}
-.structure-viewer .weas-widget {
-  width: 100%;
-}
-.structure-viewer .weas-widget select {
-  color: unset;
-}
-.structure-viewer .weas-widget select option {
-  color: black !important;
-}
-.structure-viewer .weas-widget .title {
-  font-size: unset !important;
-}
-.structure-viewer .weas-widget > div:first-child > div:first-of-type,
-.structure-selection-step
-  .structure-viewer
-  .weas-widget
-  > div:first-child
-  canvas {
-  width: 100% !important;
-}

@@ -18,7 +18,12 @@ def use_weas(structure: StructureType) -> solara.Reactive[WeasWidget | None]:
 
     def initialize_viewer():
         if not viewer.value:
-            widget: WeasWidget = WeasWidget()
+            widget: WeasWidget = WeasWidget(
+                viewerLayout={
+                    "width": "100%",
+                    "height": "100%",
+                }
+            )
             if structure:
                 widget.from_ase(get_ase_structure(structure))
             viewer.set(widget)

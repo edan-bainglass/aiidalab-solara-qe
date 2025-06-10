@@ -68,3 +68,28 @@
   .accordion-header-text {
   margin-bottom: -2px;
 }
+
+/* Structure viewer */
+.structure-viewer {
+  padding: 12px;
+  width: 100%;
+  height: 450px;
+}
+.structure-viewer .weas-widget select {
+  color: unset;
+}
+.structure-viewer .weas-widget select option {
+  color: black !important;
+}
+.structure-viewer .weas-widget .title {
+  font-size: unset !important;
+}
+.structure-viewer > div,
+.structure-viewer > div > div,
+.weas-widget,
+.weas-widget > div,
+.weas-widget > div > canvas,
+.weas-widget > div > div:first-of-type {
+  width: 100% !important;
+  height: 100% !important;
+}
