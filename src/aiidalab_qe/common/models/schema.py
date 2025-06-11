@@ -193,7 +193,7 @@ class QeAppModel(ConfiguredBaseModel):
         }
 
     @classmethod
-    def from_process(cls, pk: int | None, lock: bool = True) -> QeAppModel:
+    def from_process(cls, pk: t.Optional[int], lock: bool = True) -> QeAppModel:
         from aiida.orm.utils.serialize import deserialize_unsafe
 
         ui_parameters: dict[str, t.Any]

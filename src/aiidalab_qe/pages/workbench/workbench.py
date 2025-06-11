@@ -18,7 +18,7 @@ wizard_store = WizardStore()
 def Workbench(store: WizardStore = wizard_store):
     print("\nrendering workbench page")
 
-    def add_workflow(pk: int | None = None):
+    def add_workflow(pk: t.Optional[int] = None):
         store.add_wizard(pk)
 
     def remove_workflow(uid: str):
@@ -53,7 +53,7 @@ def Workbench(store: WizardStore = wizard_store):
 
 
 @solara.component
-def WorkbenchControls(add_workflow: t.Callable[[int | None], None]):
+def WorkbenchControls(add_workflow: t.Callable[[t.Optional[int]], None]):
     input_pk = solara.use_reactive(t.cast(int, None))
     active_dialog = solara.use_reactive(False)
 

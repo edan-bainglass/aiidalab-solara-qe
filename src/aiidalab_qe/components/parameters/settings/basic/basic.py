@@ -95,8 +95,8 @@ def BasicSettings(model: solara.Reactive[QeWizardModel]):
 
     def Control(
         control: str,
-        on_value: t.Callable | None = None,
-        classes: list[str] | None = None,
+        on_value: t.Optional[t.Callable] = None,
+        classes: t.Optional[list[str]] = None,
     ):
         with solara.Row(classes=["control"]):
             solara.Text(

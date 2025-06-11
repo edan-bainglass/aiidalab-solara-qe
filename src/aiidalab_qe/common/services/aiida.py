@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import typing as t
 
 from aiida import load_profile, orm
 from aiida.common.exceptions import NotExistent
@@ -11,7 +12,7 @@ _ = load_profile()
 
 class AiiDAService:
     @staticmethod
-    def load_qe_app_workflow_node(pk: int) -> orm.WorkChainNode | None:
+    def load_qe_app_workflow_node(pk: int) -> t.Optional[orm.WorkChainNode]:
         with contextlib.suppress(NotExistent):
             process = orm.load_node(pk)
             if (
@@ -28,7 +29,7 @@ class AiiDAService:
         print(json.dumps(data, indent=2))
 
     @staticmethod
-    def load_code(code: str) -> orm.Code | None:
+    def load_code(code: str) -> t.Optional[orm.Code]:
         try:
             return orm.load_code(code)
         except NotExistent:

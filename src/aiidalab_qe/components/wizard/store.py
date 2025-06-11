@@ -12,7 +12,7 @@ class WizardStore:
         )
         self.active = solara.reactive(t.cast(int, None))
 
-    def add_wizard(self, pk: int | None = None):
+    def add_wizard(self, pk: t.Optional[int] = None):
         wizard = solara.reactive(QeWizardModel(pk=pk))
         new_uid = wizard.value.uid
         self.wizards.set({**self.wizards.value, new_uid: wizard})

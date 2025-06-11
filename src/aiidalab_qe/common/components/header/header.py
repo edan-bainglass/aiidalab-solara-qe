@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import typing as t
+
 import solara
 
 from .logo import Logo, LogoProps
 
 
 @solara.component
-def Header(title: str, subtitle: str = "", logo: LogoProps | None = None):
+def Header(title: str, subtitle: str = "", logo: t.Optional[LogoProps] = None):
     if logo:
         Logo(**logo)
     with solara.v.Container(class_="text-center"):

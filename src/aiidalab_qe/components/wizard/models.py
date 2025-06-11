@@ -53,6 +53,6 @@ class QeWizardModel(WizardModel[QeAppModel]):
             icon_name = STATUS_ICONS[process.process_state]
         return f"mdi-{icon_name}"
 
-    def get_ase_structure(self) -> ase.Atoms | None:
+    def get_ase_structure(self) -> t.Optional[ase.Atoms]:
         if self.data.input_structure:
             return self.data.input_structure.get_ase()

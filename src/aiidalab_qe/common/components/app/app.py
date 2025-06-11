@@ -1,18 +1,21 @@
 from __future__ import annotations
 
+import typing as t
+
 import solara
 
 from ..header import Header, LogoProps
-from ..navbar import NavBar, NavItemProps
+from ..navbar import NavBar
+from ..navbar.types import NavItemProps
 
 
 @solara.component
 def App(
     title: str,
     subtitle: str = "",
-    logo: LogoProps | None = None,
-    nav_items: list[NavItemProps] | None = None,
-    children: list[solara.Element] | None = None,
+    logo: t.Optional[LogoProps] = None,
+    nav_items: t.Optional[list[NavItemProps]] = None,
+    children: t.Optional[list[solara.Element]] = None,
 ):
     with solara.v.Container():
         Header(title, subtitle, logo)
