@@ -21,18 +21,16 @@ def SubmissionStep(
 
     def update_state():
         if not process.value:
-            new_state = WizardState.INIT
+            new_state = WizardState.READY
         else:
-            if not process.value.is_finished:
-                new_state = WizardState.ACTIVE
-            elif process.value.is_finished_ok:
-                new_state = WizardState.SUCCESS
-            else:
-                new_state = WizardState.FAIL
+            new_state = WizardState.SUCCESS
 
         on_state_change(new_state)
 
-    solara.use_effect(update_state, [process.value])
+    solara.use_effect(
+        update_state,
+        [process.value],
+    )
 
     with solara.Head():
         solara.Style(STYLES / "submission.css")
