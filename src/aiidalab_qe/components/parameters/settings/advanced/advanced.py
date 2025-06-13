@@ -6,7 +6,11 @@ from solara.toestand import Ref
 
 from aiidalab_qe.common.models.schema import CalculationParametersModel
 
-CATEGORIES = {}
+from .convergence import ConvergenceSettings
+
+CATEGORIES = {
+    "Convergence": ConvergenceSettings,
+}
 
 
 @solara.component
@@ -30,3 +34,5 @@ def AdvancedSettings(
                 ],
                 value=active_panel,
             )
+
+    CATEGORIES[active_panel.value](input_structure, parameters)
