@@ -14,19 +14,23 @@ from .utils import ConfiguredBaseModel
 
 
 class BasicSettingsModel(ConfiguredBaseModel):
+    electronic_type: t.Literal[
+        "metal",
+        "insulator",
+    ] = "metal"
+    spin_type: t.Literal[
+        "none",
+        "collinear",
+    ] = "none"
+    spin_orbit: t.Literal[
+        "wo_soc",
+        "soc",
+    ] = "wo_soc"
     protocol: t.Literal[
         "fast",
         "balanced",
         "stringent",
     ] = "balanced"
-    spin_type: t.Literal[
-        "none",
-        "collinear",
-    ] = "none"
-    electronic_type: t.Literal[
-        "metal",
-        "insulator",
-    ] = "metal"
 
 
 class SystemParametersModel(ConfiguredBaseModel):
@@ -49,9 +53,6 @@ class SystemParametersModel(ConfiguredBaseModel):
         "methfessel-paxton",
     ] = "cold"
     degauss: float = 0.0
-    lspinorb: bool = False
-    noncolin: bool = False
-    nspin: int = 1
     tot_magnetization: float = 0.0
 
 
@@ -149,7 +150,7 @@ class QeAppModel(ConfiguredBaseModel):
     def to_legacy_parameters(self) -> dict:
         parameters = self.calculation_parameters
         resources = self.computational_resources
-        return {
+        legacy_parameters = {
             "workchain": {
                 "protocol": parameters.basic.protocol,
                 "spin_type": parameters.basic.spin_type,
@@ -191,6 +192,13 @@ class QeAppModel(ConfiguredBaseModel):
                 },
             },
         }
+        if parameters.basic.spin_orbit == "soc":
+            legacy_parameters["advanced"]["pw"]["parameters"]["SYSTEM"] |= {
+                "lspinorb": True,
+                "noncolin": True,
+                "nspin": 4,
+            }
+        return legacy_parameters
 
     @classmethod
     def from_process(cls, pk: t.Optional[int], lock: bool = True) -> QeAppModel:
