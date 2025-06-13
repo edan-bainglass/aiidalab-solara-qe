@@ -3,9 +3,7 @@ from __future__ import annotations
 import typing as t
 
 import solara
-from solara.toestand import Ref
-
-from aiidalab_qe.components.wizard.models import QeWizardModel
+from aiida import orm
 
 MOLECULAR_RELAXATION_OPTIONS = {
     "positions": {
@@ -26,9 +24,12 @@ STRUCTURAL_RELAXATION_OPTIONS = {
 
 
 @solara.component
-def RelaxationSelector(model: solara.Reactive[QeWizardModel]):
-    input_structure = Ref(model.fields.data.input_structure)
-    relax_type = Ref(model.fields.data.calculation_parameters.relax_type)
+def RelaxationSelector(
+    input_structure: solara.Reactive[orm.StructureData],
+    relax_type: solara.Reactive[str],
+):
+    print("\nrendering relaxation-selector component")
+
     is_relax = solara.use_reactive(relax_type.value not in (None, "none"))
     options = solara.use_reactive(t.cast(dict[str, dict[str, str]], {}))
 

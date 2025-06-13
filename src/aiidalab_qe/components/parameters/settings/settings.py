@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import solara
-import solara.toestand
 
-from aiidalab_qe.components.wizard.models import QeWizardModel
+from aiidalab_qe.common.models.schema import CalculationParametersModel
 from aiidalab_qe.plugins.utils import get_plugin_settings
 
 from .advanced import AdvancedSettings
@@ -29,8 +28,10 @@ CATEGORIES = {
 
 
 @solara.component
-def CalculationSettings(model: solara.Reactive[QeWizardModel]):
-    properties = solara.toestand.Ref(model.fields.data.properties)
+def CalculationSettings(
+    properties: solara.Reactive[list[str]],
+    parameters: solara.Reactive[CalculationParametersModel],
+):
     category = solara.use_reactive("basic")
 
     with solara.Div(class_="calculation-settings"):
@@ -49,4 +50,4 @@ def CalculationSettings(model: solara.Reactive[QeWizardModel]):
                     ],
                     value=category,
                 )
-        CATEGORIES[category.value](model)
+        CATEGORIES[category.value](parameters)

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import solara
+from solara.toestand import Ref
 
-from aiidalab_qe.components.wizard.models import QeWizardModel
+from aiidalab_qe.common.models.schema import CalculationParametersModel
 
 
 @solara.component
-def AdvancedSettings(model: solara.Reactive[QeWizardModel]):
-    pass
+def AdvancedSettings(parameters: solara.Reactive[CalculationParametersModel]):
+    advanced_settings = parameters.fields.advanced

@@ -1,18 +1,14 @@
 from __future__ import annotations
 
 import solara
-from solara.toestand import Ref
 
-from aiidalab_qe.components.wizard.models import QeWizardModel
 from aiidalab_qe.plugins.utils import get_plugin_titles
 
 PROPERTY_TITLES = get_plugin_titles()
 
 
 @solara.component
-def PropertiesSelector(model: solara.Reactive[QeWizardModel]):
-    properties = Ref(model.fields.data.properties)
-
+def PropertiesSelector(properties: solara.Reactive[list[str]]):
     def update_properties(prop: str, checked: bool):
         properties.set(
             [*properties.value, prop]
