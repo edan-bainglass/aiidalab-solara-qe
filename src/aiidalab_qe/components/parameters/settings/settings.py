@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import solara
+from aiida import orm
 
 from aiidalab_qe.common.models.schema import CalculationParametersModel
 from aiidalab_qe.plugins.utils import get_plugin_settings
@@ -30,6 +31,7 @@ CATEGORIES = {
 @solara.component
 def CalculationSettings(
     properties: solara.Reactive[list[str]],
+    input_structure: solara.Reactive[orm.StructureData],
     parameters: solara.Reactive[CalculationParametersModel],
 ):
     category = solara.use_reactive("basic")
@@ -50,4 +52,4 @@ def CalculationSettings(
                     ],
                     value=category,
                 )
-        CATEGORIES[category.value](parameters)
+        CATEGORIES[category.value](input_structure, parameters)

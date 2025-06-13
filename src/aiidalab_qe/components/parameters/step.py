@@ -72,5 +72,5 @@ def ParametersConfigurationStep(
             ParametersConfigurationSubstep(
                 label="Step 2.2: Customize calculation parameters",
                 content=CalculationSettings,
-                props=[properties, parameters],
+                props=[properties, input_structure, parameters],
             )

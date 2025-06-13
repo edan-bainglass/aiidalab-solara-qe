@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-
 import solara
+from aiida import orm
 from solara.toestand import Ref
 
 from aiidalab_qe.common.components.selection import ToggleButtons
@@ -9,7 +9,10 @@ from aiidalab_qe.common.models.schema import CalculationParametersModel
 
 
 @solara.component
-def BasicSettings(parameters: solara.Reactive[CalculationParametersModel]):
+def BasicSettings(
+    input_structure: solara.Reactive[orm.StructureData],
+    parameters: solara.Reactive[CalculationParametersModel],
+):
     basic_settings = parameters.fields.basic
 
     with solara.Div(class_="basic-settings"):
