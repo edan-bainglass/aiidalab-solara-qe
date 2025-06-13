@@ -103,7 +103,7 @@ class QeAppWorkChain(WorkChain):
         hubbard_dict = parameters["advanced"].pop("hubbard_parameters", None)
 
         # Check if hubbard_dict is provided
-        if hubbard_dict is not None:
+        if hubbard_dict:
             hubbard_parameters = hubbard_dict["hubbard_u"]
             hubbard_structure = HubbardStructureData.from_structure(structure)
 
@@ -164,9 +164,9 @@ class QeAppWorkChain(WorkChain):
                     parameters["workchain"]["electronic_type"]
                 ),
                 spin_type=SpinType(parameters["workchain"]["spin_type"]),
-                initial_magnetic_moments=parameters["advanced"][
+                initial_magnetic_moments=parameters["advanced"].get(
                     "initial_magnetic_moments"
-                ],
+                ),
                 overrides=relax_overrides,
                 **kwargs,
             )

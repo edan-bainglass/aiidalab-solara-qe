@@ -77,7 +77,7 @@ class PwModel(ConfiguredBaseModel):
 
 
 class HubbardParametersModel(ConfiguredBaseModel):
-    hubbard_u: dict[str, float] = pdt.Field(default_factory=dict)
+    hubbard_u: t.Optional[dict[str, float]] = None
 
 
 class AdvancedSettingsModel(ConfiguredBaseModel):
