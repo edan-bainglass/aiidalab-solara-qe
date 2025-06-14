@@ -78,7 +78,10 @@ class PwModel(ConfiguredBaseModel):
 
 
 class HubbardParametersModel(ConfiguredBaseModel):
-    hubbard_u: t.Optional[dict[str, float]] = None
+    use_hubbard_u: t.Annotated[bool, pdt.Field(exclude=True)] = False
+    use_eigenvalues: t.Annotated[bool, pdt.Field(exclude=True)] = False
+    hubbard_u: dict[str, float] = {}
+    eigenvalues: list[list[list[tuple[int, int, str, float]]]] = []
 
 
 class AdvancedSettingsModel(ConfiguredBaseModel):

@@ -7,11 +7,13 @@ from solara.toestand import Ref
 from aiidalab_qe.common.models.schema import CalculationParametersModel
 
 from .convergence import ConvergenceSettings
+from .hubbard import HubbardUSettings
 from .smearing import SmearingSettings
 
 CATEGORIES = {
     "Convergence": ConvergenceSettings,
     "Smearing": SmearingSettings,
+    "Hubbard U": HubbardUSettings,
 }
 
 
