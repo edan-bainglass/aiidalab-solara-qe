@@ -16,6 +16,7 @@ dependencies = [
     "aiida-quantumespresso>=4.7,<5",
     "pydantic~=2.0",
     "ase",
+    "pymatgen",
     "weas-widget"
 ]
 
