@@ -6,15 +6,17 @@ import solara
 import solara.toestand
 from aiida import orm
 from ase.build import bulk, molecule
+from ase.io import read
 
 from aiidalab_qe.common.components.wizard import WizardState, onStateChange
 from aiidalab_qe.common.hooks import use_weas
-from aiidalab_qe.config.paths import STYLES
+from aiidalab_qe.config.paths import DATA, STYLES
 
 from ..wizard.models import QeWizardModel
 
 STRUCTURES = [
     "Bulk Si",
+    "LiCoO2",
     "H2O molecule",
 ]
 
@@ -36,6 +38,9 @@ def StructureSelectionStep(
             new_structure = bulk("Si", "diamond", a=5.43)
         elif selected_structure == "H2O molecule":
             new_structure = molecule("H2O")
+        else:
+            path = DATA / "structure/examples" / selected_structure
+            new_structure = read(path.with_suffix(".vasp"), format="vasp")
         if viewer.value:
             viewer.value.from_ase(new_structure)
         input_structure.set(orm.StructureData(ase=new_structure))
