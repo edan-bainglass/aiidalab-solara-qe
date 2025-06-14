@@ -12,11 +12,11 @@ license = { file = "LICENSE" }
 keywords = ["aiidalab", "quantum-espresso", "solara"]
 dependencies = [
     "solara~=1.0",
-    "aiida-core~=2.3,<3",
+    "aiida-core~=2.6,<3",
     "aiida-quantumespresso>=4.7,<5",
     "pydantic~=2.0",
-    "ase",
-    "pymatgen",
+    "ase~=3.25.0",
+    "pymatgen~=2025.4.10",
     "weas-widget"
 ]
 
