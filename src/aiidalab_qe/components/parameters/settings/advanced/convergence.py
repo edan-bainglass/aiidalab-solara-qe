@@ -11,6 +11,7 @@ from aiidalab_qe.utils import create_kpoints_from_distance
 
 @solara.component
 def ConvergenceSettings(
+    active: bool,
     input_structure: solara.Reactive[orm.StructureData],
     parameters: solara.Reactive[CalculationParametersModel],
 ):
@@ -21,9 +22,8 @@ def ConvergenceSettings(
     etot_conv_thr = Ref(advanced_settings.pw.parameters.CONTROL.etot_conv_thr)
     scf_conv_thr = Ref(advanced_settings.pw.parameters.ELECTRONS.conv_thr)
     kpoints_distance = Ref(advanced_settings.kpoints_distance)
-    mesh_grid = solara.use_reactive("")
 
-    def update_mesh_grid():
+    def get_mesh_grid():
         if not has_pbc:
             grid = ""
         elif kpoints_distance.value <= 0:
@@ -35,15 +35,21 @@ def ConvergenceSettings(
                 False,
             )
             grid = f"{'x'.join([str(k) for k in mesh])} mesh"
-        mesh_grid.set(grid)
 
-    solara.use_effect(
-        update_mesh_grid,
-        [kpoints_distance.value, input_structure.value],
+        return grid
+
+    mesh_grid = solara.use_memo(
+        get_mesh_grid,
+        [input_structure.value, kpoints_distance.value],
+    )
+
+    protocol_defaults = solara.use_memo(
+        PwBaseWorkChain.get_protocol_inputs,
+        [protocol.value],
     )
 
     def update_from_protocol():
-        params = PwBaseWorkChain.get_protocol_inputs(protocol.value)
+        params = protocol_defaults
         forc_conv_thr.set(params["pw"]["parameters"]["CONTROL"]["forc_conv_thr"])
         etot_conv_thr.set(params["meta_parameters"]["etot_conv_thr_per_atom"])
         scf_conv_thr.set(params["meta_parameters"]["conv_thr_per_atom"])
@@ -51,8 +57,13 @@ def ConvergenceSettings(
 
     solara.use_effect(
         update_from_protocol,
-        [protocol.value],
+        [input_structure.value, protocol.value],
     )
+
+    if not active:
+        return
+
+    print("\nrendering convergence-settings component")
 
     with solara.Div(class_="convergence-settings"):
         solara.InputFloat(
@@ -71,4 +82,4 @@ def ConvergenceSettings(
             label="Kpoints distance (Å⁻¹)",
             value=kpoints_distance,
         )
-        solara.Text(mesh_grid.value)
+        solara.Text(mesh_grid)

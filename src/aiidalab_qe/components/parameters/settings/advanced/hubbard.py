@@ -17,6 +17,7 @@ from aiidalab_qe.common.models.schema import CalculationParametersModel
 
 @solara.component
 def HubbardUSettings(
+    active: bool,
     input_structure: solara.Reactive[orm.StructureData],
     parameters: solara.Reactive[CalculationParametersModel],
 ):
@@ -25,8 +26,6 @@ def HubbardUSettings(
     use_eigenvalues = Ref(hubbard_settings.use_eigenvalues)
     hubbard_u = Ref(hubbard_settings.hubbard_u)
     eigenvalues = Ref(hubbard_settings.eigenvalues)
-
-    print("\nRendering Hubbard-U-settings component")
 
     def get_orbital_labels() -> list[str]:
         return (
@@ -115,6 +114,11 @@ def HubbardUSettings(
         reset_hubbard_parameters,
         [input_structure.value],
     )
+
+    if not active:
+        return
+
+    print("\nrendering hubbard-u-settings component")
 
     with solara.Div(class_="hubbard-settings"):
         solara.Checkbox(

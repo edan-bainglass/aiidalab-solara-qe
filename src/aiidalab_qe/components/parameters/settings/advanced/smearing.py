@@ -14,6 +14,7 @@ from aiidalab_qe.common.models.schema import (
 
 @solara.component
 def SmearingSettings(
+    active: bool,
     input_structure: solara.Reactive[orm.StructureData],
     parameters: solara.Reactive[CalculationParametersModel],
 ):
@@ -31,6 +32,11 @@ def SmearingSettings(
         update_degauss,
         [protocol.value],
     )
+
+    if not active:
+        return
+
+    print("\nrendering smearing-settings component")
 
     with solara.Div(class_="smearing-settings"):
         solara.Select(

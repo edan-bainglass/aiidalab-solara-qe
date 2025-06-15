@@ -19,24 +19,32 @@ CATEGORIES = {
 
 @solara.component
 def AdvancedSettings(
+    active: bool,
     input_structure: solara.Reactive[orm.StructureData],
     parameters: solara.Reactive[CalculationParametersModel],
 ):
     spin_type = Ref(parameters.fields.basic.spin_type)
     active_panel = solara.use_reactive("Convergence")
 
-    with solara.Row(classes=["mb-2"]):
-        with solara.Column():
-            solara.Select(
-                label="",
-                values=[
-                    *filter(
-                        lambda category: category != "Magnetization"
-                        or spin_type.value == "collinear",
-                        CATEGORIES,
+    with solara.Div(class_="advanced-settings"):
+        with solara.Row(classes=["mb-2"]):
+            with solara.Column():
+                if active:
+                    solara.Select(
+                        label="",
+                        values=[
+                            *filter(
+                                lambda category: category != "Magnetization"
+                                or spin_type.value == "collinear",
+                                CATEGORIES,
+                            )
+                        ],
+                        value=active_panel,
                     )
-                ],
-                value=active_panel,
-            )
 
-    CATEGORIES[active_panel.value](input_structure, parameters)
+        for panel_key, AdvancedSettingsPanel in CATEGORIES.items():
+            AdvancedSettingsPanel(
+                active=active and active_panel.value == panel_key,
+                input_structure=input_structure,
+                parameters=parameters,
+            )

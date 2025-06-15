@@ -34,7 +34,7 @@ def CalculationSettings(
     input_structure: solara.Reactive[orm.StructureData],
     parameters: solara.Reactive[CalculationParametersModel],
 ):
-    category = solara.use_reactive("basic")
+    active_panel = solara.use_reactive("basic")
 
     with solara.Div(class_="calculation-settings"):
         with solara.Row(classes=["mb-2"]):
@@ -50,6 +50,13 @@ def CalculationSettings(
                             *BUILTIN_CATEGORIES,
                         }
                     ],
-                    value=category,
+                    value=active_panel,
                 )
-        CATEGORIES[category.value](input_structure, parameters)
+
+        for panel_key, SettingsPanel in CATEGORIES.items():
+            if panel_key in BUILTIN_CATEGORIES or panel_key in properties.value:
+                SettingsPanel(
+                    active=active_panel.value == panel_key,
+                    input_structure=input_structure,
+                    parameters=parameters,
+                )

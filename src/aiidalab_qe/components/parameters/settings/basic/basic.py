@@ -10,10 +10,16 @@ from aiidalab_qe.common.models.schema import CalculationParametersModel
 
 @solara.component
 def BasicSettings(
+    active: bool,
     input_structure: solara.Reactive[orm.StructureData],
     parameters: solara.Reactive[CalculationParametersModel],
 ):
     basic_settings = parameters.fields.basic
+
+    if not active:
+        return
+
+    print("\nrendering basic-settings component")
 
     with solara.Div(class_="basic-settings"):
         ToggleButtons(
