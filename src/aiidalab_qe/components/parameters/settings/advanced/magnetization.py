@@ -77,7 +77,6 @@ def MagnetizationSettings(
     with solara.Div(class_="magnetization-settings"):
         if electronic_type.value == "metal":
             ToggleButtons(
-                reactive=input_type,
                 options={
                     "moments": {
                         "label": "Initial magnetic moments",
@@ -86,6 +85,7 @@ def MagnetizationSettings(
                         "label": "Total magnetization",
                     },
                 },
+                value=input_type,
                 class_="magnetization-input-selector",
             )
         MagneticMomentsInput(

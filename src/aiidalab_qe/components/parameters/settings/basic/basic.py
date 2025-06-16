@@ -23,7 +23,6 @@ def BasicSettings(
 
     with solara.Div(class_="basic-settings"):
         ToggleButtons(
-            reactive=Ref(basic_settings.electronic_type),
             label="Electronic Type",
             options={
                 "metal": {
@@ -35,9 +34,9 @@ def BasicSettings(
                     "description": "Insulating system",
                 },
             },
+            value=Ref(basic_settings.electronic_type),
         )
         ToggleButtons(
-            reactive=Ref(basic_settings.spin_type),
             label="Magnetism",
             options={
                 "none": {
@@ -49,9 +48,9 @@ def BasicSettings(
                     "description": "Non-magnetic system",
                 },
             },
+            value=Ref(basic_settings.spin_type),
         )
         ToggleButtons(
-            reactive=Ref(basic_settings.spin_orbit),
             label="Spin-orbit coupling",
             options={
                 "wo_soc": {
@@ -63,9 +62,9 @@ def BasicSettings(
                     "description": "Include spin-orbit coupling",
                 },
             },
+            value=Ref(basic_settings.spin_orbit),
         )
         ToggleButtons(
-            reactive=Ref(basic_settings.protocol),
             label="Protocol",
             options={
                 "fast": {
@@ -81,5 +80,6 @@ def BasicSettings(
                     "description": "High accuracy for demanding calculations",
                 },
             },
+            value=Ref(basic_settings.protocol),
             class_="protocol-selector",
         )

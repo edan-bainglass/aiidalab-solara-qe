@@ -5,9 +5,9 @@ import solara
 
 @solara.component
 def ToggleButtons(
-    reactive: solara.Reactive,
+    value: solara.Reactive,
     options: dict[str, dict[str, str]],
-    on_change: t.Optional[t.Callable] = None,
+    on_value: t.Optional[t.Callable] = None,
     label: t.Optional[str] = None,
     class_: str = "",
 ):
@@ -15,8 +15,8 @@ def ToggleButtons(
         if label is not None:
             solara.Text(label, classes=["control-label"])
         with solara.ToggleButtonsSingle(
-            value=reactive,
-            on_value=on_change,
+            value=value,
+            on_value=on_value,
             dense=True,
             classes=["toggle-buttons", *class_.split()],
         ):
