@@ -6,6 +6,7 @@ import typing as t
 
 from aiida import load_profile, orm
 from aiida.common.exceptions import NotExistent
+from aiida_pseudo.groups.family import PseudoPotentialFamily
 
 _ = load_profile()
 
@@ -33,5 +34,11 @@ class AiiDAService:
         try:
             return orm.load_code(code)
         except NotExistent:
-            raise ValueError(f"Code '{code}' does not exist in AiiDA.")
-        return None
+            return print(f"Code '{code}' does not exist in AiiDA.")
+
+    @staticmethod
+    def load_pseudo_family(label: str) -> t.Optional[PseudoPotentialFamily]:
+        try:
+            return orm.Group.collection.get(label=label)  # type: ignore
+        except NotExistent:
+            return print(f"Pseudo family '{label}' does not exist in AiiDA.")

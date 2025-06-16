@@ -22,8 +22,8 @@ def ToggleButtons(
         ):
             for option, data in options.items():
                 solara.Button(
-                    label=data["label"],
-                    tooltip=data["description"],
+                    label=data.get("label", option),
+                    tooltip=data.get("description", ""),
                     value=option,
                     style="width: 100px;",
                 )

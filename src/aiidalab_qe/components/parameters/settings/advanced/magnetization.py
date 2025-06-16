@@ -1,0 +1,132 @@
+from __future__ import annotations
+
+import solara
+from aiida import orm
+from aiida_pseudo.groups.family import PseudoPotentialFamily
+from aiida_quantumespresso.workflows.protocols.utils import (
+    get_magnetization_parameters,
+    get_starting_magnetization,
+)
+from solara.toestand import Ref
+
+from aiidalab_qe.common.components.selection import ToggleButtons
+from aiidalab_qe.common.models.schema import CalculationParametersModel
+from aiidalab_qe.common.services.aiida import AiiDAService
+import solara.widgets
+
+DEFAULT_MOMENTS = get_magnetization_parameters()
+
+
+@solara.component
+def MagnetizationSettings(
+    active: bool,
+    input_structure: solara.Reactive[orm.StructureData],
+    parameters: solara.Reactive[CalculationParametersModel],
+):
+    advanced_settings = parameters.fields.advanced
+    system_settings = advanced_settings.pw.parameters.SYSTEM
+    pseudo_family = Ref(advanced_settings.pseudo_family)
+    electronic_type = Ref(parameters.fields.basic.electronic_type)
+    total_magnetization = Ref(system_settings.tot_magnetization)
+    initial_magnetic_moments = Ref(advanced_settings.initial_magnetic_moments)
+
+    input_type = solara.use_reactive(
+        "moments" if electronic_type.value == "metal" else "total"
+    )
+
+    def to_moment(
+        symbol: str,
+        starting_magnetization: dict[str, float],
+        family: PseudoPotentialFamily,
+    ) -> float:
+        magnetization = (
+            starting_magnetization.get(symbol, 0.1)
+            if DEFAULT_MOMENTS.get(symbol, {}).get("magmom")
+            else 0.1
+        )
+        return round(magnetization * family.get_pseudo(symbol).z_valence, 3)
+
+    def update_initial_magnetic_moments():
+        if not (
+            input_structure.value
+            and (family := AiiDAService.load_pseudo_family(pseudo_family.value))
+        ):
+            initial_magnetic_moments.set({})
+            return
+        starting_magnetization = get_starting_magnetization(
+            input_structure.value,
+            family,
+        )
+        initial_magnetic_moments.set(
+            {
+                kind.name: to_moment(kind.symbol, starting_magnetization, family)
+                for kind in input_structure.value.kinds
+            }
+        )
+
+    solara.use_effect(
+        update_initial_magnetic_moments,
+        [input_structure.value],
+    )
+
+    if not active:
+        return
+
+    print("\nrendering magnetization-settings component")
+
+    with solara.Div(class_="magnetization-settings"):
+        if electronic_type.value == "metal":
+            ToggleButtons(
+                reactive=input_type,
+                options={
+                    "moments": {
+                        "label": "Initial magnetic moments",
+                    },
+                    "total": {
+                        "label": "Total magnetization",
+                    },
+                },
+                class_="magnetization-input-selector",
+            )
+        MagneticMomentsInput(
+            active=input_type.value == "moments",
+            initial_magnetic_moments=initial_magnetic_moments,
+        )
+        TotalMagnetizationInput(
+            active=input_type.value == "total",
+            total_magnetization=total_magnetization,
+        )
+
+
+@solara.component
+def TotalMagnetizationInput(
+    active: bool,
+    total_magnetization: solara.Reactive[float],
+):
+    if active:
+        with solara.Div(class_="total-magnetization-input"):
+            solara.InputFloat(
+                label="Total magnetization",
+                value=total_magnetization,
+            )
+
+
+@solara.component
+def MagneticMomentsInput(
+    active: bool,
+    initial_magnetic_moments: solara.Reactive[dict[str, float]],
+):
+    if active:
+        with solara.Div(class_="initial-magnetic-moments-input"):
+            for site, moment in initial_magnetic_moments.value.items():
+
+                def update_moments(value: float, site=site):
+                    new_moments = initial_magnetic_moments.value.copy()
+                    new_moments[site] = value
+                    initial_magnetic_moments.set(new_moments)
+
+                solara.InputFloat(
+                    label=site,
+                    value=moment,
+                    on_value=update_moments,
+                )

@@ -8,12 +8,14 @@ from aiidalab_qe.common.models.schema import CalculationParametersModel
 
 from .convergence import ConvergenceSettings
 from .hubbard import HubbardUSettings
+from .magnetization import MagnetizationSettings
 from .smearing import SmearingSettings
 
 CATEGORIES = {
     "Convergence": ConvergenceSettings,
     "Smearing": SmearingSettings,
     "Hubbard U": HubbardUSettings,
+    "Magnetization": MagnetizationSettings,
 }
 
 
@@ -25,6 +27,15 @@ def AdvancedSettings(
 ):
     spin_type = Ref(parameters.fields.basic.spin_type)
     active_panel = solara.use_reactive("Convergence")
+
+    def redirect_to_valid_panel():
+        if spin_type.value == "none" and active_panel.value == "Magnetization":
+            active_panel.set("Convergence")
+
+    solara.use_effect(
+        redirect_to_valid_panel,
+        [spin_type.value],
+    )
 
     with solara.Div(class_="advanced-settings"):
         with solara.Row(classes=["mb-2"]):
