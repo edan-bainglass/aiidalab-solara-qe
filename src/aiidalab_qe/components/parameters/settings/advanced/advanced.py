@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import solara
-from aiida import orm
 from solara.toestand import Ref
 
 from aiidalab_qe.common.models.schema import CalculationParametersModel
+from aiidalab_qe.common.types import StructureType
 
 from .convergence import ConvergenceSettings
 from .hubbard import HubbardUSettings
@@ -24,7 +24,7 @@ CATEGORIES = {
 @solara.component
 def AdvancedSettings(
     active: bool,
-    input_structure: solara.Reactive[orm.StructureData],
+    input_structure: solara.Reactive[StructureType],
     parameters: solara.Reactive[CalculationParametersModel],
 ):
     spin_type = Ref(parameters.fields.basic.spin_type)

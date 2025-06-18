@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 import solara
-from aiida import orm
 from solara.toestand import Ref
 
 from aiidalab_qe.common.components.selection import ToggleButtons
 from aiidalab_qe.common.models.schema import CalculationParametersModel
+from aiidalab_qe.common.types import StructureType
 
 
 @solara.component
 def BasicSettings(
     active: bool,
-    input_structure: solara.Reactive[orm.StructureData],
+    input_structure: solara.Reactive[StructureType],
     parameters: solara.Reactive[CalculationParametersModel],
 ):
     basic_settings = parameters.fields.basic

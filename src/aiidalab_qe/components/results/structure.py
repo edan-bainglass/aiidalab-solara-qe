@@ -1,11 +1,11 @@
+from aiidalab_qe.common.types import ProcessType
 import solara
-from aiida import orm
 
 from aiidalab_qe.common.hooks.weas import use_weas
 
 
 @solara.component
-def StructureResults(process: orm.ProcessNode):
+def StructureResults(process: ProcessType):
     viewer = use_weas(process.inputs.structure)
 
     if not viewer.value:

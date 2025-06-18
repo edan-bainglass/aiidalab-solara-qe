@@ -6,20 +6,34 @@ import solara
 import solara.toestand
 
 from aiidalab_qe.common.components.html import Paragraph
+from aiidalab_qe.common.models.schema import CalculationParametersModel
+from aiidalab_qe.common.types import StructureType
 
 from .model import BandsSettingsModel as Model
 
-if t.TYPE_CHECKING:
-    from aiidalab_qe.components.wizard.models import QeWizardModel
-
 
 @solara.component
-def BandStructureSettings(model: solara.Reactive[QeWizardModel]):
-    calculation_parameters = model.fields.data.calculation_parameters
-    bands_settings: Model = calculation_parameters.plugins["bands"].model  # type: ignore
+def BandStructureSettings(
+    active: bool,
+    input_structure: solara.Reactive[StructureType],
+    parameters: solara.Reactive[CalculationParametersModel],
+):
+    bands_settings = t.cast(Model, parameters.fields.plugins["bands"].model)
     projwfc_bands = solara.toestand.Ref(bands_settings.projwfc_bands)
 
-    with solara.Div(class_="band-structure-settings"):
+    with solara.Div(
+        class_=" ".join(
+            [
+                "control-group bands-settings",
+                *(["d-none"] if not active else []),
+            ],
+        ),
+    ):
+        if not active:
+            return
+
+        print("\nrendering bands-settings component")
+
         with solara.Div(class_="plugin-info"):
             Paragraph("""
                 The band structure workflow will automatically detect the

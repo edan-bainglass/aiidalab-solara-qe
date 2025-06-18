@@ -1,18 +1,18 @@
 from __future__ import annotations
 
 import solara
-from aiida import orm
 from aiida_quantumespresso.workflows.pw.base import PwBaseWorkChain
 from solara.toestand import Ref
 
 from aiidalab_qe.common.models.schema import CalculationParametersModel
+from aiidalab_qe.common.types import StructureType
 from aiidalab_qe.utils import create_kpoints_from_distance
 
 
 @solara.component
 def ConvergenceSettings(
     active: bool,
-    input_structure: solara.Reactive[orm.StructureData],
+    input_structure: solara.Reactive[StructureType],
     parameters: solara.Reactive[CalculationParametersModel],
 ):
     has_pbc = input_structure.value and any(input_structure.value.pbc)

@@ -3,7 +3,6 @@ from __future__ import annotations
 import typing as t
 
 import solara
-from aiida import orm
 from aiida_pseudo.common.units import U
 from aiida_pseudo.data.pseudo import PseudoPotentialData
 from solara.toestand import Ref
@@ -11,6 +10,7 @@ from solara.toestand import Ref
 from aiidalab_qe.common.components.selection import ToggleButtons
 from aiidalab_qe.common.models.schema import CalculationParametersModel
 from aiidalab_qe.common.services.aiida import AiiDAService
+from aiidalab_qe.common.types import StructureType
 
 from .uploader import PseudoUploadComponent
 
@@ -21,7 +21,7 @@ PSEUDODOJO_VERSION = "0.4"
 @solara.component
 def PseudopotentialsSettings(
     active: bool,
-    input_structure: solara.Reactive[orm.StructureData],
+    input_structure: solara.Reactive[StructureType],
     parameters: solara.Reactive[CalculationParametersModel],
 ):
     protocol = Ref(parameters.fields.basic.protocol)

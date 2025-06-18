@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import solara
-from aiida import orm
 from aiida_quantumespresso.data.hubbard_structure import (
     HubbardParameters,
     HubbardStructureData,
@@ -10,6 +9,7 @@ from pymatgen.core import Element
 from solara.toestand import Ref
 
 from aiidalab_qe.common.models.schema import CalculationParametersModel
+from aiidalab_qe.common.types import StructureType
 
 from .eigenvalues_input import EigenvaluesInput
 from .u_param_input import HubbardUParameterInput
@@ -19,7 +19,7 @@ from .utils import get_manifold
 @solara.component
 def HubbardUSettings(
     active: bool,
-    input_structure: solara.Reactive[orm.StructureData],
+    input_structure: solara.Reactive[StructureType],
     parameters: solara.Reactive[CalculationParametersModel],
 ):
     hubbard_settings = parameters.fields.advanced.hubbard_parameters

@@ -7,21 +7,22 @@ import solara.toestand
 from aiida_quantumespresso.workflows.pdos import PdosWorkChain
 
 from aiidalab_qe.common.components.html import Paragraph
+from aiidalab_qe.common.models.schema import CalculationParametersModel
+from aiidalab_qe.common.types import StructureType
 from aiidalab_qe.utils import create_kpoints_from_distance
 
 from .model import PdosSettingsModel as Model
 
-if t.TYPE_CHECKING:
-    from aiidalab_qe.components.wizard.models import QeWizardModel
-
 
 @solara.component
-def PdosSettings(model: solara.Reactive[QeWizardModel]):
-    calculation_parameters = model.fields.data.calculation_parameters
-    protocol = solara.toestand.Ref(calculation_parameters.basic.protocol)
-    input_structure = solara.toestand.Ref(model.fields.data.input_structure)
+def PdosSettings(
+    active: bool,
+    input_structure: solara.Reactive[StructureType],
+    parameters: solara.Reactive[CalculationParametersModel],
+):
+    protocol = solara.toestand.Ref(parameters.fields.basic.protocol)
 
-    pdos_settings: Model = calculation_parameters.plugins["pdos"].model  # type: ignore
+    pdos_settings = t.cast(Model, parameters.fields.plugins["pdos"].model)
     kpoints_distance = solara.toestand.Ref(pdos_settings.kpoints_distance)
     use_pdos_degauss = solara.toestand.Ref(pdos_settings.use_pdos_degauss)
     pdos_degauss = solara.toestand.Ref(pdos_settings.pdos_degauss)
@@ -71,7 +72,19 @@ def PdosSettings(model: solara.Reactive[QeWizardModel]):
         [protocol.value],
     )
 
-    with solara.Div(class_="pdos-settings"):
+    with solara.Div(
+        class_=" ".join(
+            [
+                "control-group pdos-settings",
+                *(["d-none"] if not active else []),
+            ],
+        ),
+    ):
+        if not active:
+            return
+
+        print("\nrendering pdos-settings component")
+
         with solara.Div(class_="plugin-info"):
             Paragraph("""
                 By default, the <b>tetrahedron method</b> is used for the partial

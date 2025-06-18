@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-
 import solara
-from aiida import orm
 from aiida_quantumespresso.workflows.pw.base import PwBaseWorkChain
 from solara.toestand import Ref
 
@@ -10,12 +8,13 @@ from aiidalab_qe.common.models.schema import (
     CalculationParametersModel,
     SystemParametersModel,
 )
+from aiidalab_qe.common.types import StructureType
 
 
 @solara.component
 def SmearingSettings(
     active: bool,
-    input_structure: solara.Reactive[orm.StructureData],
+    input_structure: solara.Reactive[StructureType],
     parameters: solara.Reactive[CalculationParametersModel],
 ):
     protocol = Ref(parameters.fields.basic.protocol)

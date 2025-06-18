@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import solara
-from aiida import orm
 from aiida_pseudo.groups.family import PseudoPotentialFamily
 from aiida_quantumespresso.workflows.protocols.utils import get_magnetization_parameters
 from solara.toestand import Ref
@@ -9,6 +8,7 @@ from solara.toestand import Ref
 from aiidalab_qe.common.components.selection import ToggleButtons
 from aiidalab_qe.common.models.schema import CalculationParametersModel
 from aiidalab_qe.common.services.aiida import AiiDAService
+from aiidalab_qe.common.types import StructureType
 
 DEFAULT_MOMENTS = get_magnetization_parameters()
 
@@ -16,7 +16,7 @@ DEFAULT_MOMENTS = get_magnetization_parameters()
 @solara.component
 def MagnetizationSettings(
     active: bool,
-    input_structure: solara.Reactive[orm.StructureData],
+    input_structure: solara.Reactive[StructureType],
     parameters: solara.Reactive[CalculationParametersModel],
 ):
     advanced_settings = parameters.fields.advanced

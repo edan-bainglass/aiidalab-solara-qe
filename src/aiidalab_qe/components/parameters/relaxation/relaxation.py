@@ -3,7 +3,8 @@ from __future__ import annotations
 import typing as t
 
 import solara
-from aiida import orm
+
+from aiidalab_qe.common.types import StructureType
 
 MOLECULAR_RELAXATION_OPTIONS = {
     "positions": {
@@ -25,7 +26,7 @@ STRUCTURAL_RELAXATION_OPTIONS = {
 
 @solara.component
 def RelaxationSelector(
-    input_structure: solara.Reactive[orm.StructureData],
+    input_structure: solara.Reactive[StructureType],
     relax_type: solara.Reactive[str],
 ):
     print("\nrendering relaxation-selector component")

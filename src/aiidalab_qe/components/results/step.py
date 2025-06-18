@@ -3,9 +3,9 @@ from __future__ import annotations
 import solara
 import solara.lab
 import solara.toestand
-from aiida import orm
 
 from aiidalab_qe.common.components.wizard import onStateChange
+from aiidalab_qe.common.types import ProcessType
 from aiidalab_qe.components.results.structure import StructureResults
 from aiidalab_qe.components.wizard.models import QeWizardModel
 from aiidalab_qe.config.paths import STYLES
@@ -41,7 +41,7 @@ def ResultsStep(
 
 
 @solara.component
-def ProcessSummary(process: orm.ProcessNode):
+def ProcessSummary(process: ProcessType):
     with solara.Div(class_="process-panel summary-panel"):
         with solara.Column():
             solara.Text(f"pk: {process.pk}")
@@ -50,13 +50,13 @@ def ProcessSummary(process: orm.ProcessNode):
 
 
 @solara.component
-def ProcessStatus(process: orm.ProcessNode):
+def ProcessStatus(process: ProcessType):
     with solara.Div(class_="process-panel status-panel"):
         solara.Text("Not yet implemented")
 
 
 @solara.component
-def ProcessResults(process: orm.ProcessNode):
+def ProcessResults(process: ProcessType):
     with solara.Div(class_="process-panel results-panel"):
         with solara.lab.Tabs():
             for prop in sorted(

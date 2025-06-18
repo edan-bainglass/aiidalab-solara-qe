@@ -1,9 +1,10 @@
 import solara
 import solara.toestand
-from aiida import orm
+
+from aiidalab_qe.common.types import ProcessType
 
 
 @solara.component
-def BandStructureResults(process: orm.ProcessNode):
+def BandStructureResults(process: ProcessType):
     with solara.Div(class_="results-panel"):
         solara.Text("Band structure results will be displayed here.")
