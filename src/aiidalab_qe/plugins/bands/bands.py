@@ -50,6 +50,7 @@ def BandStructureSettings(
                 of these contributions, providing insight into the electronic
                 structure.
             """)
+
         solara.Checkbox(
             label="Fat bands",
             value=projwfc_bands,

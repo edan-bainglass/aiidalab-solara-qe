@@ -20,48 +20,48 @@ def PdosSettings(
     input_structure: solara.Reactive[StructureType],
     parameters: solara.Reactive[CalculationParametersModel],
 ):
+    has_pbc = input_structure.value and any(input_structure.value.pbc)
     protocol = solara.toestand.Ref(parameters.fields.basic.protocol)
-
     pdos_settings = t.cast(Model, parameters.fields.plugins["pdos"].model)
     kpoints_distance = solara.toestand.Ref(pdos_settings.kpoints_distance)
     use_pdos_degauss = solara.toestand.Ref(pdos_settings.use_pdos_degauss)
     pdos_degauss = solara.toestand.Ref(pdos_settings.pdos_degauss)
     energy_grid_step = solara.toestand.Ref(pdos_settings.energy_grid_step)
-    mesh_grid = solara.use_reactive("")
-    degauss_ev = solara.use_reactive("")
 
-    def update_mesh_grid():
-        # TODO pbc guard is not correct. Address the underlying issue!
-        if not (input_structure.value and any(input_structure.value.pbc)):
+    degauss_ev = solara.use_memo(
+        lambda: "({:.3f} eV)".format(pdos_degauss.value * 13.605698066),
+        [pdos_degauss.value],
+    )
+
+    def get_mesh_grid():
+        if not has_pbc:
             grid = ""
-        elif kpoints_distance.value > 0:
+        elif kpoints_distance.value <= 0:
+            grid = "Please select a number higher than 0.0"
+        else:
             mesh = create_kpoints_from_distance(
                 input_structure.value,
                 kpoints_distance.value,
                 False,
             )
-            grid = f"Mesh {mesh!s}"
-        else:
-            grid = "Please select a number higher than 0.0"
-        mesh_grid.set(grid)
+            grid = f"{'x'.join([str(k) for k in mesh])} mesh"
 
-    solara.use_effect(
-        update_mesh_grid,
-        [kpoints_distance.value],
+        return grid
+
+    mesh_grid = solara.use_memo(
+        get_mesh_grid,
+        [input_structure.value, kpoints_distance.value],
     )
 
-    def update_degauss_ev():
-        degauss_ev.set("({:.3f} eV)".format(pdos_degauss.value * 13.605698066))
-
-    solara.use_effect(
-        update_degauss_ev,
-        [pdos_degauss.value],
+    protocol_defaults = solara.use_memo(
+        PdosWorkChain.get_protocol_inputs,
+        [protocol.value],
     )
 
     def update_kpoints_distance():
-        parameters = PdosWorkChain.get_protocol_inputs(protocol.value)
-        if any(input_structure.value.pbc):
-            distance = parameters["nscf"]["kpoints_distance"]
+        defaults = protocol_defaults
+        if has_pbc:
+            distance = defaults["nscf"]["kpoints_distance"]
         else:
             distance = 100.0
             use_pdos_degauss.set(True)
@@ -69,7 +69,7 @@ def PdosSettings(
 
     solara.use_effect(
         update_kpoints_distance,
-        [protocol.value],
+        [input_structure.value, protocol.value],
     )
 
     with solara.Div(
@@ -98,25 +98,26 @@ def PdosSettings(
                 a more accurate representation of the PDOS, especially when the
                 electronic states are localized.
             """)
-        with solara.Div(class_="plugin-controls"):
-            with solara.HBox(classes=["align-items-baseline"]):
-                solara.InputFloat(
-                    label="NSCF K-points distance (Å⁻¹)",
-                    value=kpoints_distance,
-                )
-                solara.Text(mesh_grid.value)
-            solara.InputFloat(
-                label="Energy grid step (eV)",
-                value=energy_grid_step,
-            )
-            solara.Checkbox(
-                label="Use custom PDOS degauss",
-                value=use_pdos_degauss,
-            )
-            with solara.HBox():
-                solara.InputFloat(
-                    label="PDOS degauss (Ry)",
-                    value=pdos_degauss,
-                    disabled=not use_pdos_degauss.value,
-                )
-                solara.Text(degauss_ev.value)
+
+        solara.InputFloat(
+            label="NSCF K-points distance (Å⁻¹)",
+            value=kpoints_distance,
+        )
+        solara.Text(mesh_grid)
+
+        solara.InputFloat(
+            label="Energy grid step (eV)",
+            value=energy_grid_step,
+        )
+
+        solara.Checkbox(
+            label="Use custom PDOS degauss",
+            value=use_pdos_degauss,
+        )
+
+        solara.InputFloat(
+            label="PDOS degauss (Ry)",
+            value=pdos_degauss,
+            disabled=not use_pdos_degauss.value,
+        )
+        solara.Text(degauss_ev)
