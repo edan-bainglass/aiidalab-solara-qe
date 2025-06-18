@@ -33,12 +33,19 @@ def SmearingSettings(
         [protocol.value],
     )
 
-    if not active:
-        return
+    with solara.Div(
+        class_=" ".join(
+            [
+                "control-group smearing-settings",
+                *(["d-none"] if not active else []),
+            ],
+        ),
+    ):
+        if not active:
+            return
 
-    print("\nrendering smearing-settings component")
+        print("\nrendering smearing-settings component")
 
-    with solara.Div(class_="smearing-settings"):
         solara.Select(
             label="Smearing",
             values=[*SystemParametersModel.get_options("smearing")],

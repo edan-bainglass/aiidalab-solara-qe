@@ -60,12 +60,19 @@ def ConvergenceSettings(
         [input_structure.value, protocol.value],
     )
 
-    if not active:
-        return
+    with solara.Div(
+        class_=" ".join(
+            [
+                "control-group convergence-settings",
+                *(["d-none"] if not active else []),
+            ],
+        ),
+    ):
+        if not active:
+            return
 
-    print("\nrendering convergence-settings component")
+        print("\nrendering convergence-settings component")
 
-    with solara.Div(class_="convergence-settings"):
         solara.InputFloat(
             label="Force (Ry/Bohr)",
             value=forc_conv_thr,

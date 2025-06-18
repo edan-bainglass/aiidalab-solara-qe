@@ -115,12 +115,19 @@ def HubbardUSettings(
         [input_structure.value],
     )
 
-    if not active:
-        return
+    with solara.Div(
+        class_=" ".join(
+            [
+                "control-group hubbard-settings",
+                *(["d-none"] if not active else []),
+            ],
+        ),
+    ):
+        if not active:
+            return
 
-    print("\nrendering hubbard-u-settings component")
+        print("\nrendering hubbard-settings component")
 
-    with solara.Div(class_="hubbard-settings"):
         solara.Checkbox(
             label="Use Hubbard U",
             value=use_hubbard_u,

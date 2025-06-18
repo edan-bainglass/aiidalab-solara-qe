@@ -37,21 +37,26 @@ def AdvancedSettings(
         [spin_type.value],
     )
 
-    with solara.Div(class_="advanced-settings"):
-        with solara.Row(classes=["mb-2"]):
-            with solara.Column():
-                if active:
-                    solara.Select(
-                        label="",
-                        values=[
-                            *filter(
-                                lambda category: category != "Magnetization"
-                                or spin_type.value == "collinear",
-                                CATEGORIES,
-                            )
-                        ],
-                        value=active_panel,
-                    )
+    with solara.Div(
+        class_=" ".join(
+            [
+                "advanced-settings",
+                *(["d-none"] if not active else []),
+            ],
+        ),
+    ):
+        solara.Select(
+            label="",
+            values=[
+                *filter(
+                    lambda category: category != "Magnetization"
+                    or spin_type.value == "collinear",
+                    CATEGORIES,
+                )
+            ],
+            value=active_panel,
+            classes=["parameters-category-selector"],
+        )
 
         for panel_key, AdvancedSettingsPanel in CATEGORIES.items():
             AdvancedSettingsPanel(

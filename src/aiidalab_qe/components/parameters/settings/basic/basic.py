@@ -16,12 +16,19 @@ def BasicSettings(
 ):
     basic_settings = parameters.fields.basic
 
-    if not active:
-        return
+    with solara.Div(
+        class_=" ".join(
+            [
+                "control-group basic-settings",
+                *(["d-none"] if not active else []),
+            ],
+        ),
+    ):
+        if not active:
+            return
 
-    print("\nrendering basic-settings component")
+        print("\nrendering basic-settings component")
 
-    with solara.Div(class_="basic-settings"):
         ToggleButtons(
             label="Electronic Type",
             options={

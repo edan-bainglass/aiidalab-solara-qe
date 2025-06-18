@@ -69,12 +69,19 @@ def MagnetizationSettings(
         [input_structure.value],
     )
 
-    if not active:
-        return
+    with solara.Div(
+        class_=" ".join(
+            [
+                "control-group magnetization-settings",
+                *(["d-none"] if not active else []),
+            ],
+        ),
+    ):
+        if not active:
+            return
 
-    print("\nrendering magnetization-settings component")
+        print("\nrendering magnetization-settings component")
 
-    with solara.Div(class_="magnetization-settings"):
         if electronic_type.value == "metal":
             ToggleButtons(
                 options={
