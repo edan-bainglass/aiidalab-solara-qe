@@ -49,11 +49,11 @@ def ConvergenceSettings(
     )
 
     def update_from_protocol():
-        params = protocol_defaults
-        forc_conv_thr.set(params["pw"]["parameters"]["CONTROL"]["forc_conv_thr"])
-        etot_conv_thr.set(params["meta_parameters"]["etot_conv_thr_per_atom"])
-        scf_conv_thr.set(params["meta_parameters"]["conv_thr_per_atom"])
-        kpoints_distance.set(params["kpoints_distance"] if has_pbc else 100.0)
+        defaults = protocol_defaults
+        forc_conv_thr.set(defaults["pw"]["parameters"]["CONTROL"]["forc_conv_thr"])
+        etot_conv_thr.set(defaults["meta_parameters"]["etot_conv_thr_per_atom"])
+        scf_conv_thr.set(defaults["meta_parameters"]["conv_thr_per_atom"])
+        kpoints_distance.set(defaults["kpoints_distance"] if has_pbc else 100.0)
 
     solara.use_effect(
         update_from_protocol,
