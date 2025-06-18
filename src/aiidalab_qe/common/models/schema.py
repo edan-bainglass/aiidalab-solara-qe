@@ -22,9 +22,12 @@ class BasicSettingsModel(ConfiguredBaseModel):
         "none",
         "collinear",
     ] = "none"
-    spin_orbit: t.Literal[
-        "wo_soc",
-        "soc",
+    spin_orbit: t.Annotated[
+        t.Literal[
+            "wo_soc",
+            "soc",
+        ],
+        pdt.Field(exclude=True),
     ] = "wo_soc"
     protocol: t.Literal[
         "fast",
@@ -236,12 +239,22 @@ class QeAppModel(ConfiguredBaseModel):
         )
 
 
+# TODO needs attention!
 def _extract_calculation_parameters(parameters: dict) -> CalculationParametersModel:
     model = CalculationParametersModel()
     workchain_parameters: dict = parameters.pop("workchain", {})
     model.relax_type = workchain_parameters.pop("relax_type")
     model.basic = BasicSettingsModel(**workchain_parameters)
-    model.advanced = AdvancedSettingsModel(**parameters.pop("advanced", {}))
+    advanced_parameters = parameters.pop("advanced", {})
+    model.basic.spin_orbit = (
+        "soc"
+        if advanced_parameters.get("pw", {})
+        .get("parameters", {})
+        .get("SYSTEM", {})
+        .get("lspinorb")
+        else "wo_soc"
+    )
+    model.advanced = AdvancedSettingsModel(**advanced_parameters)
     plugins = get_plugin_settings()
     model.plugins = {
         plugin: PluginSettingsModel(

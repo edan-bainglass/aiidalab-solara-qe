@@ -6,11 +6,13 @@ import solara
 @solara.component
 def ToggleButtons(
     value: solara.Reactive,
-    options: dict[str, dict[str, str]],
+    options: t.Union[dict[str, dict[str, str]], tuple[str, ...]],
     on_value: t.Optional[t.Callable] = None,
     label: t.Optional[str] = None,
     class_: str = "",
 ):
+    if isinstance(options, tuple):
+        options = {option: {"label": option} for option in options}
     with solara.Row(classes=["control"]):
         if label is not None:
             solara.Text(label, classes=["control-label"])

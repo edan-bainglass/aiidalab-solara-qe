@@ -7,6 +7,7 @@ import typing as t
 from aiida import load_profile, orm
 from aiida.common.exceptions import NotExistent
 from aiida_pseudo.groups.family import PseudoPotentialFamily
+from aiida_pseudo.groups.mixins import RecommendedCutoffMixin
 
 _ = load_profile()
 
@@ -37,8 +38,19 @@ class AiiDAService:
             return print(f"Code '{code}' does not exist in AiiDA.")
 
     @staticmethod
-    def load_pseudo_family(label: str) -> t.Optional[PseudoPotentialFamily]:
+    def load_pseudo_family(
+        label: str,
+    ) -> t.Optional[t.Union[PseudoPotentialFamily, RecommendedCutoffMixin]]:
         try:
             return orm.Group.collection.get(label=label)  # type: ignore
         except NotExistent:
             return print(f"Pseudo family '{label}' does not exist in AiiDA.")
+
+    @staticmethod
+    def get_pseudo(uuid: str) -> t.Optional[orm.UpfData]:
+        try:
+            return orm.load_node(uuid)  # type: ignore
+        except NotExistent:
+            return print(f"Pseudo with UUID '{uuid}' does not exist in AiiDA.")
+        except ValueError:
+            return

@@ -1,5 +1,4 @@
 from aiida import orm
-from aiida_pseudo.groups.family import PseudoPotentialFamily
 
 
 def set_component_resources(component, code_info):
@@ -31,11 +30,6 @@ def enable_pencil_decomposition(component):
     """Enable the pencil decomposition for the given component."""
 
     component.settings = orm.Dict({"CMDLINE": ["-pd", ".true."]})
-
-
-def fetch_pseudo_family_by_label(label) -> PseudoPotentialFamily:
-    """Fetch the pseudo family by label."""
-    return orm.Group.collection.get(label=label)  # type: ignore
 
 
 def create_kpoints_from_distance(structure, distance, force_parity) -> list[int]:
