@@ -37,21 +37,21 @@ def CalculationSettings(
     active_panel = solara.use_reactive("basic")
 
     with solara.Div(class_="calculation-settings"):
-        with solara.Row(classes=["mb-2"]):
-            with solara.Column():
-                solara.Select(
-                    label="Category",
-                    values=[
-                        category
-                        for category in CATEGORIES
-                        if category
-                        in {
-                            *properties.value,
-                            *BUILTIN_CATEGORIES,
-                        }
-                    ],
-                    value=active_panel,
-                )
+        solara.Select(
+            label="",
+            values=[
+                category.capitalize()
+                for category in CATEGORIES
+                if category
+                in {
+                    *properties.value,
+                    *BUILTIN_CATEGORIES,
+                }
+            ],
+            value=active_panel.value.capitalize(),
+            on_value=lambda v: active_panel.set(v.lower()),
+            classes=["parameters-category-selector"],
+        )
 
         for panel_key, SettingsPanel in CATEGORIES.items():
             if panel_key in BUILTIN_CATEGORIES or panel_key in properties.value:
