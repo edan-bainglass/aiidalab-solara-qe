@@ -11,17 +11,18 @@ PROPERTY_TITLES = get_plugin_titles()
 def PropertiesSelector(properties: solara.Reactive[list[str]]):
     print("\nrendering properties-selector component")
 
-    def update_properties(prop: str, checked: bool):
-        properties.set(
-            [*properties.value, prop]
-            if checked
-            else [*filter(lambda p: p != prop, properties.value)]
-        )
-
     with solara.Div(class_="properties-selector"):
         for prop, title in PROPERTY_TITLES.items():
+
+            def update_properties(checked: bool, prop: str = prop):
+                properties.set(
+                    [*properties.value, prop]
+                    if checked
+                    else [*filter(lambda p: p != prop, properties.value)]
+                )
+
             solara.Checkbox(
                 label=title,
                 value=prop in properties.value,
-                on_value=lambda checked, prop=prop: update_properties(prop, checked),
+                on_value=update_properties,
             )
