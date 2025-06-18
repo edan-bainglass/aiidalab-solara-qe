@@ -89,7 +89,7 @@ def ResourcesSelectionStep(
 
 @solara.component
 def ResourcesPanel(codes: solara.Reactive[dict[str, CodeModel]]):
-    with solara.Div(class_="row g-0 row-gap-3 column-gap-3"):
+    with solara.v.Row(class_="resources-panel"):
         for code_key in codes.value:
             code_model = solara.toestand.Ref(codes.fields[code_key])
             ResourceCard(code_model)

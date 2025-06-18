@@ -31,7 +31,7 @@ def ResourceCard(model: solara.Reactive[CodeModel]):
         initialize_code_selector,
     )
 
-    with solara.Div(class_="col-12 col-md-6 col-xl-4 p-0"):
+    with solara.Div(class_="col-12 col-md-6 col-xl-4 resource"):
         with solara.v.Card(class_="m-0"):
             with solara.v.CardTitle(class_="pb-0"):
                 solara.Text(model.value.name)

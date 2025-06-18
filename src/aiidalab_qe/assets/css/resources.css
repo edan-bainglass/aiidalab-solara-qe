@@ -1,0 +1,8 @@
+.resources-panel {
+  margin: 0 -8px;
+  row-gap: 16px;
+}
+
+.resource {
+  padding: 0 8px;
+}
