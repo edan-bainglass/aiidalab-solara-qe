@@ -2,7 +2,7 @@ from aiidalab_qe.common.models.codes import CodeModel, PwCodeModel
 
 from ..models import PluginResourcesModel, PluginSettingsModel
 from .model import PdosSettingsModel
-from .settings import PdosSettings
+from .pdos import PdosSettings
 
 pdos = {
     "title": "Electronic projected density of states (PDOS)",
