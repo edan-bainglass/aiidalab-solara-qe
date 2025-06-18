@@ -3,16 +3,12 @@ from __future__ import annotations
 import solara
 from aiida import orm
 from aiida_pseudo.groups.family import PseudoPotentialFamily
-from aiida_quantumespresso.workflows.protocols.utils import (
-    get_magnetization_parameters,
-    get_starting_magnetization,
-)
+from aiida_quantumespresso.workflows.protocols.utils import get_magnetization_parameters
 from solara.toestand import Ref
 
 from aiidalab_qe.common.components.selection import ToggleButtons
 from aiidalab_qe.common.models.schema import CalculationParametersModel
 from aiidalab_qe.common.services.aiida import AiiDAService
-import solara.widgets
 
 DEFAULT_MOMENTS = get_magnetization_parameters()
 
@@ -36,15 +32,10 @@ def MagnetizationSettings(
 
     def to_moment(
         symbol: str,
-        starting_magnetization: dict[str, float],
         family: PseudoPotentialFamily,
     ) -> float:
-        magnetization = (
-            starting_magnetization.get(symbol, 0.1)
-            if DEFAULT_MOMENTS.get(symbol, {}).get("magmom")
-            else 0.1
-        )
-        return round(magnetization * family.get_pseudo(symbol).z_valence, 3)
+        moment = DEFAULT_MOMENTS.get(symbol, {}).get("magmom")
+        return moment or round(0.1 * family.get_pseudo(symbol).z_valence, 3)
 
     def update_initial_magnetic_moments():
         if not (
@@ -53,13 +44,9 @@ def MagnetizationSettings(
         ):
             initial_magnetic_moments.set({})
             return
-        starting_magnetization = get_starting_magnetization(
-            input_structure.value,
-            family,
-        )
         initial_magnetic_moments.set(
             {
-                kind.name: to_moment(kind.symbol, starting_magnetization, family)
+                kind.name: to_moment(kind.symbol, family)
                 for kind in input_structure.value.kinds
             }
         )
