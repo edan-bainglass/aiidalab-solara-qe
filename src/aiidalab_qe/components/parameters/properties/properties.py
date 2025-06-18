@@ -9,7 +9,7 @@ PROPERTY_TITLES = get_plugin_titles()
 
 @solara.component
 def PropertiesSelector(properties: solara.Reactive[list[str]]):
-    print("\nrendering relaxation-selector component")
+    print("\nrendering properties-selector component")
 
     def update_properties(prop: str, checked: bool):
         properties.set(
