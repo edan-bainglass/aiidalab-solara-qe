@@ -92,7 +92,7 @@ class AdvancedSettingsModel(ConfiguredBaseModel):
     clean_workdir: bool = False
     kpoints_distance: float = 0.0
     optimization_maxsteps: int = 50
-    pseudo_family: str = "SSSP/1.3/PBE/efficiency"
+    pseudo_family: str = "SSSP/1.3/PBEsol/efficiency"
     hubbard_parameters: HubbardParametersModel = HubbardParametersModel()
     initial_magnetic_moments: dict[str, float] = pdt.Field(default_factory=dict)
 
