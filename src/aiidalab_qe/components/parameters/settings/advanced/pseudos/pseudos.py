@@ -8,9 +8,8 @@ from aiida_pseudo.data.pseudo import PseudoPotentialData
 from solara.toestand import Ref
 
 from aiidalab_qe.common.components.selection import ToggleButtons
-from aiidalab_qe.common.models.schema import CalculationParametersModel
+from aiidalab_qe.common.models.schema import QeAppModel
 from aiidalab_qe.common.services.aiida import AiiDAService
-from aiidalab_qe.common.types import StructureType
 
 from .uploader import PseudoUploadComponent
 
@@ -19,18 +18,15 @@ PSEUDODOJO_VERSION = "0.4"
 
 
 @solara.component
-def PseudopotentialsSettings(
-    active: bool,
-    input_structure: solara.Reactive[StructureType],
-    parameters: solara.Reactive[CalculationParametersModel],
-):
-    protocol = Ref(parameters.fields.basic.protocol)
-    spin_orbit = Ref(parameters.fields.basic.spin_orbit)
-    advanced_settings = parameters.fields.advanced
-    pseudos = Ref(advanced_settings.pw.pseudos)
-    pseudo_family = Ref(advanced_settings.pseudo_family)
-    ecutwfc = Ref(advanced_settings.pw.parameters.SYSTEM.ecutwfc)
-    ecutrho = Ref(advanced_settings.pw.parameters.SYSTEM.ecutrho)
+def PseudopotentialsSettings(active: bool, model: solara.Reactive[QeAppModel]):
+    input_structure = Ref(model.fields.input_structure)
+    parameters = model.fields.calculation_parameters
+    protocol = Ref(parameters.basic.protocol)
+    spin_orbit = Ref(parameters.basic.spin_orbit)
+    pseudos = Ref(parameters.advanced.pw.pseudos)
+    pseudo_family = Ref(parameters.advanced.pseudo_family)
+    ecutwfc = Ref(parameters.advanced.pw.parameters.SYSTEM.ecutwfc)
+    ecutrho = Ref(parameters.advanced.pw.parameters.SYSTEM.ecutrho)
 
     functional = solara.use_reactive("PBEsol")
 

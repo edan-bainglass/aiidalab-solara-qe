@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import solara
+from solara.toestand import Ref
 
-from aiidalab_qe.common.models.schema import CalculationParametersModel
-from aiidalab_qe.common.types import StructureType
+from aiidalab_qe.common.models.schema import QeAppModel
 from aiidalab_qe.plugins.utils import get_plugin_settings
 
 from .advanced import AdvancedSettings
@@ -29,11 +29,8 @@ CATEGORIES = {
 
 
 @solara.component
-def CalculationSettings(
-    properties: solara.Reactive[list[str]],
-    input_structure: solara.Reactive[StructureType],
-    parameters: solara.Reactive[CalculationParametersModel],
-):
+def CalculationSettings(model: solara.Reactive[QeAppModel]):
+    properties = Ref(model.fields.properties)
     active_panel = solara.use_reactive("basic")
 
     with solara.Div(class_="calculation-settings"):
@@ -57,6 +54,5 @@ def CalculationSettings(
             if panel_key in BUILTIN_CATEGORIES or panel_key in properties.value:
                 SettingsPanel(
                     active=active_panel.value == panel_key,
-                    input_structure=input_structure,
-                    parameters=parameters,
+                    model=model,
                 )

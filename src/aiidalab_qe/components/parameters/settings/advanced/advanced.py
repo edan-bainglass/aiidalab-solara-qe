@@ -3,8 +3,7 @@ from __future__ import annotations
 import solara
 from solara.toestand import Ref
 
-from aiidalab_qe.common.models.schema import CalculationParametersModel
-from aiidalab_qe.common.types import StructureType
+from aiidalab_qe.common.models.schema import QeAppModel
 
 from .convergence import ConvergenceSettings
 from .hubbard import HubbardUSettings
@@ -22,12 +21,8 @@ CATEGORIES = {
 
 
 @solara.component
-def AdvancedSettings(
-    active: bool,
-    input_structure: solara.Reactive[StructureType],
-    parameters: solara.Reactive[CalculationParametersModel],
-):
-    spin_type = Ref(parameters.fields.basic.spin_type)
+def AdvancedSettings(active: bool, model: solara.Reactive[QeAppModel]):
+    spin_type = Ref(model.fields.calculation_parameters.basic.spin_type)
     active_panel = solara.use_reactive("Convergence")
 
     def redirect_to_valid_panel():
@@ -63,6 +58,5 @@ def AdvancedSettings(
         for panel_key, AdvancedSettingsPanel in CATEGORIES.items():
             AdvancedSettingsPanel(
                 active=active and active_panel.value == panel_key,
-                input_structure=input_structure,
-                parameters=parameters,
+                model=model,
             )

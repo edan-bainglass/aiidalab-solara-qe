@@ -3,23 +3,21 @@ from __future__ import annotations
 import typing as t
 
 import solara
-import solara.toestand
+from solara.toestand import Ref
 
 from aiidalab_qe.common.components.html import Paragraph
-from aiidalab_qe.common.models.schema import CalculationParametersModel
-from aiidalab_qe.common.types import StructureType
 
 from .model import BandsSettingsModel as Model
 
+if t.TYPE_CHECKING:
+    from aiidalab_qe.common.models.schema import QeAppModel
+
 
 @solara.component
-def BandStructureSettings(
-    active: bool,
-    input_structure: solara.Reactive[StructureType],
-    parameters: solara.Reactive[CalculationParametersModel],
-):
-    bands_settings = t.cast(Model, parameters.fields.plugins["bands"].model)
-    projwfc_bands = solara.toestand.Ref(bands_settings.projwfc_bands)
+def BandStructureSettings(active: bool, model: solara.Reactive[QeAppModel]):
+    parameters = model.fields.calculation_parameters
+    bands_settings = t.cast(Model, parameters.plugins["bands"].model)
+    projwfc_bands = Ref(bands_settings.projwfc_bands)
 
     with solara.Div(
         class_=" ".join(

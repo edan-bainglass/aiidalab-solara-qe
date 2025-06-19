@@ -4,24 +4,21 @@ import solara
 from aiida_quantumespresso.workflows.pw.base import PwBaseWorkChain
 from solara.toestand import Ref
 
-from aiidalab_qe.common.models.schema import CalculationParametersModel
-from aiidalab_qe.common.types import StructureType
+from aiidalab_qe.common.models.schema import QeAppModel
 from aiidalab_qe.utils import create_kpoints_from_distance
 
 
 @solara.component
-def ConvergenceSettings(
-    active: bool,
-    input_structure: solara.Reactive[StructureType],
-    parameters: solara.Reactive[CalculationParametersModel],
-):
+def ConvergenceSettings(active: bool, model: solara.Reactive[QeAppModel]):
+    input_structure = Ref(model.fields.input_structure)
     has_pbc = input_structure.value and any(input_structure.value.pbc)
-    protocol = Ref(parameters.fields.basic.protocol)
-    advanced_settings = parameters.fields.advanced
-    forc_conv_thr = Ref(advanced_settings.pw.parameters.CONTROL.forc_conv_thr)
-    etot_conv_thr = Ref(advanced_settings.pw.parameters.CONTROL.etot_conv_thr)
-    scf_conv_thr = Ref(advanced_settings.pw.parameters.ELECTRONS.conv_thr)
-    kpoints_distance = Ref(advanced_settings.kpoints_distance)
+    parameters = model.fields.calculation_parameters
+    protocol = Ref(parameters.basic.protocol)
+    pw_parameters = parameters.advanced.pw.parameters
+    forc_conv_thr = Ref(pw_parameters.CONTROL.forc_conv_thr)
+    etot_conv_thr = Ref(pw_parameters.CONTROL.etot_conv_thr)
+    scf_conv_thr = Ref(pw_parameters.ELECTRONS.conv_thr)
+    kpoints_distance = Ref(parameters.advanced.kpoints_distance)
 
     def get_mesh_grid():
         if not has_pbc:

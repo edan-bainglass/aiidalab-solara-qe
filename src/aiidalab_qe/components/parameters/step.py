@@ -6,6 +6,7 @@ import solara
 import solara.toestand
 
 from aiidalab_qe.common.components.wizard import BG_COLORS, WizardState, onStateChange
+from aiidalab_qe.common.models.schema import QeAppModel
 from aiidalab_qe.components.wizard.models import QeWizardModel
 from aiidalab_qe.config.paths import STYLES
 
@@ -21,12 +22,9 @@ def ParametersConfigurationStep(
 ):
     print("\nrendering parameters-configuration-step component")
 
-    data = model.fields.data
-    properties = solara.toestand.Ref(data.properties)
-    parameters = solara.toestand.Ref(data.calculation_parameters)
-    input_structure = solara.toestand.Ref(data.input_structure)
-    relax_type = solara.toestand.Ref(parameters.fields.relax_type)
-    process = solara.toestand.Ref(data.process)
+    process = solara.toestand.Ref(model.fields.data.process)
+    data_model = solara.toestand.Ref(model.fields.data)
+    parameters = solara.toestand.Ref(model.fields.data.calculation_parameters)
 
     def update_state():
         if not parameters.value:
@@ -46,7 +44,7 @@ def ParametersConfigurationStep(
     def ParametersConfigurationSubstep(
         label: str,
         content: t.Callable[[t.Any], solara.Element],
-        props: list[t.Any],
+        model: solara.Reactive[QeAppModel],
     ):
         with solara.v.ExpansionPanel(class_="accordion-item"):
             with solara.v.ExpansionPanelHeader(
@@ -56,21 +54,21 @@ def ParametersConfigurationStep(
                 with solara.Div(class_="accordion-header-content"):
                     solara.Text(label, classes=["accordion-header-text"])
             with solara.v.ExpansionPanelContent(class_="accordion-collapse"):
-                content(*props)
+                content(model)
 
     with solara.Head():
         solara.Style(STYLES / "parameters.css")
 
     with solara.Div(class_="parameters-configuration-step"):
-        RelaxationSelector(input_structure, relax_type)
+        RelaxationSelector(data_model)
         with solara.v.ExpansionPanels(class_="accordion"):
             ParametersConfigurationSubstep(
                 label="Step 2.1: Select which properties to compute",
                 content=PropertiesSelector,
-                props=[properties],
+                model=data_model,
             )
             ParametersConfigurationSubstep(
                 label="Step 2.2: Customize calculation parameters",
                 content=CalculationSettings,
-                props=[properties, input_structure, parameters],
+                model=data_model,
             )

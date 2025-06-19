@@ -4,17 +4,12 @@ import solara
 from solara.toestand import Ref
 
 from aiidalab_qe.common.components.selection import ToggleButtons
-from aiidalab_qe.common.models.schema import CalculationParametersModel
-from aiidalab_qe.common.types import StructureType
+from aiidalab_qe.common.models.schema import QeAppModel
 
 
 @solara.component
-def BasicSettings(
-    active: bool,
-    input_structure: solara.Reactive[StructureType],
-    parameters: solara.Reactive[CalculationParametersModel],
-):
-    basic_settings = parameters.fields.basic
+def BasicSettings(active: bool, model: solara.Reactive[QeAppModel]):
+    basic_settings = model.fields.calculation_parameters.basic
 
     with solara.Div(
         class_=" ".join(

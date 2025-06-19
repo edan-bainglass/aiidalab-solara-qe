@@ -3,30 +3,29 @@ from __future__ import annotations
 import typing as t
 
 import solara
-import solara.toestand
 from aiida_quantumespresso.workflows.pdos import PdosWorkChain
+from solara.toestand import Ref
 
 from aiidalab_qe.common.components.html import Paragraph
-from aiidalab_qe.common.models.schema import CalculationParametersModel
-from aiidalab_qe.common.types import StructureType
 from aiidalab_qe.utils import create_kpoints_from_distance
 
 from .model import PdosSettingsModel as Model
 
+if t.TYPE_CHECKING:
+    from aiidalab_qe.common.models.schema import QeAppModel
+
 
 @solara.component
-def PdosSettings(
-    active: bool,
-    input_structure: solara.Reactive[StructureType],
-    parameters: solara.Reactive[CalculationParametersModel],
-):
+def PdosSettings(active: bool, model: solara.Reactive[QeAppModel]):
+    input_structure = Ref(model.fields.input_structure)
+    parameters = model.fields.calculation_parameters
     has_pbc = input_structure.value and any(input_structure.value.pbc)
-    protocol = solara.toestand.Ref(parameters.fields.basic.protocol)
-    pdos_settings = t.cast(Model, parameters.fields.plugins["pdos"].model)
-    kpoints_distance = solara.toestand.Ref(pdos_settings.kpoints_distance)
-    use_pdos_degauss = solara.toestand.Ref(pdos_settings.use_pdos_degauss)
-    pdos_degauss = solara.toestand.Ref(pdos_settings.pdos_degauss)
-    energy_grid_step = solara.toestand.Ref(pdos_settings.energy_grid_step)
+    protocol = Ref(parameters.basic.protocol)
+    pdos_settings = t.cast(Model, parameters.plugins["pdos"].model)
+    kpoints_distance = Ref(pdos_settings.kpoints_distance)
+    use_pdos_degauss = Ref(pdos_settings.use_pdos_degauss)
+    pdos_degauss = Ref(pdos_settings.pdos_degauss)
+    energy_grid_step = Ref(pdos_settings.energy_grid_step)
 
     degauss_ev = solara.use_memo(
         lambda: "({:.3f} eV)".format(pdos_degauss.value * 13.605698066),

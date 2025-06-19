@@ -3,8 +3,9 @@ from __future__ import annotations
 import typing as t
 
 import solara
+from solara.toestand import Ref
 
-from aiidalab_qe.common.types import StructureType
+from aiidalab_qe.common.models.schema import QeAppModel
 
 MOLECULAR_RELAXATION_OPTIONS = {
     "positions": {
@@ -25,12 +26,9 @@ STRUCTURAL_RELAXATION_OPTIONS = {
 
 
 @solara.component
-def RelaxationSelector(
-    input_structure: solara.Reactive[StructureType],
-    relax_type: solara.Reactive[str],
-):
-    print("\nrendering relaxation-selector component")
-
+def RelaxationSelector(model: solara.Reactive[QeAppModel]):
+    input_structure = Ref(model.fields.input_structure)
+    relax_type = Ref(model.fields.calculation_parameters.relax_type)
     is_relax = solara.use_reactive(relax_type.value not in (None, "none"))
     options = solara.use_reactive(t.cast(dict[str, dict[str, str]], {}))
 
@@ -56,6 +54,8 @@ def RelaxationSelector(
     )
 
     with solara.Div(class_="relaxation-selector"):
+        print("\nrendering relaxation-selector component")
+
         solara.Switch(
             label="Relax structure",
             value=is_relax,
