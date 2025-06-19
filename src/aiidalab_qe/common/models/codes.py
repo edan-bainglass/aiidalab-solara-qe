@@ -84,6 +84,10 @@ class PwCodeModel(CodeModel):
             "parallelization": self.parallelization.model_dump(exclude_none=True),
         }
 
+    def update_and_validate(self, data: dict[str, t.Any]) -> CodeModel:
+        data["parallelization"] = CodeParallelizationModel(**data["parallelization"])
+        return super().update_and_validate(data)
+
 
 class CodeModelFactory:
     @staticmethod

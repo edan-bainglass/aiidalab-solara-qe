@@ -283,12 +283,7 @@ def _extract_computational_resources(codes: CodesParams) -> ComputationalResourc
         ): CodeModelFactory.from_serialized(key, code_model)
         for code_key, code_model in codes.pop("global", {}).get("codes", {}).items()
     }
-    computational_resources.global_ = ResourcesModel(
-        codes=global_codes
-        or {
-            "pw": PwCodeModel(),
-        }
-    )
+    computational_resources.global_ = ResourcesModel(codes=global_codes)
     plugin_resources = get_plugin_resources()
     computational_resources.plugins = {
         plugin: plugin_resources[plugin].model_validate(
