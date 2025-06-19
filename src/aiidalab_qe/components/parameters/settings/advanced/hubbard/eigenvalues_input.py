@@ -11,6 +11,7 @@ def EigenvaluesInput(
     kind_name: str,
     num_states: int,
     eigenvalues: solara.Reactive[list[list[list[EigenvalueType]]]],
+    disabled: bool = False,
 ):
     kind_eigenvalues = eigenvalues.value[kind_index]
     with solara.Row():
@@ -43,4 +44,5 @@ def EigenvaluesInput(
                             values=["-1", "0", "1"],
                             value=str(int(eigenvalue)),
                             on_value=update_eigenvalue,
+                            disabled=disabled,
                         )

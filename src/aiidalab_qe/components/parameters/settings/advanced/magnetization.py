@@ -14,6 +14,7 @@ DEFAULT_MOMENTS = get_magnetization_parameters()
 
 @solara.component
 def MagnetizationSettings(active: bool, model: solara.Reactive[QeAppModel]):
+    process = Ref(model.fields.process)
     input_structure = Ref(model.fields.input_structure)
     advanced_settings = model.fields.calculation_parameters.advanced
     system_settings = advanced_settings.pw.parameters.SYSTEM
@@ -24,6 +25,11 @@ def MagnetizationSettings(active: bool, model: solara.Reactive[QeAppModel]):
 
     input_type = solara.use_reactive(
         "moments" if electronic_type.value == "metal" else "total"
+    )
+
+    disabled = solara.use_memo(
+        lambda: process.value is not None,
+        [process.value],
     )
 
     def to_moment(
@@ -76,15 +82,18 @@ def MagnetizationSettings(active: bool, model: solara.Reactive[QeAppModel]):
                     },
                 },
                 value=input_type,
+                disabled=disabled,
                 class_="magnetization-input-selector",
             )
         MagneticMomentsInput(
             active=input_type.value == "moments",
             initial_magnetic_moments=initial_magnetic_moments,
+            disabled=disabled,
         )
         TotalMagnetizationInput(
             active=input_type.value == "total",
             total_magnetization=total_magnetization,
+            disabled=disabled,
         )
 
 
@@ -92,12 +101,14 @@ def MagnetizationSettings(active: bool, model: solara.Reactive[QeAppModel]):
 def TotalMagnetizationInput(
     active: bool,
     total_magnetization: solara.Reactive[float],
+    disabled: bool = False,
 ):
     if active:
         with solara.Div(class_="total-magnetization-input"):
             solara.InputFloat(
                 label="Total magnetization",
                 value=total_magnetization,
+                disabled=disabled,
             )
 
 
@@ -105,6 +116,7 @@ def TotalMagnetizationInput(
 def MagneticMomentsInput(
     active: bool,
     initial_magnetic_moments: solara.Reactive[MagneticMomentsType],
+    disabled: bool = False,
 ):
     if active:
         with solara.Div(class_="initial-magnetic-moments-input"):
@@ -119,4 +131,5 @@ def MagneticMomentsInput(
                     label=site,
                     value=moment,
                     on_value=update_moments,
+                    disabled=disabled,
                 )

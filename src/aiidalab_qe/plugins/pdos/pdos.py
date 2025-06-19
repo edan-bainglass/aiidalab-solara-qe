@@ -17,6 +17,7 @@ if t.TYPE_CHECKING:
 
 @solara.component
 def PdosSettings(active: bool, model: solara.Reactive[QeAppModel]):
+    process = Ref(model.fields.process)
     input_structure = Ref(model.fields.input_structure)
     parameters = model.fields.calculation_parameters
     has_pbc = input_structure.value and any(input_structure.value.pbc)
@@ -26,6 +27,11 @@ def PdosSettings(active: bool, model: solara.Reactive[QeAppModel]):
     use_pdos_degauss = Ref(pdos_settings.use_pdos_degauss)
     pdos_degauss = Ref(pdos_settings.pdos_degauss)
     energy_grid_step = Ref(pdos_settings.energy_grid_step)
+
+    disabled = solara.use_memo(
+        lambda: process.value is not None,
+        [process.value],
+    )
 
     degauss_ev = solara.use_memo(
         lambda: "({:.3f} eV)".format(pdos_degauss.value * 13.605698066),
@@ -101,22 +107,25 @@ def PdosSettings(active: bool, model: solara.Reactive[QeAppModel]):
         solara.InputFloat(
             label="NSCF K-points distance (Å⁻¹)",
             value=kpoints_distance,
+            disabled=disabled,
         )
         solara.Text(mesh_grid)
 
         solara.InputFloat(
             label="Energy grid step (eV)",
             value=energy_grid_step,
+            disabled=disabled,
         )
 
         solara.Checkbox(
             label="Use custom PDOS degauss",
             value=use_pdos_degauss,
+            disabled=disabled,
         )
 
         solara.InputFloat(
             label="PDOS degauss (Ry)",
             value=pdos_degauss,
-            disabled=not use_pdos_degauss.value,
+            disabled=disabled or not use_pdos_degauss.value,
         )
         solara.Text(degauss_ev)

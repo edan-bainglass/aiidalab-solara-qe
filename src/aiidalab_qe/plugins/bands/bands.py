@@ -15,9 +15,15 @@ if t.TYPE_CHECKING:
 
 @solara.component
 def BandStructureSettings(active: bool, model: solara.Reactive[QeAppModel]):
+    process = Ref(model.fields.process)
     parameters = model.fields.calculation_parameters
     bands_settings = t.cast(Model, parameters.plugins["bands"].model)
     projwfc_bands = Ref(bands_settings.projwfc_bands)
+
+    disabled = solara.use_memo(
+        lambda: process.value is not None,
+        [process.value],
+    )
 
     with solara.Div(
         class_=" ".join(
@@ -52,4 +58,5 @@ def BandStructureSettings(active: bool, model: solara.Reactive[QeAppModel]):
         solara.Checkbox(
             label="Fat bands",
             value=projwfc_bands,
+            disabled=disabled,
         )

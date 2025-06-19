@@ -17,12 +17,19 @@ from .utils import get_manifold
 
 @solara.component
 def HubbardUSettings(active: bool, model: solara.Reactive[QeAppModel]):
+    process = Ref(model.fields.process)
     input_structure = Ref(model.fields.input_structure)
     hubbard_settings = model.fields.calculation_parameters.advanced.hubbard_parameters
     use_hubbard_u = Ref(hubbard_settings.use_hubbard_u)
     use_eigenvalues = Ref(hubbard_settings.use_eigenvalues)
     hubbard_u = Ref(hubbard_settings.hubbard_u)
+    # TODO needs work - see get_active_eigenvalues in old code
     eigenvalues = Ref(hubbard_settings.eigenvalues)
+
+    disabled = solara.use_memo(
+        lambda: process.value is not None,
+        [process.value],
+    )
 
     def get_orbital_labels() -> list[str]:
         return (
@@ -128,6 +135,7 @@ def HubbardUSettings(active: bool, model: solara.Reactive[QeAppModel]):
         solara.Checkbox(
             label="Use Hubbard U",
             value=use_hubbard_u,
+            disabled=disabled,
         )
 
         if use_hubbard_u.value:
@@ -141,12 +149,14 @@ def HubbardUSettings(active: bool, model: solara.Reactive[QeAppModel]):
                             label: u,
                         }
                     ),
+                    disabled=disabled,
                 )
 
             if valid_kinds:
                 solara.Checkbox(
                     label="Define eigenvalues",
                     value=use_eigenvalues,
+                    disabled=disabled,
                 )
 
                 if use_eigenvalues.value:
@@ -156,4 +166,5 @@ def HubbardUSettings(active: bool, model: solara.Reactive[QeAppModel]):
                             kind_name=kind_name,
                             num_states=num_states,
                             eigenvalues=eigenvalues,
+                            disabled=disabled,
                         )

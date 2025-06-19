@@ -9,7 +9,13 @@ from aiidalab_qe.common.models.schema import QeAppModel
 
 @solara.component
 def BasicSettings(active: bool, model: solara.Reactive[QeAppModel]):
+    process = Ref(model.fields.process)
     basic_settings = model.fields.calculation_parameters.basic
+
+    disabled = solara.use_memo(
+        lambda: process.value is not None,
+        [process.value],
+    )
 
     with solara.Div(
         class_=" ".join(
@@ -37,6 +43,7 @@ def BasicSettings(active: bool, model: solara.Reactive[QeAppModel]):
                 },
             },
             value=Ref(basic_settings.electronic_type),
+            disabled=disabled,
         )
         ToggleButtons(
             label="Magnetism",
@@ -51,6 +58,7 @@ def BasicSettings(active: bool, model: solara.Reactive[QeAppModel]):
                 },
             },
             value=Ref(basic_settings.spin_type),
+            disabled=disabled,
         )
         ToggleButtons(
             label="Spin-orbit coupling",
@@ -65,6 +73,7 @@ def BasicSettings(active: bool, model: solara.Reactive[QeAppModel]):
                 },
             },
             value=Ref(basic_settings.spin_orbit),
+            disabled=disabled,
         )
         ToggleButtons(
             label="Protocol",
@@ -83,5 +92,6 @@ def BasicSettings(active: bool, model: solara.Reactive[QeAppModel]):
                 },
             },
             value=Ref(basic_settings.protocol),
+            disabled=disabled,
             class_="protocol-selector",
         )

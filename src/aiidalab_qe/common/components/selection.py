@@ -8,6 +8,7 @@ def ToggleButtons(
     value: solara.Reactive,
     options: t.Union[dict[str, dict[str, str]], tuple[str, ...]],
     on_value: t.Optional[t.Callable] = None,
+    disabled: bool = False,
     label: t.Optional[str] = None,
     class_: str = "",
 ):
@@ -27,5 +28,6 @@ def ToggleButtons(
                     label=data.get("label", option),
                     tooltip=data.get("description", ""),
                     value=option,
+                    disabled=disabled,
                     style="width: 100px;",
                 )

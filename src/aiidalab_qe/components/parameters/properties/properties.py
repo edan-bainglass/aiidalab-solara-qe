@@ -11,7 +11,13 @@ PROPERTY_TITLES = get_plugin_titles()
 
 @solara.component
 def PropertiesSelector(model: solara.Reactive[QeAppModel]):
+    process = Ref(model.fields.process)
     properties = Ref(model.fields.properties)
+
+    disabled = solara.use_memo(
+        lambda: process.value is not None,
+        [process.value],
+    )
 
     with solara.Div(class_="properties-selector"):
         print("\nrendering properties-selector component")
@@ -25,8 +31,10 @@ def PropertiesSelector(model: solara.Reactive[QeAppModel]):
                     else [*filter(lambda p: p != prop, properties.value)]
                 )
 
+            # TODO triggers multiple re-renders - investigate!
             solara.Checkbox(
                 label=title,
                 value=prop in properties.value,
                 on_value=update_properties,
+                disabled=disabled,
             )

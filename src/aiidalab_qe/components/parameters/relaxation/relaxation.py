@@ -27,10 +27,17 @@ STRUCTURAL_RELAXATION_OPTIONS = {
 
 @solara.component
 def RelaxationSelector(model: solara.Reactive[QeAppModel]):
+    # TODO check if effects are optimal (options may not need to be reactive)
+    process = Ref(model.fields.process)
     input_structure = Ref(model.fields.input_structure)
     relax_type = Ref(model.fields.calculation_parameters.relax_type)
     is_relax = solara.use_reactive(relax_type.value not in (None, "none"))
     options = solara.use_reactive(t.cast(dict[str, dict[str, str]], {}))
+
+    disabled = solara.use_memo(
+        lambda: process.value is not None,
+        [process.value],
+    )
 
     def set_relaxation_options():
         options.set(
@@ -60,6 +67,7 @@ def RelaxationSelector(model: solara.Reactive[QeAppModel]):
             label="Relax structure",
             value=is_relax,
             classes=["relaxation-switch"],
+            disabled=disabled,
         )
         if is_relax.value:
             if not options.value:
@@ -76,4 +84,5 @@ def RelaxationSelector(model: solara.Reactive[QeAppModel]):
                             icon_name=props["icon"],
                             tooltip=props["description"],
                             value=option,
+                            disabled=disabled,
                         )

@@ -19,6 +19,7 @@ PSEUDODOJO_VERSION = "0.4"
 
 @solara.component
 def PseudopotentialsSettings(active: bool, model: solara.Reactive[QeAppModel]):
+    process = Ref(model.fields.process)
     input_structure = Ref(model.fields.input_structure)
     parameters = model.fields.calculation_parameters
     protocol = Ref(parameters.basic.protocol)
@@ -27,8 +28,12 @@ def PseudopotentialsSettings(active: bool, model: solara.Reactive[QeAppModel]):
     pseudo_family = Ref(parameters.advanced.pseudo_family)
     ecutwfc = Ref(parameters.advanced.pw.parameters.SYSTEM.ecutwfc)
     ecutrho = Ref(parameters.advanced.pw.parameters.SYSTEM.ecutrho)
-
     functional = solara.use_reactive("PBEsol")
+
+    disabled = solara.use_memo(
+        lambda: process.value is not None,
+        [process.value],
+    )
 
     library_options = solara.use_memo(
         lambda: (

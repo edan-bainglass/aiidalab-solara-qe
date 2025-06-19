@@ -10,6 +10,7 @@ from aiidalab_qe.utils import create_kpoints_from_distance
 
 @solara.component
 def ConvergenceSettings(active: bool, model: solara.Reactive[QeAppModel]):
+    process = Ref(model.fields.process)
     input_structure = Ref(model.fields.input_structure)
     has_pbc = input_structure.value and any(input_structure.value.pbc)
     parameters = model.fields.calculation_parameters
@@ -19,6 +20,11 @@ def ConvergenceSettings(active: bool, model: solara.Reactive[QeAppModel]):
     etot_conv_thr = Ref(pw_parameters.CONTROL.etot_conv_thr)
     scf_conv_thr = Ref(pw_parameters.ELECTRONS.conv_thr)
     kpoints_distance = Ref(parameters.advanced.kpoints_distance)
+
+    disabled = solara.use_memo(
+        lambda: process.value is not None,
+        [process.value],
+    )
 
     def get_mesh_grid():
         if not has_pbc:
@@ -73,17 +79,21 @@ def ConvergenceSettings(active: bool, model: solara.Reactive[QeAppModel]):
         solara.InputFloat(
             label="Force (Ry/Bohr)",
             value=forc_conv_thr,
+            disabled=disabled,
         )
         solara.InputFloat(
             label="Energy (Ry/atom)",
             value=etot_conv_thr,
+            disabled=disabled,
         )
         solara.InputFloat(
             label="SCF (Ry/atom)",
             value=scf_conv_thr,
+            disabled=disabled,
         )
         solara.InputFloat(
             label="Kpoints distance (Å⁻¹)",
             value=kpoints_distance,
+            disabled=disabled,
         )
         solara.Text(mesh_grid)

@@ -9,10 +9,16 @@ from aiidalab_qe.common.models.schema import QeAppModel, SystemParametersModel
 
 @solara.component
 def SmearingSettings(active: bool, model: solara.Reactive[QeAppModel]):
+    process = Ref(model.fields.process)
     parameters = model.fields.calculation_parameters
     protocol = Ref(parameters.basic.protocol)
     smearing = Ref(parameters.advanced.pw.parameters.SYSTEM.smearing)
     degauss = Ref(parameters.advanced.pw.parameters.SYSTEM.degauss)
+
+    disabled = solara.use_memo(
+        lambda: process.value is not None,
+        [process.value],
+    )
 
     def update_degauss():
         params = PwBaseWorkChain.get_protocol_inputs(protocol.value)
@@ -43,8 +49,10 @@ def SmearingSettings(active: bool, model: solara.Reactive[QeAppModel]):
             values=[*SystemParametersModel.get_options("smearing")],
             value=smearing,
             on_value=smearing.set,
+            disabled=disabled,
         )
         solara.InputFloat(
             label="degauss (Ry)",
             value=degauss,
+            disabled=disabled,
         )
