@@ -104,7 +104,7 @@ def TotalMagnetizationInput(
 @solara.component
 def MagneticMomentsInput(
     active: bool,
-    initial_magnetic_moments: solara.Reactive[dict[str, float]],
+    initial_magnetic_moments: solara.Reactive[MagneticMomentsType],
 ):
     if active:
         with solara.Div(class_="initial-magnetic-moments-input"):

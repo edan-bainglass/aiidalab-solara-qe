@@ -2,13 +2,15 @@ from copy import deepcopy
 
 import solara
 
+from aiidalab_qe.common.models.schema import EigenvalueType
+
 
 @solara.component
 def EigenvaluesInput(
     kind_index: int,
     kind_name: str,
     num_states: int,
-    eigenvalues: solara.Reactive[list[list[list[tuple[int, int, str, float]]]]],
+    eigenvalues: solara.Reactive[list[list[list[EigenvalueType]]]],
 ):
     kind_eigenvalues = eigenvalues.value[kind_index]
     with solara.Row():

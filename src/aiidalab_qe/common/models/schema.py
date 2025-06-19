@@ -36,9 +36,12 @@ class BasicSettingsModel(ConfiguredBaseModel):
     ] = "balanced"
 
 
+EigenvalueType = tuple[int, int, str, float]
+
+
 class SystemParametersModel(ConfiguredBaseModel):
     tot_charge: float = 0.0
-    starting_ns_eigenvalue: t.Optional[list[tuple[int, int, str, int]]] = None
+    starting_ns_eigenvalue: t.Optional[list[EigenvalueType]] = None
     ecutwfc: float = 0.0
     ecutrho: float = 0.0
     vdw_corr: t.Literal[
@@ -84,7 +87,10 @@ class HubbardParametersModel(ConfiguredBaseModel):
     use_hubbard_u: t.Annotated[bool, pdt.Field(exclude=True)] = False
     use_eigenvalues: t.Annotated[bool, pdt.Field(exclude=True)] = False
     hubbard_u: dict[str, float] = {}
-    eigenvalues: list[list[list[tuple[int, int, str, float]]]] = []
+    eigenvalues: list[list[list[EigenvalueType]]] = []
+
+
+MagneticMomentsType = dict[str, float]
 
 
 class AdvancedSettingsModel(ConfiguredBaseModel):
@@ -94,7 +100,7 @@ class AdvancedSettingsModel(ConfiguredBaseModel):
     optimization_maxsteps: int = 50
     pseudo_family: str = "SSSP/1.3/PBEsol/efficiency"
     hubbard_parameters: HubbardParametersModel = HubbardParametersModel()
-    initial_magnetic_moments: dict[str, float] = pdt.Field(default_factory=dict)
+    initial_magnetic_moments: MagneticMomentsType = pdt.Field(default_factory=dict)
 
 
 class CalculationParametersModel(ConfiguredBaseModel):
