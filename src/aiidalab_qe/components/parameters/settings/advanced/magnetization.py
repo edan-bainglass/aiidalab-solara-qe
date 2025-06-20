@@ -16,6 +16,7 @@ DEFAULT_MOMENTS = get_magnetization_parameters()
 def MagnetizationSettings(active: bool, model: solara.Reactive[QeAppModel]):
     process = Ref(model.fields.process)
     input_structure = Ref(model.fields.input_structure)
+    spin_type = Ref(model.fields.calculation_parameters.basic.spin_type)
     advanced_settings = model.fields.calculation_parameters.advanced
     system_settings = advanced_settings.pw.parameters.SYSTEM
     pseudo_family = Ref(advanced_settings.pseudo_family)
@@ -39,15 +40,19 @@ def MagnetizationSettings(active: bool, model: solara.Reactive[QeAppModel]):
         moment = DEFAULT_MOMENTS.get(symbol, {}).get("magmom")
         return moment or round(0.1 * family.get_pseudo(symbol).z_valence, 3)
 
-    def update_initial_magnetic_moments():
+    def set_defaults():
         if disabled:
             return
+
         if not (
-            input_structure.value
+            spin_type.value == "collinear"
+            and input_structure.value
             and (family := AiiDAService.load_pseudo_family(pseudo_family.value))
         ):
+            total_magnetization.set(0.0)
             initial_magnetic_moments.set({})
             return
+
         initial_magnetic_moments.set(
             {
                 kind.name: to_moment(kind.symbol, family)
@@ -56,8 +61,8 @@ def MagnetizationSettings(active: bool, model: solara.Reactive[QeAppModel]):
         )
 
     solara.use_effect(
-        update_initial_magnetic_moments,
-        [input_structure.value],
+        set_defaults,
+        [input_structure.value, spin_type.value],
     )
 
     with solara.Div(
