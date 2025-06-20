@@ -5,7 +5,7 @@ import typing as t
 import pydantic as pdt
 from aiida.orm import ProcessNode, StructureData
 
-from aiidalab_qe.common.services.aiida import AiiDAService
+from aiidalab_qe.common.services.aiida import AiiDAService, PseudoFamilyNode
 from aiidalab_qe.plugins.models import PluginResourcesModel, PluginSettingsModel
 from aiidalab_qe.plugins.utils import get_plugin_resources, get_plugin_settings
 
@@ -87,10 +87,75 @@ class HubbardParametersModel(ConfiguredBaseModel):
     use_hubbard_u: t.Annotated[bool, pdt.Field(exclude=True)] = False
     use_eigenvalues: t.Annotated[bool, pdt.Field(exclude=True)] = False
     hubbard_u: dict[str, float] = {}
-    eigenvalues: list[list[list[EigenvalueType]]] = []
+class PseudoFamilyParametersModel(ConfiguredBaseModel):
+    versions: dict[str, str] = {
+        "SSSP": "1.3",
+        "PseudoDojo": "0.4",
+    }
+    functional: t.Literal[
+        "PBE",
+        "PBEsol",
+    ] = "PBEsol"
+    version: str = "1.3"
+    library: t.Literal[
+        "SSSP",
+        "PseudoDojo",
+    ] = "SSSP"
+    accuracy: t.Literal[
+        "efficiency",
+        "precision",
+        "standard",
+        "stringent",
+    ] = "efficiency"
+    relativistic: t.Optional[t.Literal["SR", "FR"]] = None
+    file_type: t.Optional[t.Literal["upf"]] = None
+
+    @classmethod
+    def from_string(cls, pseudo_family_string: str) -> PseudoFamilyParametersModel:
+        library = pseudo_family_string.split("/")[0]
+        if library == "SSSP":
+            version, functional, accuracy = pseudo_family_string.split("/")[1:]
+            relativistic = None
+            file_type = None
+        elif library == "PseudoDojo":
+            (
+                version,
+                functional,
+                relativistic,
+                accuracy,
+                file_type,
+            ) = pseudo_family_string.split("/")[1:]
+        else:
+            raise ValueError(
+                f"Not able to parse valid library name from {pseudo_family_string}"
+            )
+
+        return cls(
+            library=library,
+            version=version,
+            functional=functional,
+            accuracy=accuracy,
+            relativistic=relativistic,
+            file_type=file_type,
+        )
+
+    def to_string(self) -> str:
+        prefix = f"{self.library}/{self.versions.get(self.library)}"
+        if self.library == "PseudoDojo":
+            suffix = f"{self.functional}/{self.relativistic}/{self.accuracy}/upf"
+        elif self.library == "SSSP":
+            suffix = f"{self.functional}/{self.accuracy}"
+        return f"{prefix}/{suffix}"
+
+    def get_node(self) -> t.Optional[PseudoFamilyNode]:
+        """Get the pseudo family node from AiiDA."""
+        if not self.library or not self.functional:
+            return None
+        pseudo_family_string = self.to_string()
+        return AiiDAService.load_pseudo_family(pseudo_family_string)  # type: ignore
 
 
-MagneticMomentsType = dict[str, float]
+MagneticMomentsType = t.Optional[dict[str, float]]
 
 
 class AdvancedSettingsModel(ConfiguredBaseModel):
@@ -99,8 +164,19 @@ class AdvancedSettingsModel(ConfiguredBaseModel):
     kpoints_distance: float = 0.0
     optimization_maxsteps: int = 50
     pseudo_family: str = "SSSP/1.3/PBEsol/efficiency"
+    pseudo_family_parameters: t.Annotated[
+        PseudoFamilyParametersModel,
+        pdt.Field(exclude=True),
+    ] = PseudoFamilyParametersModel()
     hubbard_parameters: HubbardParametersModel = HubbardParametersModel()
     initial_magnetic_moments: MagneticMomentsType = pdt.Field(default_factory=dict)
+
+    @pdt.model_validator(mode="after")
+    def update_pseudo_family_parameters(self) -> AdvancedSettingsModel:
+        if self.pseudo_family:
+            parameters = PseudoFamilyParametersModel.from_string(self.pseudo_family)
+            self.pseudo_family_parameters = parameters
+        return self
 
 
 class CalculationParametersModel(ConfiguredBaseModel):

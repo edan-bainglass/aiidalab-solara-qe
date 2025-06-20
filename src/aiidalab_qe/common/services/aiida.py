@@ -11,6 +11,8 @@ from aiida_pseudo.groups.mixins import RecommendedCutoffMixin
 
 _ = load_profile()
 
+PseudoFamilyNode = t.Union[PseudoPotentialFamily, RecommendedCutoffMixin]
+
 
 class AiiDAService:
     @staticmethod
@@ -38,9 +40,7 @@ class AiiDAService:
             return print(f"Code '{code}' does not exist in AiiDA.")
 
     @staticmethod
-    def load_pseudo_family(
-        label: str,
-    ) -> t.Optional[t.Union[PseudoPotentialFamily, RecommendedCutoffMixin]]:
+    def load_pseudo_family(label: str) -> t.Optional[PseudoFamilyNode]:
         try:
             return orm.Group.collection.get(label=label)  # type: ignore
         except NotExistent:

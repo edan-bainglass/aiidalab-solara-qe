@@ -31,6 +31,9 @@
   text-align: right;
   width: 140px;
 }
+.toggle-buttons button {
+  width: 115px !important;
+}
 .magnetization-input-selector button {
   width: fit-content !important;
 }
@@ -43,9 +46,6 @@
   .magnetization-input-selector button {
     width: 100% !important;
   }
-}
-.toggle-buttons button {
-  width: 115px !important;
 }
 .pseudo-cutoffs {
   align-items: baseline !important;

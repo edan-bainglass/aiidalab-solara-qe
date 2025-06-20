@@ -29,5 +29,4 @@ def ToggleButtons(
                     tooltip=data.get("description", ""),
                     value=option,
                     disabled=disabled,
-                    style="width: 100px;",
                 )

@@ -25,10 +25,13 @@ def PseudopotentialsSettings(active: bool, model: solara.Reactive[QeAppModel]):
     protocol = Ref(parameters.basic.protocol)
     spin_orbit = Ref(parameters.basic.spin_orbit)
     pseudos = Ref(parameters.advanced.pw.pseudos)
-    pseudo_family = Ref(parameters.advanced.pseudo_family)
+    pseudo_family = Ref(parameters.advanced.pseudo_family_parameters)
+    functional = Ref(parameters.advanced.pseudo_family_parameters.functional)
+    library = Ref(parameters.advanced.pseudo_family_parameters.library)
+    accuracy = Ref(parameters.advanced.pseudo_family_parameters.accuracy)
+    relativistic = Ref(parameters.advanced.pseudo_family_parameters.relativistic)
     ecutwfc = Ref(parameters.advanced.pw.parameters.SYSTEM.ecutwfc)
     ecutrho = Ref(parameters.advanced.pw.parameters.SYSTEM.ecutrho)
-    functional = solara.use_reactive("PBEsol")
 
     disabled = solara.use_memo(
         lambda: process.value is not None,
@@ -46,8 +49,6 @@ def PseudopotentialsSettings(active: bool, model: solara.Reactive[QeAppModel]):
         ),
         [spin_orbit.value],
     )
-
-    library = solara.use_reactive(library_options[0])
 
     accuracy_options = solara.use_memo(
         lambda: (
@@ -74,39 +75,69 @@ def PseudopotentialsSettings(active: bool, model: solara.Reactive[QeAppModel]):
         [library.value],
     )
 
-    def get_default_accuracy() -> str:
-        if library.value == "SSSP":
-            return "precision" if protocol.value == "stringent" else "efficiency"
-        elif library.value == "PseudoDojo":
-            return "stringent" if protocol.value == "stringent" else "standard"
-        else:
-            return ""
-
-    default_accuracy = solara.use_memo(
-        get_default_accuracy,
-        [library.value, protocol.value],
-    )
-
-    accuracy = solara.use_reactive(default_accuracy)
-
-    def get_family_link() -> str:
-        if library.value == "SSSP":
-            pseudo_family_link = (
-                f"https://www.materialscloud.org/discover/sssp/table/{accuracy.value}"
-            )
-        else:
-            pseudo_family_link = "http://www.pseudo-dojo.org/"
-
-        return pseudo_family_link
-
     family_link = solara.use_memo(
-        get_family_link,
+        lambda: "http://www.pseudo-dojo.org/"
+        if library.value == "PseudoDojo"
+        else f"https://www.materialscloud.org/discover/sssp/table/{accuracy.value}",
         [library.value, accuracy.value],
     )
 
+    def get_pseudos_metadata(
+        refresh: bool = False,
+    ) -> tuple[dict[str, str], dict[str, list[float]], dict[str, str]]:
+        structure = input_structure.value
+        family = pseudo_family.value
+
+        if not (structure and family):
+            return {}, {"ecutwfc": [], "ecutrho": []}, {}
+
+        family_node = family.get_node()
+        cutoffs = family_node.get_cutoffs()
+        unit = family_node.get_cutoffs_unit()
+
+        filenames: dict[str, str] = {}
+        cutoffs_dict: dict[str, list[float]] = {"ecutwfc": [], "ecutrho": []}
+        resolved_pseudos: dict[str, str] = {}
+
+        default_pseudos = (
+            t.cast(
+                dict[str, PseudoPotentialData],
+                family_node.get_pseudos(structure=input_structure.value),
+            )
+            if refresh
+            else {}
+        )
+
+        for kind in structure.kinds:
+            if refresh:
+                if not (pseudo := default_pseudos.get(kind.name)):
+                    continue
+            else:
+                if not (uuid := pseudos.value.get(kind.name)):
+                    continue
+                pseudo = AiiDAService.get_pseudo(uuid)
+
+            resolved_pseudos[kind.name] = pseudo.uuid
+            filenames[kind.name] = pseudo.filename
+
+            kind_cutoffs: dict = cutoffs.get(pseudo.element, {})
+            kind_cutoffs_Ry = {
+                key: U.Quantity(v, unit).to("Ry").to_tuple()[0]
+                for key, v in kind_cutoffs.items()
+            }
+            cutoffs_dict["ecutwfc"].append(kind_cutoffs_Ry.get("cutoff_wfc", 0.0))
+            cutoffs_dict["ecutrho"].append(kind_cutoffs_Ry.get("cutoff_rho", 0.0))
+
+        return filenames, cutoffs_dict, resolved_pseudos
+
+    filenames, cutoffs, _ = solara.use_memo(
+        get_pseudos_metadata,
+        [],
+    )
+
     # Caches to avoid DB re-fetching and/or re-computation
-    pseudo_filenames = solara.use_reactive(t.cast(dict[str, str], {}))
-    pseudo_cutoffs = solara.use_reactive(([0.0], [0.0]))
+    pseudo_filenames = solara.use_reactive(filenames)
+    pseudo_cutoffs = solara.use_reactive(cutoffs)
 
     ready = input_structure.value and all(
         [
@@ -123,70 +154,46 @@ def PseudopotentialsSettings(active: bool, model: solara.Reactive[QeAppModel]):
         ]
     )
 
-    def set_pseudo_family():
-        lib = library.value
-        fun = functional.value
-        acc = accuracy.value
-        if lib == "PseudoDojo":
-            ver = PSEUDODOJO_VERSION
-            rel = "FR" if spin_orbit.value == "soc" else "SR"
-            family_string = f"{lib}/{ver}/{fun}/{rel}/{acc}/upf"
-        elif lib == "SSSP":
-            ver = SSSP_VERSION
-            family_string = f"{lib}/{ver}/{fun}/{acc}"
-        else:
-            print(f"Unknown pseudo family parameters: {lib} | {fun} | {acc}")
-            family_string = ""
-        pseudo_family.set(family_string)
+    def set_accuracy():
+        if disabled:
+            return
+        index = 1 if protocol.value == "stringent" else 0
+        accuracy.set([*accuracy_options.keys()][index])
+
+    def set_library_and_relativistic():
+        if disabled:
+            return
+        library.set("PseudoDojo" if spin_orbit.value == "soc" else "SSSP")
+        relativistic.set("FR" if spin_orbit.value == "soc" else "SR")
 
     def set_defaults():
-        if not (
-            input_structure.value
-            and (family := AiiDAService.load_pseudo_family(pseudo_family.value))
-        ):
+        if disabled:
             return
 
-        default_pseudos = t.cast(
-            dict[str, PseudoPotentialData],
-            family.get_pseudos(structure=input_structure.value),
-        )
+        if not (input_structure.value and pseudo_family.value):
+            return
 
-        current_unit = family.get_cutoffs_unit()
-        cutoffs = family.get_cutoffs()
+        new_filenames, new_cutoffs, new_pseudos = get_pseudos_metadata(refresh=True)
 
-        new_pseudos = {}
-        new_filenames = {}
-        new_cutoffs = [[], []]
-
-        for kind in input_structure.value.kinds:
-            pseudo = default_pseudos.get(kind.name)
-            new_pseudos[kind.name] = pseudo.uuid
-            new_filenames[kind.name] = AiiDAService.get_pseudo(pseudo.uuid).filename
-            kind_cutoffs: dict = cutoffs.get(kind.symbol, {})
-            kind_cutoffs_Ry = {
-                key: U.Quantity(v, current_unit).to("Ry").to_tuple()[0]
-                for key, v in kind_cutoffs.items()
-            }
-            new_cutoffs[0].append(kind_cutoffs_Ry.get("cutoff_wfc", 0.0))
-            new_cutoffs[1].append(kind_cutoffs_Ry.get("cutoff_rho", 0.0))
-
-        pseudos.set(new_pseudos)
-        ecutwfc.set(max(new_cutoffs[0]))
-        ecutrho.set(max(new_cutoffs[1]))
         pseudo_filenames.set(new_filenames)
         pseudo_cutoffs.set(new_cutoffs)
 
-    def update_panel():
-        if input_structure.value:
-            set_defaults()
+        pseudos.set(new_pseudos)
+        ecutwfc.set(max(new_cutoffs["ecutwfc"]))
+        ecutrho.set(max(new_cutoffs["ecutrho"]))
 
     solara.use_effect(
-        set_pseudo_family,
-        [functional.value, library.value, accuracy.value],
+        set_accuracy,
+        [protocol.value, library.value],
     )
 
     solara.use_effect(
-        update_panel,
+        set_library_and_relativistic,
+        [spin_orbit.value],
+    )
+
+    solara.use_effect(
+        set_defaults,
         [input_structure.value, pseudo_family.value],
     )
 
@@ -210,16 +217,19 @@ def PseudopotentialsSettings(active: bool, model: solara.Reactive[QeAppModel]):
                 "PBEsol",
             ),
             value=functional,
+            disabled=disabled,
         )
         ToggleButtons(
             label="Library",
             options=library_options,
             value=library,
+            disabled=disabled,
         )
         ToggleButtons(
             label="Accuracy",
             options=accuracy_options,
             value=accuracy,
+            disabled=disabled,
         )
 
         with solara.Row(classes=["pseudo-cutoffs"]):
@@ -230,11 +240,13 @@ def PseudopotentialsSettings(active: bool, model: solara.Reactive[QeAppModel]):
             solara.InputText(
                 label="ψ",
                 value=ecutwfc,
+                disabled=disabled,
                 classes=["cutoff-input"],
             )
             solara.InputText(
                 label="ρ",
                 value=ecutrho,
+                disabled=disabled,
                 classes=["cutoff-input"],
             )
 
@@ -252,8 +264,12 @@ def PseudopotentialsSettings(active: bool, model: solara.Reactive[QeAppModel]):
                 PseudoUploadComponent(
                     kind_name=kind.name,
                     pseudo_filename=pseudo_filenames.value.get(kind.name),
-                    cutoffs=(pseudo_cutoffs.value[0][i], pseudo_cutoffs.value[1][i]),
+                    cutoffs=(
+                        pseudo_cutoffs.value["ecutwfc"][i],
+                        pseudo_cutoffs.value["ecutrho"][i],
+                    ),
                     update=update,
+                    disabled=disabled,
                 )
 
         with solara.Div(class_="pseudo-family-link"):
