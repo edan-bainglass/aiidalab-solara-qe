@@ -21,10 +21,11 @@ def SmearingSettings(active: bool, model: solara.Reactive[QeAppModel]):
     )
 
     def update_degauss():
-        params = PwBaseWorkChain.get_protocol_inputs(protocol.value)
-        system_params = params.get("pw", {}).get("parameters", {}).get("SYSTEM", {})
-        smearing.set(system_params["smearing"])
-        degauss.set(system_params["degauss"])
+        if disabled:
+            return
+        defaults = PwBaseWorkChain.get_protocol_inputs(protocol.value)
+        smearing.set(defaults["pw"]["parameters"]["SYSTEM"]["smearing"])
+        degauss.set(defaults["pw"]["parameters"]["SYSTEM"]["degauss"])
 
     solara.use_effect(
         update_degauss,

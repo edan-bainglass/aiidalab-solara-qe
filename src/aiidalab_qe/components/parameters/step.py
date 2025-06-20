@@ -18,8 +18,6 @@ def ParametersConfigurationStep(
     model: solara.Reactive[QeWizardModel],
     on_state_change: onStateChange,
 ):
-    print("\nrendering parameters-configuration-step component")
-
     process = solara.toestand.Ref(model.fields.data.process)
     data_model = solara.toestand.Ref(model.fields.data)
     parameters = solara.toestand.Ref(model.fields.data.calculation_parameters)
@@ -43,6 +41,8 @@ def ParametersConfigurationStep(
         solara.Style(STYLES / "parameters.css")
 
     with solara.Div(class_="parameters-configuration-step"):
+        print("\nrendering parameters-configuration-step component")
+
         RelaxationSelector(data_model)
         with solara.v.ExpansionPanels(class_="accordion"):
             ParametersConfigurationSubstep(

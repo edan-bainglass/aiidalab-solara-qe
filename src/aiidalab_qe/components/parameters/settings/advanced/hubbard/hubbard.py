@@ -23,7 +23,6 @@ def HubbardUSettings(active: bool, model: solara.Reactive[QeAppModel]):
     use_hubbard_u = Ref(hubbard_settings.use_hubbard_u)
     use_eigenvalues = Ref(hubbard_settings.use_eigenvalues)
     hubbard_u = Ref(hubbard_settings.hubbard_u)
-    # TODO needs work - see get_active_eigenvalues in old code
     eigenvalues = Ref(hubbard_settings.eigenvalues)
 
     disabled = solara.use_memo(
@@ -106,6 +105,8 @@ def HubbardUSettings(active: bool, model: solara.Reactive[QeAppModel]):
         )
 
     def reset_hubbard_parameters():
+        if disabled:
+            return
         use_hubbard_u.set(False)
         use_eigenvalues.set(False)
         if isinstance(input_structure.value, HubbardStructureData):

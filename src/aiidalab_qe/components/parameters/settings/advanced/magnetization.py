@@ -40,6 +40,8 @@ def MagnetizationSettings(active: bool, model: solara.Reactive[QeAppModel]):
         return moment or round(0.1 * family.get_pseudo(symbol).z_valence, 3)
 
     def update_initial_magnetic_moments():
+        if disabled:
+            return
         if not (
             input_structure.value
             and (family := AiiDAService.load_pseudo_family(pseudo_family.value))
