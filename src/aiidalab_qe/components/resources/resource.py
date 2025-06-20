@@ -6,7 +6,7 @@ from aiidalab_qe.common.models.codes import CodeModel
 
 
 @solara.component
-def ResourceCard(model: solara.Reactive[CodeModel]):
+def ResourceCard(model: solara.Reactive[CodeModel], disabled: bool = False):
     code_ref = solara.toestand.Ref(model.fields.code)
     nodes = solara.toestand.Ref(model.fields.nodes)
     cpus = solara.toestand.Ref(model.fields.cpus)
@@ -16,6 +16,9 @@ def ResourceCard(model: solara.Reactive[CodeModel]):
     code_options = solara.use_reactive([])
 
     def initialize_code_selector():
+        if disabled:
+            return
+
         codes: list[orm.Code] = orm.Code.collection.all()
         code_options.set(
             [
@@ -43,9 +46,30 @@ def ResourceCard(model: solara.Reactive[CodeModel]):
                     label="Code",
                     values=code_options.value,
                     value=code_ref,
+                    disabled=disabled,
                 )
-                solara.InputInt(label="Nodes", value=nodes)
-                solara.InputInt(label="CPUs", value=cpus)
-                solara.InputInt(label="Tasks per node", value=ntasks)
-                solara.InputInt(label="CPUs per task", value=cpus_task)
-                solara.InputInt(label="Wallclock time (s)", value=wallclock)
+                solara.InputInt(
+                    label="Nodes",
+                    value=nodes,
+                    disabled=disabled,
+                )
+                solara.InputInt(
+                    label="CPUs",
+                    value=cpus,
+                    disabled=disabled,
+                )
+                solara.InputInt(
+                    label="Tasks per node",
+                    value=ntasks,
+                    disabled=disabled,
+                )
+                solara.InputInt(
+                    label="CPUs per task",
+                    value=cpus_task,
+                    disabled=disabled,
+                )
+                solara.InputInt(
+                    label="Wallclock time (s)",
+                    value=wallclock,
+                    disabled=disabled,
+                )

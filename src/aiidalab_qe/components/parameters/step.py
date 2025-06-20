@@ -22,11 +22,17 @@ def ParametersConfigurationStep(
     data_model = solara.toestand.Ref(model.fields.data)
     parameters = solara.toestand.Ref(model.fields.data.calculation_parameters)
 
+    disabled = solara.use_memo(
+        lambda: process.value is not None,
+        [process.value],
+    )
+
     def update_state():
+        if disabled:
+            return
+
         if not parameters.value:
             new_state = WizardState.READY
-        elif process.value:
-            new_state = WizardState.SUCCESS
         else:
             new_state = WizardState.CONFIGURED
 

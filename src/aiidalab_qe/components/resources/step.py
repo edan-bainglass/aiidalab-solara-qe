@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import solara
-import solara.toestand
+from solara.toestand import Ref
 
 from aiidalab_qe.common.components.wizard import WizardState, onStateChange
 from aiidalab_qe.common.models.codes import CodeModel
@@ -16,26 +16,32 @@ def ResourcesSelectionStep(
     model: solara.Reactive[QeWizardModel],
     on_state_change: onStateChange,
 ):
-    print("\nrendering computational-resources-step component")
+    process = Ref(model.fields.data.process)
+    properties = Ref(model.fields.data.properties)
+    resources = Ref(model.fields.data.computational_resources)
+    active = Ref(resources.fields.active)
+    global_codes = Ref(resources.fields.global_.codes)
 
-    properties = solara.toestand.Ref(model.fields.data.properties)
-    resources = solara.toestand.Ref(model.fields.data.computational_resources)
-    process = solara.toestand.Ref(model.fields.data.process)
-    active = solara.toestand.Ref(resources.fields.active)
-
-    global_codes = solara.toestand.Ref(resources.fields.global_.codes)
+    disabled = solara.use_memo(
+        lambda: process.value is not None,
+        [process.value],
+    )
 
     def update_state():
+        if disabled:
+            return
+
         if not resources.value:
             new_state = WizardState.READY
-        elif process.value:
-            new_state = WizardState.SUCCESS
         else:
             new_state = WizardState.CONFIGURED
 
         on_state_change(new_state)
 
-    def build_global_codes():
+    def set_global_codes():
+        if disabled:
+            return
+
         # TODO possible optimization; consider building once and toggling (in)active
 
         plugin_resources = resources.value.plugins
@@ -58,19 +64,21 @@ def ResourcesSelectionStep(
         active.set("global")
 
     solara.use_effect(
-        build_global_codes,
-        [properties.value],
+        update_state,
+        [resources.value],
     )
 
     solara.use_effect(
-        update_state,
-        [resources.value],
+        set_global_codes,
+        [properties.value],
     )
 
     with solara.Head():
         solara.Style(STYLES / "resources.css")
 
     with solara.Div(class_="resources-selection-step"):
+        print("\nrendering computational-resources-step component")
+
         with solara.Row(classes=["mb-2"]):
             with solara.Column():
                 solara.Select(
@@ -80,28 +88,39 @@ def ResourcesSelectionStep(
                 )
 
         if active.value == "global":
-            ResourcesPanel(global_codes)
+            ResourcesPanel(
+                global_codes,
+                disabled=disabled,
+            )
         else:
             plugin_fields = resources.fields.plugins[active.value]
-            this_plugin_resources = solara.toestand.Ref(plugin_fields)
-            PluginResourcesPanel(this_plugin_resources, global_codes)
+            this_plugin_resources = Ref(plugin_fields)
+            PluginResourcesPanel(
+                this_plugin_resources,
+                global_codes,
+                disabled=disabled,
+            )
 
 
 @solara.component
-def ResourcesPanel(codes: solara.Reactive[dict[str, CodeModel]]):
+def ResourcesPanel(
+    codes: solara.Reactive[dict[str, CodeModel]],
+    disabled: bool = False,
+):
     with solara.v.Row(class_="resources-panel"):
         for code_key in codes.value:
-            code_model = solara.toestand.Ref(codes.fields[code_key])
-            ResourceCard(code_model)
+            code_model = Ref(codes.fields[code_key])
+            ResourceCard(code_model, disabled=disabled)
 
 
 @solara.component
 def PluginResourcesPanel(
     model: solara.Reactive[PluginResourcesModel],
     global_codes: solara.Reactive[dict[str, CodeModel]],
+    disabled: bool = False,
 ):
-    plugin_codes = solara.toestand.Ref(model.fields.codes)
-    override = solara.toestand.Ref(model.fields.override)
+    plugin_codes = Ref(model.fields.codes)
+    override = Ref(model.fields.override)
 
     def reset_codes_to_global():
         global_plugin_codes = {
@@ -129,6 +148,10 @@ def PluginResourcesPanel(
         label="Override global resources",
         value=override.value,
         on_value=lambda _: on_override_toggle(),
+        disabled=disabled,
     )
     if override.value:
-        ResourcesPanel(plugin_codes)
+        ResourcesPanel(
+            plugin_codes,
+            disabled=disabled,
+        )

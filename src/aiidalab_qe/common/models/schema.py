@@ -260,7 +260,7 @@ class QeAppModel(ConfiguredBaseModel):
                 "spin_type": parameters.basic.spin_type,
                 "electronic_type": parameters.basic.electronic_type,
                 "relax_type": parameters.relax_type,
-                "properties": ["relax", *self.properties],
+                "properties": ["relax", *self.properties],  # TODO relax always?
             },
             "advanced": {
                 **parameters.advanced.model_dump(exclude_none=True),

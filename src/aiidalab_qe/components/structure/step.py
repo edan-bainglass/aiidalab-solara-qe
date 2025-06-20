@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import typing as t
 
+import ase.build
 import solara
-import solara.toestand
 from aiida import orm
-from ase.build import bulk, molecule
 from ase.io import read
+from solara.toestand import Ref
 
 from aiidalab_qe.common.components.wizard import WizardState, onStateChange
 from aiidalab_qe.common.hooks import use_weas
@@ -26,18 +26,21 @@ def StructureSelectionStep(
     model: solara.Reactive[QeWizardModel],
     on_state_change: onStateChange,
 ):
-    print("\nrendering structure-selection-step component")
-
-    process = solara.toestand.Ref(model.fields.data.process)
-    input_structure = solara.toestand.Ref(model.fields.data.input_structure)
+    process = Ref(model.fields.data.process)
+    input_structure = Ref(model.fields.data.input_structure)
     selection = solara.use_reactive(t.cast(str, None))
     viewer = use_weas(input_structure.value)
 
+    disabled = solara.use_memo(
+        lambda: process.value is not None,
+        [process.value],
+    )
+
     def select_structure(selected_structure: str):
         if selected_structure == "Bulk Si":
-            new_structure = bulk("Si", "diamond", a=5.43)
+            new_structure = ase.build.bulk("Si", "diamond", a=5.43)
         elif selected_structure == "H2O molecule":
-            new_structure = molecule("H2O")
+            new_structure = ase.build.molecule("H2O")
         else:
             path = DATA / "structure/examples" / selected_structure
             new_structure = read(path.with_suffix(".vasp"), format="vasp")
@@ -46,10 +49,11 @@ def StructureSelectionStep(
         input_structure.set(orm.StructureData(ase=new_structure))
 
     def update_state():
+        if disabled:
+            return
+
         if not input_structure.value:
             new_state = WizardState.READY
-        elif process.value:
-            new_state = WizardState.SUCCESS
         else:
             new_state = WizardState.CONFIGURED
 
@@ -64,6 +68,8 @@ def StructureSelectionStep(
         solara.Style(STYLES / "structure.css")
 
     with solara.Div(class_="structure-selection-step"):
+        print("\nrendering structure-selection-step component")
+
         if not viewer.value:
             with solara.Div(class_="spinner"):
                 solara.SpinnerSolara()
@@ -73,6 +79,7 @@ def StructureSelectionStep(
                 value=selection,
                 values=STRUCTURES,
                 on_value=select_structure,
+                disabled=disabled,
                 classes=["structure-selector"],
             )
             solara.Div(

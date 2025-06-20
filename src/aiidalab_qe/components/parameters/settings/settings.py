@@ -41,8 +41,8 @@ def CalculationSettings(model: solara.Reactive[QeAppModel]):
                 for category in CATEGORIES
                 if category
                 in {
-                    *properties.value,
                     *BUILTIN_CATEGORIES,
+                    *properties.value,
                 }
             ],
             value=active_panel.value.capitalize(),
