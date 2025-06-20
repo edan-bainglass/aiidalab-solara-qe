@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import typing as t
 
+import numpy as np
 import pydantic as pdt
 from aiida.orm import ProcessNode, StructureData
 
@@ -11,6 +12,11 @@ from aiidalab_qe.plugins.utils import get_plugin_resources, get_plugin_settings
 
 from .codes import CodeModelFactory, PwCodeModel, ResourcesModel
 from .utils import ConfiguredBaseModel
+
+PROTOCOL_MAP = {
+    "moderate": "balanced",
+    "precise": "stringent",
+}
 
 
 class BasicSettingsModel(ConfiguredBaseModel):
@@ -87,6 +93,15 @@ class HubbardParametersModel(ConfiguredBaseModel):
     use_hubbard_u: t.Annotated[bool, pdt.Field(exclude=True)] = False
     use_eigenvalues: t.Annotated[bool, pdt.Field(exclude=True)] = False
     hubbard_u: dict[str, float] = {}
+    eigenvalues: t.Annotated[
+        list[list[list[EigenvalueType]]],
+        pdt.Field(exclude=True),
+    ] = []
+    """Starting eigenvalues for Hubbard U formatted as
+    [[[state, spin, kind_name, eigenvalue], ...], ...]
+    for ease of use in the UI."""
+
+
 class PseudoFamilyParametersModel(ConfiguredBaseModel):
     versions: dict[str, str] = {
         "SSSP": "1.3",
@@ -238,6 +253,7 @@ class QeAppModel(ConfiguredBaseModel):
     def to_legacy_parameters(self) -> dict:
         parameters = self.calculation_parameters
         resources = self.computational_resources
+
         legacy_parameters = {
             "workchain": {
                 "protocol": parameters.basic.protocol,
@@ -280,12 +296,24 @@ class QeAppModel(ConfiguredBaseModel):
                 },
             },
         }
+
+        # SOC
+        # TODO consider doing this in a model validator
         if parameters.basic.spin_orbit == "soc":
             legacy_parameters["advanced"]["pw"]["parameters"]["SYSTEM"] |= {
                 "lspinorb": True,
                 "noncolin": True,
                 "nspin": 4,
             }
+
+        # Hubbard U
+        # TODO consider doing this in a model validator
+        if eigenvalues := parameters.advanced.hubbard_parameters.eigenvalues:
+            starting_ns_eigenvalue = convert_eigenvalues_to_qe_format(eigenvalues)
+            legacy_parameters["advanced"]["pw"]["parameters"]["SYSTEM"] |= {
+                "starting_ns_eigenvalue": starting_ns_eigenvalue,
+            }
+
         return legacy_parameters
 
     @classmethod
@@ -296,13 +324,13 @@ class QeAppModel(ConfiguredBaseModel):
 
         try:
             process = AiiDAService.load_qe_app_workflow_node(pk)
-            assert process
-            ui_parameters = deserialize_unsafe(
-                process.base.extras.get("ui_parameters", {})
-            )
-            assert ui_parameters
-        except AssertionError as err:
+            assert process, f"Process with pk={pk} not found"
+            ui_parameters = process.base.extras.get("ui_parameters", {})
+            ui_parameters = deserialize_unsafe(ui_parameters)
+            assert ui_parameters, f"UI parameters for process with pk={pk} not found"
+        except Exception as err:
             print(f"Error loading process with pk={pk}: {err}")
+            # TODO show error in UI and return nothing
             return QeAppModel()
 
         properties = ui_parameters.get("workchain", {}).pop("properties", [])
@@ -321,22 +349,35 @@ class QeAppModel(ConfiguredBaseModel):
         )
 
 
-# TODO needs attention!
 def _extract_calculation_parameters(parameters: dict) -> CalculationParametersModel:
     model = CalculationParametersModel()
-    workchain_parameters: dict = parameters.pop("workchain", {})
-    model.relax_type = workchain_parameters.pop("relax_type")
-    model.basic = BasicSettingsModel(**workchain_parameters)
-    advanced_parameters = parameters.pop("advanced", {})
-    model.basic.spin_orbit = (
-        "soc"
-        if advanced_parameters.get("pw", {})
-        .get("parameters", {})
-        .get("SYSTEM", {})
-        .get("lspinorb")
-        else "wo_soc"
-    )
-    model.advanced = AdvancedSettingsModel(**advanced_parameters)
+
+    basic: dict = parameters.pop("workchain", {})
+    advanced: dict = parameters.pop("advanced", {})
+
+    model.relax_type = basic.pop("relax_type")
+    include_soc = advanced["pw"]["parameters"]["SYSTEM"].get("lspinorb", False)
+    basic["spin_orbit"] = "soc" if include_soc else "wo_soc"
+    basic["protocol"] = PROTOCOL_MAP.get(basic["protocol"], basic["protocol"])
+    model.basic = BasicSettingsModel(**basic)
+
+    # Magnetization
+    # TODO consider doing this in a model validator
+    moments = advanced.get("initial_magnetic_moments", {})
+    advanced["initial_magnetic_moments"] = moments
+
+    # Hubbard U
+    # TODO consider doing this in a model validator
+    if "hubbard_parameters" in advanced:
+        advanced["hubbard_parameters"]["use_hubbard_u"] = True
+        system_parameters = advanced["pw"]["parameters"]["SYSTEM"]
+        if starting_ns_eigenvalue := system_parameters.get("starting_ns_eigenvalue"):
+            eigenvalues = convert_eigenvalues_to_ui_format(starting_ns_eigenvalue)
+            advanced["hubbard_parameters"]["eigenvalues"] = eigenvalues
+            advanced["hubbard_parameters"]["use_eigenvalues"] = True
+
+    model.advanced = AdvancedSettingsModel(**advanced)
+
     plugins = get_plugin_settings()
     model.plugins = {
         plugin: PluginSettingsModel(
@@ -345,7 +386,31 @@ def _extract_calculation_parameters(parameters: dict) -> CalculationParametersMo
         )
         for plugin, data in parameters.items()
     }
+
     return model
+
+
+def convert_eigenvalues_to_ui_format(
+    eigenvalues: list[EigenvalueType],
+) -> list[list[list[EigenvalueType]]]:
+    eigenvalues_array = np.array(eigenvalues, dtype=object)
+    num_states = len(set(eigenvalues_array[:, 0]))
+    num_spins = len(set(eigenvalues_array[:, 1]))
+    num_kinds = len(set(eigenvalues_array[:, 2]))
+    new_shape = (num_kinds, num_spins, num_states, 4)
+    return eigenvalues_array.reshape(new_shape).tolist()
+
+
+def convert_eigenvalues_to_qe_format(
+    eigenvalues: list[list[list[EigenvalueType]]],
+) -> list[EigenvalueType]:
+    # TODO double-check the conversion logic
+    eigenvalues_array = np.array(eigenvalues, dtype=object)
+    new_shape = (int(np.prod(eigenvalues_array.shape[:-1])), 4)
+    return [
+        tuple(eigenvalue)
+        for eigenvalue in eigenvalues_array.reshape(new_shape).tolist()
+    ]
 
 
 CodesParams = dict[str, dict[str, dict[str, t.Any]]]
