@@ -31,9 +31,10 @@ def ResourceCard(model: solara.Reactive[CodeModel], disabled: bool = False):
 
     solara.use_effect(
         initialize_code_selector,
-        [],
+        [code.value],
     )
 
+    # TODO check why .set needs to be explicitly passed here (in general?)
     with solara.Div(class_="col-12 col-md-6 col-xl-4 resource"):
         with solara.v.Card(class_="m-0"):
             with solara.v.CardTitle(class_="pb-0"):
@@ -50,26 +51,31 @@ def ResourceCard(model: solara.Reactive[CodeModel], disabled: bool = False):
                 )
                 solara.InputInt(
                     label="Nodes",
-                    value=nodes,
+                    value=nodes.value,
+                    on_value=nodes.set,
                     disabled=disabled,
                 )
                 solara.InputInt(
                     label="CPUs",
-                    value=cpus,
+                    value=cpus.value,
+                    on_value=cpus.set,
                     disabled=disabled,
                 )
                 solara.InputInt(
                     label="Tasks per node",
-                    value=ntasks,
+                    value=ntasks.value,
+                    on_value=ntasks.set,
                     disabled=disabled,
                 )
                 solara.InputInt(
                     label="CPUs per task",
-                    value=cpus_task,
+                    value=cpus_task.value,
+                    on_value=cpus_task.set,
                     disabled=disabled,
                 )
                 solara.InputInt(
                     label="Wallclock time (s)",
-                    value=wallclock,
+                    value=wallclock.value,
+                    on_value=wallclock.set,
                     disabled=disabled,
                 )

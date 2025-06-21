@@ -40,9 +40,6 @@ def ResourcesSelectionStep(
         on_state_change(new_state)
 
     def set_global_codes():
-        # if disabled:
-        #     return
-
         # TODO possible optimization; consider building once and toggling (in)active
 
         plugin_resources = resources.value.plugins
@@ -88,27 +85,34 @@ def ResourcesSelectionStep(
                     value=active,
                 )
 
-        if active.value == "global":
-            ResourcesPanel(
-                global_codes,
-                disabled=disabled,
-            )
-        else:
-            plugin_fields = resources.fields.plugins[active.value]
-            this_plugin_resources = Ref(plugin_fields)
+        ResourcesPanel(
+            active=active.value == "global",
+            codes=global_codes,
+            disabled=disabled,
+        )
+        for prop in properties.value:
             PluginResourcesPanel(
-                this_plugin_resources,
-                global_codes,
+                active=active.value == prop,
+                model=Ref(resources.fields.plugins[prop]),
+                global_codes=global_codes,
                 disabled=disabled,
             )
 
 
 @solara.component
 def ResourcesPanel(
+    active: bool,
     codes: solara.Reactive[dict[str, CodeModel]],
     disabled: bool = False,
 ):
-    with solara.v.Row(class_="resources-panel"):
+    with solara.v.Row(
+        class_=" ".join(
+            [
+                "resources-panel",
+                *(["d-none"] if not active else []),
+            ],
+        ),
+    ):
         for code_key in codes.value:
             code_model = Ref(codes.fields[code_key])
             ResourceCard(code_model, disabled=disabled)
@@ -116,6 +120,7 @@ def ResourcesPanel(
 
 @solara.component
 def PluginResourcesPanel(
+    active: bool,
     model: solara.Reactive[PluginResourcesModel],
     global_codes: solara.Reactive[dict[str, CodeModel]],
     disabled: bool = False,
@@ -140,19 +145,28 @@ def PluginResourcesPanel(
             )
         )
 
-    def on_override_toggle():
+    def on_override_toggle(value: bool):
         reset_codes_to_global()
-        override.set(not override.value)
+        override.set(value)
 
-    solara.Checkbox(
-        style="margin-bottom: 1rem;",
-        label="Override global resources",
-        value=override.value,
-        on_value=lambda _: on_override_toggle(),
-        disabled=disabled,
-    )
-    if override.value:
-        ResourcesPanel(
-            plugin_codes,
+    with solara.Div(
+        class_=" ".join(
+            [
+                "resources-panel",
+                *(["d-none"] if not active else []),
+            ],
+        ),
+    ):
+        solara.Checkbox(
+            style="margin-bottom: 1rem;",
+            label="Override global resources",
+            value=override.value,
+            on_value=on_override_toggle,
             disabled=disabled,
         )
+        if override.value:
+            ResourcesPanel(
+                active=active,
+                codes=plugin_codes,
+                disabled=disabled,
+            )
