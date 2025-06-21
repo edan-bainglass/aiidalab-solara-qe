@@ -5,20 +5,21 @@ from solara.toestand import Ref
 
 from aiidalab_qe.common.components.wizard import WizardState, onStateChange
 from aiidalab_qe.common.models.codes import CodeModel
-from aiidalab_qe.components.resources.resource import ResourceCard
-from aiidalab_qe.components.wizard.models import QeWizardModel
+from aiidalab_qe.common.models.schema import QeAppModel
 from aiidalab_qe.config.paths import STYLES
 from aiidalab_qe.plugins.models import PluginResourcesModel
+
+from .resource import ResourceCard
 
 
 @solara.component
 def ResourcesSelectionStep(
-    model: solara.Reactive[QeWizardModel],
+    model: solara.Reactive[QeAppModel],
     on_state_change: onStateChange,
 ):
-    process = Ref(model.fields.data.process)
-    properties = Ref(model.fields.data.properties)
-    resources = Ref(model.fields.data.computational_resources)
+    process = Ref(model.fields.process)
+    properties = Ref(model.fields.properties)
+    resources = Ref(model.fields.computational_resources)
     active = Ref(resources.fields.active)
     global_codes = Ref(resources.fields.global_.codes)
 

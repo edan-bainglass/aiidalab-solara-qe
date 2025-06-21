@@ -1,0 +1,12 @@
+.relaxation-selector .v-btn__content .v-icon--left {
+  margin-left: 0;
+}
+.relaxation-selector {
+  margin-bottom: 12px;
+}
+.relaxation-selector .relaxation-switch {
+  margin-bottom: 12px;
+}
+.properties-selector .v-input {
+  margin-bottom: 12px;
+}

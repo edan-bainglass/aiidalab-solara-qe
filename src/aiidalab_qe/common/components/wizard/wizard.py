@@ -3,11 +3,11 @@ from __future__ import annotations
 import typing as t
 
 import solara
-import solara.toestand
+from solara.toestand import Ref
 
 from aiidalab_qe.config.paths import STYLES
 
-from .models import WizardModel
+from .models import WDM, WizardModel
 from .state import BG_COLORS, STATE_ICONS, WizardState
 from .types import WizardStepProps
 
@@ -20,8 +20,8 @@ def Wizard(
 ):
     print("\nrendering wizard component")
 
-    current_step = solara.toestand.Ref(model.fields.current_step)
-    states = solara.toestand.Ref(model.fields.states)
+    current_step = Ref(model.fields.current_step)
+    states = Ref(model.fields.states)
 
     render_context = solara.reacton.core.get_render_context()
 
@@ -80,7 +80,7 @@ def Wizard(
                                 step,
                                 state,
                                 update_state,
-                                model,
+                                Ref(model.fields.data),
                                 i < len(steps) - 1,
                                 submit_callback=submit_callback,
                             )
@@ -106,9 +106,9 @@ def WizardStepBody(
     step: WizardStepProps,
     state: WizardState,
     on_state_change: t.Callable[[int, WizardState], None],
-    model: solara.Reactive[WizardModel],
+    model: solara.Reactive[WDM],
     confirmable: bool = True,
-    submit_callback: t.Callable[[WizardModel], None] = None,
+    submit_callback: t.Callable[[WDM], None] = None,
 ):
     update_state = solara.use_memo(
         lambda i=index, state=state: lambda new_state: (

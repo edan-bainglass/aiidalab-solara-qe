@@ -2,24 +2,25 @@ from __future__ import annotations
 
 import solara
 import solara.lab
-import solara.toestand
+from solara.toestand import Ref
 
 from aiidalab_qe.common.components.wizard import onStateChange
+from aiidalab_qe.common.models.schema import QeAppModel
 from aiidalab_qe.common.types import ProcessType
-from aiidalab_qe.components.results.structure import StructureResults
-from aiidalab_qe.components.wizard.models import QeWizardModel
 from aiidalab_qe.config.paths import STYLES
 from aiidalab_qe.plugins.utils import get_plugin_results
+
+from .structure import StructureResults
 
 plugin_results_panels = get_plugin_results()
 
 
 @solara.component
 def ResultsStep(
-    model: solara.Reactive[QeWizardModel],
+    model: solara.Reactive[QeAppModel],
     on_state_change: onStateChange,
 ):
-    process = solara.toestand.Ref(model.fields.data.process)
+    process = Ref(model.fields.process)
 
     if not process.value:
         solara.Info("No process found. Please submit a workflow.", classes=["mb-0"])

@@ -10,6 +10,7 @@ from aiidalab_qe.common.components.wizard.models import WizardModel
 from aiidalab_qe.common.components.wizard.state import WizardState
 from aiidalab_qe.common.models.schema import QeAppModel
 from aiidalab_qe.common.services.aiida import AiiDAService
+from aiidalab_qe.components.wizard.steps import QE_WIZARD_STEPS
 
 STATUS_ICONS = {
     ProcessState.CREATED: "rocket-launch",
@@ -26,6 +27,7 @@ class QeWizardModel(WizardModel[QeAppModel]):
 
     @pdt.model_validator(mode="after")
     def _from_pk(self):
+        num_steps = len(QE_WIZARD_STEPS)
         if self.pk and (process := AiiDAService.load_qe_app_workflow_node(self.pk)):
             if not process.process_state:
                 results_state = WizardState.INIT
@@ -36,9 +38,9 @@ class QeWizardModel(WizardModel[QeAppModel]):
                     results_state = WizardState.FAIL
             else:
                 results_state = WizardState.ACTIVE
-            self.states = [WizardState.SUCCESS] * 4 + [results_state]
+            self.states = [WizardState.SUCCESS] * num_steps + [results_state]
         else:
-            self.states = [WizardState.READY, *[WizardState.INIT] * 4]
+            self.states = [WizardState.READY, *[WizardState.INIT] * num_steps]
         self.data = self.data or (
             QeAppModel.from_process(self.pk) if self.pk else QeAppModel()
         )

@@ -10,9 +10,8 @@ from solara.toestand import Ref
 
 from aiidalab_qe.common.components.wizard import WizardState, onStateChange
 from aiidalab_qe.common.hooks import use_weas
+from aiidalab_qe.common.models.schema import QeAppModel
 from aiidalab_qe.config.paths import DATA, STYLES
-
-from ..wizard.models import QeWizardModel
 
 STRUCTURES = [
     "Bulk Si",
@@ -23,11 +22,11 @@ STRUCTURES = [
 
 @solara.component
 def StructureSelectionStep(
-    model: solara.Reactive[QeWizardModel],
+    model: solara.Reactive[QeAppModel],
     on_state_change: onStateChange,
 ):
-    process = Ref(model.fields.data.process)
-    input_structure = Ref(model.fields.data.input_structure)
+    process = Ref(model.fields.process)
+    input_structure = Ref(model.fields.input_structure)
     selection = solara.use_reactive(t.cast(str, None))
     viewer = use_weas(input_structure.value)
 
