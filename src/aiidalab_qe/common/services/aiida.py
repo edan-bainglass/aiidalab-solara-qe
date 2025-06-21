@@ -40,6 +40,15 @@ class AiiDAService:
             return print(f"Code '{code}' does not exist in AiiDA.")
 
     @staticmethod
+    def get_codes(default_calcjob_plugin: str) -> list[str]:
+        codes: list[orm.Code] = orm.Code.collection.all()
+        return [
+            code.full_label
+            for code in codes
+            if code.default_calc_job_plugin == default_calcjob_plugin
+        ]
+
+    @staticmethod
     def load_pseudo_family(label: str) -> t.Optional[PseudoFamilyNode]:
         try:
             return orm.Group.collection.get(label=label)  # type: ignore

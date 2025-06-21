@@ -1,51 +1,51 @@
 import solara
-import solara.toestand
-from aiida import orm
+from solara.toestand import Ref
 
 from aiidalab_qe.common.models.codes import CodeModel
+from aiidalab_qe.common.services.aiida import AiiDAService
 
 
 @solara.component
 def ResourceCard(model: solara.Reactive[CodeModel], disabled: bool = False):
-    code_ref = solara.toestand.Ref(model.fields.code)
-    nodes = solara.toestand.Ref(model.fields.nodes)
-    cpus = solara.toestand.Ref(model.fields.cpus)
-    ntasks = solara.toestand.Ref(model.fields.ntasks_per_node)
-    cpus_task = solara.toestand.Ref(model.fields.cpus_per_task)
-    wallclock = solara.toestand.Ref(model.fields.max_wallclock_seconds)
-    code_options = solara.use_reactive([])
+    name = Ref(model.fields.name)
+    description = Ref(model.fields.description)
+    default_calcjob_plugin = Ref(model.fields.default_calcjob_plugin)
+    code = Ref(model.fields.code)
+    nodes = Ref(model.fields.nodes)
+    cpus = Ref(model.fields.cpus)
+    ntasks = Ref(model.fields.ntasks_per_node)
+    cpus_task = Ref(model.fields.cpus_per_task)
+    wallclock = Ref(model.fields.max_wallclock_seconds)
+
+    code_options = solara.use_memo(
+        lambda: AiiDAService.get_codes(default_calcjob_plugin.value),
+        [default_calcjob_plugin.value],
+    )
 
     def initialize_code_selector():
         if disabled:
             return
 
-        codes: list[orm.Code] = orm.Code.collection.all()
-        code_options.set(
-            [
-                code.full_label
-                for code in codes
-                if code.default_calc_job_plugin == model.value.default_calcjob_plugin
-            ]
-        )
-        if not code_ref.value:
-            code_ref.set(code_options.value[0])
+        if not code.value:
+            code.set(code_options[0])
 
     solara.use_effect(
         initialize_code_selector,
+        [],
     )
 
     with solara.Div(class_="col-12 col-md-6 col-xl-4 resource"):
         with solara.v.Card(class_="m-0"):
             with solara.v.CardTitle(class_="pb-0"):
-                solara.Text(model.value.name)
-                if description := model.value.description:
-                    with solara.Tooltip(description):
+                solara.Text(name.value)
+                if description.value:
+                    with solara.Tooltip(description.value):
                         solara.v.Icon(children=["mdi-information"], class_="ml-2")
             with solara.v.CardText():
                 solara.Select(
                     label="Code",
-                    values=code_options.value,
-                    value=code_ref,
+                    values=code_options,
+                    value=code,
                     disabled=disabled,
                 )
                 solara.InputInt(

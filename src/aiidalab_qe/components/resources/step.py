@@ -39,8 +39,8 @@ def ResourcesSelectionStep(
         on_state_change(new_state)
 
     def set_global_codes():
-        if disabled:
-            return
+        # if disabled:
+        #     return
 
         # TODO possible optimization; consider building once and toggling (in)active
 
