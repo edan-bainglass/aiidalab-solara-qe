@@ -333,7 +333,12 @@ class QeAppModel(ConfiguredBaseModel):
             # TODO show error in UI and return nothing
             return QeAppModel()
 
-        properties = ui_parameters.get("workchain", {}).pop("properties", [])
+        properties = [
+            *filter(
+                lambda p: p != "relax",
+                ui_parameters.get("workchain", {}).pop("properties", []),
+            )
+        ]
         codes = ui_parameters.pop("codes", {})
         calculation_parameters = _extract_calculation_parameters(ui_parameters)
         computational_resources = _extract_computational_resources(codes)
