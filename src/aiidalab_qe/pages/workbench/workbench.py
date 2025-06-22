@@ -18,42 +18,27 @@ wizard_store = WizardStore()
 def Workbench(store: WizardStore = wizard_store):
     print("\nrendering workbench page")
 
-    def add_workflow(pk: t.Optional[int] = None):
-        store.add_wizard(pk)
-
-    def remove_workflow(uid: str):
-        store.remove_wizard(uid)
-
     with solara.Head():
         solara.Style(STYLES / "workbench.css")
 
     with solara.Div(class_="workbench"):
-        WorkbenchControls(add_workflow=add_workflow)
+        WorkbenchControls(store)
         with solara.lab.Tabs(
             vertical=True,
             lazy=False,
             value=store.active,
         ):
-            for uid, wizard_model in store.wizards.value.items():
-
-                def remove_this_workflow(this_uid: str = uid):
-                    remove_workflow(this_uid)
-
+            for i, model in enumerate(store.wizards.value):
                 with solara.lab.Tab(
-                    tab_children=[
-                        TabHeader(
-                            wizard_model,
-                            remove_this_workflow,
-                        ),
-                    ],
+                    tab_children=[TabHeader(i, store, model)],
                 ):
                     # NOTE: key prevents unnecessary rendering but breaks reactiveness
                     # see https://github.com/widgetti/solara/issues/1060
-                    TabBody(wizard_model)  # .key(uid)
+                    TabBody(model)  # .key(wizard_model.value.uid)
 
 
 @solara.component
-def WorkbenchControls(add_workflow: t.Callable[[t.Optional[int]], None]):
+def WorkbenchControls(store: WizardStore):
     input_pk = solara.use_reactive(t.cast(int, None))
     active_dialog = solara.use_reactive(False)
 
@@ -64,7 +49,7 @@ def WorkbenchControls(add_workflow: t.Callable[[t.Optional[int]], None]):
 
     def submit_dialog():
         with render_context:
-            add_workflow(input_pk.value)
+            store.add_wizard(input_pk.value)
             input_pk.set(0)
             active_dialog.set(False)
 
@@ -77,7 +62,7 @@ def WorkbenchControls(add_workflow: t.Callable[[t.Optional[int]], None]):
         solara.IconButton(
             color="secondary",
             icon_name="mdi-plus-thick",
-            on_click=add_workflow,
+            on_click=store.add_wizard,
         )
         solara.IconButton(
             color="secondary",
@@ -107,12 +92,16 @@ def WorkbenchControls(add_workflow: t.Callable[[t.Optional[int]], None]):
 
 @solara.component
 def TabHeader(
+    index: int,
+    store: WizardStore,
     model: solara.Reactive[QeWizardModel],
-    remove_workflow: t.Callable[[str], None],
 ):
     pk = Ref(model.fields.pk)
     label = Ref(model.fields.data.label)
     status_icon = Ref(model.fields.status_icon)
+
+    def remove_wizard():
+        store.remove_wizard(index)
 
     with solara.Div(class_="tab-header"):
         # TODO stop close event propagation to tab selection (leads to index out of bound)
@@ -120,7 +109,7 @@ def TabHeader(
             icon_name="mdi-close",
             color="error",
             class_="tab-close-button",
-            on_click=remove_workflow,
+            on_click=remove_wizard,
         )
         solara.v.Icon(
             children=[status_icon.value],
