@@ -4,7 +4,7 @@ import typing as t
 
 import solara
 import solara.lab
-import solara.toestand
+from solara.toestand import Ref
 
 from aiidalab_qe.components.wizard import QeWizard
 from aiidalab_qe.components.wizard.models import QeWizardModel
@@ -110,9 +110,9 @@ def TabHeader(
     model: solara.Reactive[QeWizardModel],
     remove_workflow: t.Callable[[str], None],
 ):
-    pk = solara.toestand.Ref(model.fields.pk)
-    label = solara.toestand.Ref(model.fields.data.label)
-    status_icon = solara.toestand.Ref(model.fields.status_icon)
+    pk = Ref(model.fields.pk)
+    label = Ref(model.fields.data.label)
+    status_icon = Ref(model.fields.status_icon)
 
     with solara.Div(class_="tab-header"):
         # TODO stop close event propagation to tab selection (leads to index out of bound)
