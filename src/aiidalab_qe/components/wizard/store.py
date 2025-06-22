@@ -15,6 +15,12 @@ class WizardStore:
         wizard = solara.reactive(QeWizardModel(pk=pk))
         self.wizards.set([*self.wizards.value, wizard])
         self.active.set(len(self.wizards.value) - 1)
+
+    def duplicate_wizard(self):
+        model = self.wizards.value[self.active.value].value
+        data_copy = QeAppModel.from_model(model.data)
+        wizard_copy = solara.reactive(QeWizardModel(data=data_copy))
+        self.wizards.set([*self.wizards.value, wizard_copy])
         self.active.set(len(self.wizards.value) - 1)
 
     def remove_wizard(self, index: int):

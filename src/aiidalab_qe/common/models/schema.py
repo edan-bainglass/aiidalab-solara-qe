@@ -317,6 +317,9 @@ class QeAppModel(ConfiguredBaseModel):
         return legacy_parameters
 
     @classmethod
+    def from_model(cls, model: QeAppModel):
+        return model.model_copy(deep=True, update={"process": None})
+
     @classmethod
     def from_process(cls, pk: t.Optional[int]) -> QeAppModel:
         from aiida.orm.utils.serialize import deserialize_unsafe

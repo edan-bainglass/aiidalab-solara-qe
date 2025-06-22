@@ -66,6 +66,12 @@ def WorkbenchControls(store: WizardStore):
         )
         solara.IconButton(
             color="secondary",
+            icon_name="mdi-content-copy",
+            on_click=store.duplicate_wizard,
+            disabled=store.active.value is None,
+        )
+        solara.IconButton(
+            color="secondary",
             icon_name="mdi-key-plus",
             on_click=prompt_for_pk,
         )
