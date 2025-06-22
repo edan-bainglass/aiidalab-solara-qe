@@ -6,6 +6,7 @@ from solara.toestand import Ref
 
 from aiidalab_qe.common.components.wizard import onStateChange
 from aiidalab_qe.common.models.schema import QeAppModel
+from aiidalab_qe.common.services.aiida import AiiDAService
 from aiidalab_qe.common.types import ProcessType
 from aiidalab_qe.config.paths import STYLES
 from aiidalab_qe.plugins.utils import get_plugin_results
@@ -22,7 +23,12 @@ def ResultsStep(
 ):
     process = Ref(model.fields.process)
 
-    if not process.value:
+    process_node = solara.use_memo(
+        lambda: AiiDAService.load_process(process.value),
+        [process.value],
+    )
+
+    if not process_node:
         solara.Info("No process found. Please submit a workflow.", classes=["mb-0"])
         return
 
@@ -32,13 +38,13 @@ def ResultsStep(
     with solara.Div(class_="results-step"):
         with solara.lab.Tabs(value=2):
             with solara.lab.Tab("Summary"):
-                ProcessSummary(process.value)
+                ProcessSummary(process_node)
 
             with solara.lab.Tab("Status"):
-                ProcessStatus(process.value)
+                ProcessStatus(process_node)
 
             with solara.lab.Tab("Results"):
-                ProcessResults(process.value)
+                ProcessResults(process_node)
 
 
 @solara.component

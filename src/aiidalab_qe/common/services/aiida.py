@@ -63,3 +63,12 @@ class AiiDAService:
             return print(f"Pseudo with UUID '{uuid}' does not exist in AiiDA.")
         except ValueError:
             return
+
+    @staticmethod
+    def load_process(uuid: str) -> t.Optional[orm.ProcessNode]:
+        try:
+            return orm.load_node(uuid)  # type: ignore
+        except NotExistent:
+            return print(f"Process with UUID '{uuid}' does not exist in AiiDA.")
+        except ValueError:
+            return

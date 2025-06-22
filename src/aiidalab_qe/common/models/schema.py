@@ -4,9 +4,9 @@ import typing as t
 
 import numpy as np
 import pydantic as pdt
-from aiida.orm import ProcessNode, StructureData
 
 from aiidalab_qe.common.services.aiida import AiiDAService, PseudoFamilyNode
+from aiidalab_qe.common.types import StructureType
 from aiidalab_qe.plugins.models import PluginResourcesModel, PluginSettingsModel
 from aiidalab_qe.plugins.utils import get_plugin_resources, get_plugin_settings
 
@@ -244,11 +244,11 @@ class ComputationalResourcesModel(ConfiguredBaseModel):
 class QeAppModel(ConfiguredBaseModel):
     label: str = "New workflow"
     description: str = ""
-    input_structure: t.Optional[StructureData] = None
+    input_structure: t.Optional[StructureType] = None
     properties: list[str] = pdt.Field(default_factory=list)
     calculation_parameters: CalculationParametersModel = CalculationParametersModel()
     computational_resources: ComputationalResourcesModel = ComputationalResourcesModel()
-    process: t.Optional[ProcessNode] = None
+    process: t.Optional[str] = None
 
     def to_legacy_parameters(self) -> dict:
         parameters = self.calculation_parameters
@@ -317,7 +317,8 @@ class QeAppModel(ConfiguredBaseModel):
         return legacy_parameters
 
     @classmethod
-    def from_process(cls, pk: t.Optional[int], lock: bool = True) -> QeAppModel:
+    @classmethod
+    def from_process(cls, pk: t.Optional[int]) -> QeAppModel:
         from aiida.orm.utils.serialize import deserialize_unsafe
 
         ui_parameters: dict[str, t.Any]
@@ -350,7 +351,7 @@ class QeAppModel(ConfiguredBaseModel):
             properties=properties,
             calculation_parameters=calculation_parameters,
             computational_resources=computational_resources,
-            process=process,
+            process=process.uuid,
         )
 
 
