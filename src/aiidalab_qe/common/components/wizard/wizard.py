@@ -16,7 +16,7 @@ from .types import WizardStepProps
 def Wizard(
     steps: list[WizardStepProps],
     model: solara.Reactive[WizardModel],
-    submit_callback: t.Callable[[WizardModel], None] = None,
+    submit_callback: t.Callable[[], None] = None,
 ):
     print("\nrendering wizard component")
 
@@ -108,21 +108,18 @@ def WizardStepBody(
     on_state_change: t.Callable[[int, WizardState], None],
     model: solara.Reactive[WDM],
     confirmable: bool = True,
-    submit_callback: t.Callable[[WDM], None] = None,
+    submit_callback: t.Callable[[], None] = None,
 ):
-    update_state = solara.use_memo(
-        lambda i=index, state=state: lambda new_state: (
-            on_state_change(i, new_state)
-            if state in (WizardState.READY, WizardState.SUCCESS)
-            else None
-        ),
-        [state],
-    )
+    def update_state(new_state: WizardState):
+        if state in (WizardState.READY, WizardState.SUCCESS):
+            on_state_change(index, new_state)
 
-    confirm_step = solara.use_memo(
-        lambda i=index: lambda: on_state_change(i, WizardState.SUCCESS),
-        [],
-    )
+    def confirm_step():
+        on_state_change(index, WizardState.SUCCESS)
+
+    def submit_wizard():
+        on_state_change(index, WizardState.SUCCESS)
+        submit_callback()
 
     with solara.Div(class_="wizard-step-body"):
         with solara.Div(class_="wizard-step"):
@@ -136,7 +133,7 @@ def WizardStepBody(
                         color="success",
                         icon_name="mdi-rocket",
                         disabled=state is not WizardState.CONFIGURED,
-                        on_click=submit_callback,
+                        on_click=submit_wizard,
                     )
                 else:
                     solara.Button(
