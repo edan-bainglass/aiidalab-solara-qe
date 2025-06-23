@@ -6,12 +6,12 @@ import uuid
 import pydantic as pdt
 
 from aiidalab_qe.common.components.wizard.state import WizardState
-from aiidalab_qe.common.models.utils import ConfiguredBaseModel
+from aiidalab_qe.common.models.utils import Model
 
 WDM = t.TypeVar("WDM", bound=pdt.BaseModel)
 
 
-class WizardModel(ConfiguredBaseModel, t.Generic[WDM]):
+class WizardModel(Model, t.Generic[WDM]):
     uid: str = pdt.Field(default_factory=lambda: str(uuid.uuid4()))
     current_step: t.Optional[int] = None
     states: list[WizardState] = pdt.Field(default_factory=list)

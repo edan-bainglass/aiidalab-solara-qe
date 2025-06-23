@@ -4,10 +4,10 @@ import pydantic as pdt
 
 from aiidalab_qe.common.services.aiida import AiiDAService
 
-from .utils import ConfiguredBaseModel
+from .utils import Model
 
 
-class CodeModel(ConfiguredBaseModel):
+class CodeModel(Model):
     name: str = pdt.Field("", exclude=True)
     description: str = pdt.Field("", exclude=True)
     default_calcjob_plugin: str = pdt.Field("", exclude=True)
@@ -65,7 +65,7 @@ class CodeModel(ConfiguredBaseModel):
         )
 
 
-class CodeParallelizationModel(ConfiguredBaseModel):
+class CodeParallelizationModel(Model):
     npools: t.Optional[int] = None
 
 
@@ -96,5 +96,5 @@ class CodeModelFactory:
         return code_model_class(**serialized)
 
 
-class ResourcesModel(ConfiguredBaseModel):
+class ResourcesModel(Model):
     codes: dict[str, CodeModel] = pdt.Field(default_factory=dict)

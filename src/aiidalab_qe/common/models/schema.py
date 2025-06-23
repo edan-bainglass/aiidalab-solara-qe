@@ -11,7 +11,7 @@ from aiidalab_qe.plugins.models import PluginResourcesModel, PluginSettingsModel
 from aiidalab_qe.plugins.utils import get_plugin_resources, get_plugin_settings
 
 from .codes import CodeModelFactory, PwCodeModel, ResourcesModel
-from .utils import ConfiguredBaseModel
+from .utils import Model
 
 PROTOCOL_MAP = {
     "moderate": "balanced",
@@ -19,7 +19,7 @@ PROTOCOL_MAP = {
 }
 
 
-class BasicSettingsModel(ConfiguredBaseModel):
+class BasicSettingsModel(Model):
     electronic_type: t.Literal[
         "metal",
         "insulator",
@@ -45,7 +45,7 @@ class BasicSettingsModel(ConfiguredBaseModel):
 EigenvalueType = tuple[int, int, str, float]
 
 
-class SystemParametersModel(ConfiguredBaseModel):
+class SystemParametersModel(Model):
     tot_charge: float = 0.0
     starting_ns_eigenvalue: t.Optional[list[EigenvalueType]] = None
     ecutwfc: float = 0.0
@@ -68,28 +68,28 @@ class SystemParametersModel(ConfiguredBaseModel):
     tot_magnetization: float = 0.0
 
 
-class ControlParametersModel(ConfiguredBaseModel):
+class ControlParametersModel(Model):
     forc_conv_thr: float = 0.0
     etot_conv_thr: float = 0.0
 
 
-class ElectronsParametersModel(ConfiguredBaseModel):
+class ElectronsParametersModel(Model):
     conv_thr: float = 0.0
     electron_maxstep: int = 80
 
 
-class PwParametersModel(ConfiguredBaseModel):
+class PwParametersModel(Model):
     SYSTEM: SystemParametersModel = SystemParametersModel()
     CONTROL: ControlParametersModel = ControlParametersModel()
     ELECTRONS: ElectronsParametersModel = ElectronsParametersModel()
 
 
-class PwModel(ConfiguredBaseModel):
+class PwModel(Model):
     parameters: PwParametersModel = PwParametersModel()
     pseudos: dict[str, str] = pdt.Field(default_factory=dict)
 
 
-class HubbardParametersModel(ConfiguredBaseModel):
+class HubbardParametersModel(Model):
     use_hubbard_u: t.Annotated[bool, pdt.Field(exclude=True)] = False
     use_eigenvalues: t.Annotated[bool, pdt.Field(exclude=True)] = False
     hubbard_u: dict[str, float] = {}
@@ -102,7 +102,7 @@ class HubbardParametersModel(ConfiguredBaseModel):
     for ease of use in the UI."""
 
 
-class PseudoFamilyParametersModel(ConfiguredBaseModel):
+class PseudoFamilyParametersModel(Model):
     versions: dict[str, str] = {
         "SSSP": "1.3",
         "PseudoDojo": "0.4",
@@ -170,10 +170,10 @@ class PseudoFamilyParametersModel(ConfiguredBaseModel):
         return AiiDAService.load_pseudo_family(pseudo_family_string)  # type: ignore
 
 
-MagneticMomentsType = t.Optional[dict[str, float]]
+MagneticMomentsType = dict[str, float]
 
 
-class AdvancedSettingsModel(ConfiguredBaseModel):
+class AdvancedSettingsModel(Model):
     pw: PwModel = PwModel()
     clean_workdir: bool = False
     kpoints_distance: float = 0.0
@@ -184,7 +184,7 @@ class AdvancedSettingsModel(ConfiguredBaseModel):
         pdt.Field(exclude=True),
     ] = PseudoFamilyParametersModel()
     hubbard_parameters: HubbardParametersModel = HubbardParametersModel()
-    initial_magnetic_moments: MagneticMomentsType = pdt.Field(default_factory=dict)
+    initial_magnetic_moments: t.Optional[MagneticMomentsType] = None
 
     @pdt.model_validator(mode="after")
     def update_pseudo_family_parameters(self) -> AdvancedSettingsModel:
@@ -194,7 +194,7 @@ class AdvancedSettingsModel(ConfiguredBaseModel):
         return self
 
 
-class CalculationParametersModel(ConfiguredBaseModel):
+class CalculationParametersModel(Model):
     relax_type: t.Literal[
         "none",
         "positions",
@@ -215,7 +215,7 @@ class CalculationParametersModel(ConfiguredBaseModel):
         return data
 
 
-class ComputationalResourcesModel(ConfiguredBaseModel):
+class ComputationalResourcesModel(Model):
     active: str = "global"
     global_: ResourcesModel = ResourcesModel(
         codes={
@@ -241,7 +241,7 @@ class ComputationalResourcesModel(ConfiguredBaseModel):
         return data
 
 
-class QeAppModel(ConfiguredBaseModel):
+class QeAppModel(Model):
     label: str = "New workflow"
     description: str = ""
     input_structure: t.Optional[StructureType] = None
@@ -263,10 +263,10 @@ class QeAppModel(ConfiguredBaseModel):
                 "properties": ["relax", *self.properties],  # TODO relax always?
             },
             "advanced": {
-                **parameters.advanced.model_dump(exclude_none=True),
+                **parameters.advanced.get_model_state(),
             },
             **{
-                plugin: settings.model.model_dump(exclude_none=True)
+                plugin: settings.model.get_model_state()
                 for plugin, settings in parameters.plugins.items()
                 if plugin in self.properties
             },
@@ -308,11 +308,19 @@ class QeAppModel(ConfiguredBaseModel):
 
         # Hubbard U
         # TODO consider doing this in a model validator
-        if eigenvalues := parameters.advanced.hubbard_parameters.eigenvalues:
+        if not parameters.advanced.hubbard_parameters.use_hubbard_u:
+            legacy_parameters["advanced"].pop("hubbard_parameters", None)
+        if parameters.advanced.hubbard_parameters.use_eigenvalues and (
+            eigenvalues := parameters.advanced.hubbard_parameters.eigenvalues
+        ):
             starting_ns_eigenvalue = convert_eigenvalues_to_qe_format(eigenvalues)
             legacy_parameters["advanced"]["pw"]["parameters"]["SYSTEM"] |= {
                 "starting_ns_eigenvalue": starting_ns_eigenvalue,
             }
+
+        # Magnetization
+        if not parameters.advanced.initial_magnetic_moments:
+            legacy_parameters["advanced"].pop("initial_magnetic_moments", None)
 
         return legacy_parameters
 

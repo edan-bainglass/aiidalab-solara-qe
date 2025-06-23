@@ -1,7 +1,7 @@
-from aiidalab_qe.common.models.schema import ConfiguredBaseModel
+from aiidalab_qe.common.models.schema import Model
 
 
-class PdosSettingsModel(ConfiguredBaseModel):
+class PdosSettingsModel(Model):
     kpoints_distance: float = 0.1
     use_pdos_degauss: bool = False
     pdos_degauss: float = 0.005

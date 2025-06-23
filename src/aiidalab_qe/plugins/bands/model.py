@@ -1,5 +1,5 @@
-from aiidalab_qe.common.models.schema import ConfiguredBaseModel
+from aiidalab_qe.common.models.schema import Model
 
 
-class BandsSettingsModel(ConfiguredBaseModel):
+class BandsSettingsModel(Model):
     projwfc_bands: bool = False
