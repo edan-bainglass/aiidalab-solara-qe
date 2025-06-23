@@ -5,8 +5,9 @@ import typing as t
 from aiida.engine import WorkChain
 from importlib_metadata import EntryPoint, entry_points
 
-from aiidalab_qe.plugins.models import PluginResourcesModel, PluginSettingsModel
-from aiidalab_qe.plugins.types import PluginResultsComponent
+if t.TYPE_CHECKING:
+    from aiidalab_qe.plugins.models import PluginResourcesModel, PluginSettingsModel
+    from aiidalab_qe.plugins.types import PluginResultsComponent
 
 
 def print_error(entry_point, e):

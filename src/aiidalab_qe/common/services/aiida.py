@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import contextlib
-import json
 import typing as t
 
-from aiida import load_profile, orm
+from aiida import engine, load_profile, orm
 from aiida.common.exceptions import NotExistent
 from aiida_pseudo.groups.family import PseudoPotentialFamily
 from aiida_pseudo.groups.mixins import RecommendedCutoffMixin
+
+from aiidalab_qe.workflows.utils import create_builder
 
 _ = load_profile()
 
@@ -27,10 +28,12 @@ class AiiDAService:
 
     @staticmethod
     def submit(data: dict):
-        label = data.pop("label", "Untitled Workflow")
-        description = data.pop("description", "No description provided")
-        print(f"Submitting {label} ({description}) with the following inputs:")
-        print(json.dumps(data, indent=2))
+        label = data.pop("label")
+        description = data.pop("description")
+        input_structure = data.pop("input_structure")
+        builder = create_builder(input_structure, data)
+        print(f"Submitting {label} ({description=}) with:")
+        return engine.submit(builder)
 
     @staticmethod
     def load_code(code: str) -> t.Optional[orm.Code]:

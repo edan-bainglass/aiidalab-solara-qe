@@ -18,9 +18,13 @@ def QeWizard(model: solara.Reactive[QeWizardModel]):
         inputs = {
             "label": model.value.data.label,
             "description": model.value.data.description,
+            "input_structure": model.value.data.input_structure,
             **model.value.data.to_legacy_parameters(),
         }
-        AiiDAService.submit(inputs)
+        if process := AiiDAService.submit(inputs):
+            model.value.data.process = process.uuid
+        else:
+            print("Failed to submit the workflow.")
 
     with solara.Div(class_="qe-wizard"):
         solara.HTML("h2", label.value)
