@@ -14,7 +14,7 @@ def SubmissionStep(
     model: solara.Reactive[QeAppModel],
     on_state_change: onStateChange,
 ):
-    print("\nrendering submission-step component")
+    print("rendering submission-step component")
 
     label = Ref(model.fields.label)
     description = Ref(model.fields.description)

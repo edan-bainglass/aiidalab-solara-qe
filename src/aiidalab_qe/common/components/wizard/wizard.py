@@ -18,7 +18,7 @@ def Wizard(
     model: solara.Reactive[WizardModel],
     submit_callback: t.Callable[[], None] = None,
 ):
-    print("\nrendering wizard component")
+    print("rendering wizard component")
 
     current_step = Ref(model.fields.current_step)
     states = Ref(model.fields.states)

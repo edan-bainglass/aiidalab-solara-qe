@@ -7,7 +7,7 @@ from aiidalab_qe.config.paths import STYLES
 
 @solara.component
 def Home():
-    print("\nrendering home page")
+    print("rendering home page")
 
     with solara.Head():
         solara.Style(STYLES / "home.css")

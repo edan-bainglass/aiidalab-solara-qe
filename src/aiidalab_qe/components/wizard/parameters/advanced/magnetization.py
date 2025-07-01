@@ -77,7 +77,7 @@ def MagnetizationSettings(active: bool, model: solara.Reactive[QeAppModel]):
         if not active:
             return
 
-        print("\nrendering magnetization-settings component")
+        print("rendering magnetization-settings component")
 
         if electronic_type.value == "metal":
             ToggleButtons(

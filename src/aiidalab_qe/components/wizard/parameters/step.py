@@ -87,7 +87,7 @@ def ParametersConfigurationStep(
         solara.Style(STYLES / "parameters.css")
 
     with solara.Div(class_="parameters-configuration-step"):
-        print("\nrendering parameters-configuration-step component")
+        print("rendering parameters-configuration-step component")
 
         solara.Select(
             label="",

@@ -75,7 +75,7 @@ def ResourcesSelectionStep(
         solara.Style(STYLES / "resources.css")
 
     with solara.Div(class_="resources-selection-step"):
-        print("\nrendering computational-resources-step component")
+        print("rendering computational-resources-step component")
 
         with solara.Row(classes=["mb-2"]):
             with solara.Column():

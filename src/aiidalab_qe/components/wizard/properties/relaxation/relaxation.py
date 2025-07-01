@@ -61,7 +61,7 @@ def RelaxationSelector(model: solara.Reactive[QeAppModel]):
     )
 
     with solara.Div(class_="relaxation-selector"):
-        print("\nrendering relaxation-selector component")
+        print("rendering relaxation-selector component")
 
         solara.Switch(
             label="Relax structure",

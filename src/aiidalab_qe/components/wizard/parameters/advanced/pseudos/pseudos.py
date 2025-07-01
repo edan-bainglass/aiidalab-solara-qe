@@ -208,7 +208,7 @@ def PseudopotentialsSettings(active: bool, model: solara.Reactive[QeAppModel]):
         if not (active and ready):
             return
 
-        print("\nrendering pseudos-settings component")
+        print("rendering pseudos-settings component")
 
         ToggleButtons(
             label="Functional",

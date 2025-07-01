@@ -69,7 +69,7 @@ def StructureSelectionStep(
         solara.Style(STYLES / "structure.css")
 
     with solara.Div(class_="structure-selection-step"):
-        print("\nrendering structure-selection-step component")
+        print("rendering structure-selection-step component")
 
         if not viewer.value:
             with solara.Div(class_="spinner"):

@@ -28,7 +28,7 @@ def BasicSettings(active: bool, model: solara.Reactive[QeAppModel]):
         if not active:
             return
 
-        print("\nrendering basic-settings component")
+        print("rendering basic-settings component")
 
         ToggleButtons(
             label="Electronic Type",

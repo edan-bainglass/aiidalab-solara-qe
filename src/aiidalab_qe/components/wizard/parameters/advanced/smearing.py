@@ -43,7 +43,7 @@ def SmearingSettings(active: bool, model: solara.Reactive[QeAppModel]):
         if not active:
             return
 
-        print("\nrendering smearing-settings component")
+        print("rendering smearing-settings component")
 
         solara.Select(
             label="Smearing",

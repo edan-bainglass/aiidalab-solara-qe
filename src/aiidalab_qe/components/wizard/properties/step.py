@@ -39,7 +39,7 @@ def PropertiesSelectionStep(
         solara.Style(STYLES / "properties.css")
 
     with solara.Div(class_="properties-step"):
-        print("\nrendering properties-selection-step component")
+        print("rendering properties-selection-step component")
 
         RelaxationSelector(model)
 

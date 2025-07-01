@@ -88,7 +88,7 @@ def PdosSettings(active: bool, model: solara.Reactive[QeAppModel]):
         if not active:
             return
 
-        print("\nrendering pdos-settings component")
+        print("rendering pdos-settings component")
 
         with solara.Div(class_="plugin-info"):
             Paragraph("""

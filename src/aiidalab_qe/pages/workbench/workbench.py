@@ -16,7 +16,7 @@ wizard_store = WizardStore()
 
 @solara.component
 def Workbench(store: WizardStore = wizard_store):
-    print("\nrendering workbench page")
+    print("rendering workbench page")
 
     with solara.Head():
         solara.Style(STYLES / "workbench.css")

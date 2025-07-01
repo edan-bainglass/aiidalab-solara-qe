@@ -20,7 +20,7 @@ def PropertiesSelector(model: solara.Reactive[QeAppModel]):
     )
 
     with solara.Div(class_="properties-selector"):
-        print("\nrendering properties-selector component")
+        print("rendering properties-selector component")
 
         for prop, title in PROPERTY_TITLES.items():
 

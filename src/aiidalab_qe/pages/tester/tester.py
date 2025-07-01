@@ -5,7 +5,7 @@ import solara
 
 @solara.component
 def Tester():
-    print("\nrendering resources page")
+    print("rendering resources page")
     with solara.Sidebar():
         solara.Text("I am in the sidebar of the wrapping layout component")
     with solara.v.Container(class_="mx-5 mt-2"):

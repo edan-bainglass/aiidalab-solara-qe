@@ -85,7 +85,7 @@ def ConvergenceSettings(active: bool, model: solara.Reactive[QeAppModel]):
         if not active:
             return
 
-        print("\nrendering convergence-settings component")
+        print("rendering convergence-settings component")
 
         solara.InputFloat(
             label="Force (Ry/Bohr)",

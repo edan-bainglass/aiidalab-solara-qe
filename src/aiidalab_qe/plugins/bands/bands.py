@@ -36,7 +36,7 @@ def BandStructureSettings(active: bool, model: solara.Reactive[QeAppModel]):
         if not active:
             return
 
-        print("\nrendering bands-settings component")
+        print("rendering bands-settings component")
 
         with solara.Div(class_="plugin-info"):
             Paragraph("""

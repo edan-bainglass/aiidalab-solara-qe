@@ -131,7 +131,7 @@ def HubbardUSettings(active: bool, model: solara.Reactive[QeAppModel]):
         if not active:
             return
 
-        print("\nrendering hubbard-settings component")
+        print("rendering hubbard-settings component")
 
         solara.Checkbox(
             label="Use Hubbard U",
