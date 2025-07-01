@@ -65,7 +65,7 @@ class SystemParametersModel(Model):
         "methfessel-paxton",
     ] = "cold"
     degauss: float = 0.0
-    tot_magnetization: float = 0.0
+    tot_magnetization: t.Optional[float] = None
 
 
 class ControlParametersModel(Model):
