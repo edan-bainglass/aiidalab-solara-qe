@@ -45,7 +45,9 @@ def StructureSelectionStep(
             new_structure = read(path.with_suffix(".vasp"), format="vasp")
         if viewer.value:
             viewer.value.from_ase(new_structure)
-        input_structure.set(orm.StructureData(ase=new_structure))
+        structure = orm.StructureData(ase=new_structure)
+        structure.store()
+        input_structure.set(structure)
 
     def update_state():
         if disabled:
