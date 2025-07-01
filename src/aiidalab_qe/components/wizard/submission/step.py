@@ -5,6 +5,7 @@ from solara.toestand import Ref
 
 from aiidalab_qe.common.components.wizard import onStateChange
 from aiidalab_qe.common.models.schema import QeAppModel
+from aiidalab_qe.common.services.aiida import AiiDAService
 from aiidalab_qe.config.paths import STYLES
 
 
@@ -17,6 +18,32 @@ def SubmissionStep(
 
     label = Ref(model.fields.label)
     description = Ref(model.fields.description)
+    process = Ref(model.fields.process)
+
+    process_node = solara.use_memo(
+        lambda: AiiDAService.load_process(process.value),
+        [process.value],
+    )
+
+    def update_label():
+        if not process_node:
+            return
+        process_node.label = label.value
+
+    def update_description():
+        if not process_node:
+            return
+        process_node.description = description.value
+
+    solara.use_effect(
+        update_label,
+        [process.value, label.value],
+    )
+
+    solara.use_effect(
+        update_description,
+        [process.value, description.value],
+    )
 
     with solara.Head():
         solara.Style(STYLES / "submission.css")
