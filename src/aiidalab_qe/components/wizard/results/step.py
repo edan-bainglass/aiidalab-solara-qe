@@ -23,12 +23,7 @@ def ResultsStep(
 ):
     process = Ref(model.fields.process)
 
-    process_node = solara.use_memo(
-        lambda: AiiDAService.load_process(process.value),
-        [process.value],
-    )
-
-    if not process_node:
+    if not process.value:
         solara.Info("No process found. Please submit a workflow.", classes=["mb-0"])
         return
 
@@ -38,36 +33,50 @@ def ResultsStep(
     with solara.Div(class_="results-step"):
         with solara.lab.Tabs(value=2):
             with solara.lab.Tab("Summary"):
-                ProcessSummary(process_node)
+                ProcessSummary(model)
 
             with solara.lab.Tab("Status"):
-                ProcessStatus(process_node)
+                ProcessStatus(model)
 
             with solara.lab.Tab("Results"):
-                ProcessResults(process_node)
+                ProcessResults(model)
 
 
 @solara.component
-def ProcessSummary(process: ProcessType):
+def ProcessSummary(model: solara.Reactive[QeAppModel]):
+    process = Ref(model.fields.process)
+
+    process_node = solara.use_memo(
+        lambda: AiiDAService.load_process(process.value),
+        [process.value],
+    )
+
     with solara.Div(class_="process-panel summary-panel"):
         with solara.Column():
-            solara.Text(f"pk: {process.pk}")
-            solara.Text(f"Label: {process.label or 'No label'}")
-            solara.Text(f"Description: {process.description or 'No description'}")
+            solara.Text(f"pk: {process_node.pk}")
+            solara.Text(f"Label: {process_node.label or 'No label'}")
+            solara.Text(f"Description: {process_node.description or 'No description'}")
 
 
 @solara.component
-def ProcessStatus(process: ProcessType):
+def ProcessStatus(model: solara.Reactive[QeAppModel]):
     with solara.Div(class_="process-panel status-panel"):
         solara.Text("Not yet implemented")
 
 
 @solara.component
-def ProcessResults(process: ProcessType):
+def ProcessResults(model: solara.Reactive[QeAppModel]):
+    process = Ref(model.fields.process)
+
+    process_node = solara.use_memo(
+        lambda: AiiDAService.load_process(process.value),
+        [process.value],
+    )
+
     with solara.Div(class_="process-panel results-panel"):
         with solara.lab.Tabs():
             for prop in sorted(
-                process.inputs.properties,
+                process_node.inputs.properties,
                 key=lambda p: p != "relax",  # 'relax' should be first
             ):
                 if prop == "pdos":
@@ -75,6 +84,6 @@ def ProcessResults(process: ProcessType):
                 with solara.lab.Tab(prop):
                     with solara.Div(class_="results-view"):
                         if prop == "relax":
-                            StructureResults(process)
+                            StructureResults(model)
                         elif prop in plugin_results_panels:
                             plugin_results_panels[prop]
