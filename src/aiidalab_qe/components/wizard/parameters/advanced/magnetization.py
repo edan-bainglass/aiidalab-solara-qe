@@ -49,10 +49,11 @@ def MagnetizationSettings(active: bool, model: solara.Reactive[QeAppModel]):
             and input_structure.value
             and (family := AiiDAService.load_pseudo_family(pseudo_family.value))
         ):
-            total_magnetization.set(0.0)
-            initial_magnetic_moments.set({})
+            total_magnetization.set(None)
+            initial_magnetic_moments.set(None)
             return
 
+        total_magnetization.set(0.0)
         initial_magnetic_moments.set(
             {
                 kind.name: to_moment(kind.symbol, family)
@@ -92,6 +93,7 @@ def MagnetizationSettings(active: bool, model: solara.Reactive[QeAppModel]):
                 disabled=disabled,
                 class_="magnetization-input-selector",
             )
+        # TODO hide div by settings `display` based on `active`
         MagneticMomentsInput(
             active=input_type.value == "moments",
             initial_magnetic_moments=initial_magnetic_moments,
