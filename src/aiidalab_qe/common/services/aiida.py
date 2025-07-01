@@ -3,12 +3,11 @@ from __future__ import annotations
 import contextlib
 import typing as t
 
-from aiida import engine, load_profile, orm
+import requests as req
+from aiida import load_profile, orm
 from aiida.common.exceptions import NotExistent
 from aiida_pseudo.groups.family import PseudoPotentialFamily
 from aiida_pseudo.groups.mixins import RecommendedCutoffMixin
-
-from aiidalab_qe.workflows.utils import create_builder
 
 _ = load_profile()
 
@@ -26,14 +25,32 @@ class AiiDAService:
             ):
                 return process
 
-    @staticmethod
-    def submit(data: dict):
+    @classmethod
+    async def submit(cls, data: dict):
         label = data.pop("label")
         description = data.pop("description")
-        input_structure = data.pop("input_structure")
-        builder = create_builder(input_structure, data)
-        print(f"Submitting {label} ({description=}) with:")
-        return engine.submit(builder)
+        structure: orm.StructureData = data.pop("input_structure")
+        if not orm.load_node(structure):
+            structure.store()
+        print(f"Submitting {label} ({description=})")
+        payload = {
+            "label": label,
+            "description": description,
+            "structure_pk": 7183,
+            "parameters": data,
+        }
+        print(f"Payload: {payload}")
+        response: req.Response = req.post(
+            "http://localhost:5000/submit-workflow/",
+            json=payload,
+        )
+        if response.ok:
+            process_uuid = t.cast(dict, response.json()).get("process_uuid", "")
+            print(f"Process UUID: {process_uuid}")
+        else:
+            process_uuid = ""
+            print(f"Error submitting workflow: {response.text}")
+        return process_uuid
 
     @staticmethod
     def load_code(code: str) -> t.Optional[orm.Code]:
@@ -68,10 +85,21 @@ class AiiDAService:
             return
 
     @staticmethod
-    def load_process(uuid: str) -> t.Optional[orm.ProcessNode]:
+    def load_node(
+        identifier: t.Union[int, str],
+        error_message: str = "Node with UUID '{}' does not exist in AiiDA.",
+    ) -> t.Optional[orm.Node]:
         try:
-            return orm.load_node(uuid)  # type: ignore
+            return orm.load_node(identifier)  # type: ignore
         except NotExistent:
-            return print(f"Process with UUID '{uuid}' does not exist in AiiDA.")
+            return print(error_message.format(identifier))
         except ValueError:
             return
+
+    @classmethod
+    def load_process(cls, identifier: t.Union[int, str]) -> t.Optional[orm.ProcessNode]:
+        process_node = cls.load_node(
+            identifier,
+            error_message="Process with UUID '{}' does not exist in AiiDA.",
+        )
+        return t.cast(orm.ProcessNode, process_node) if process_node else None

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import solara
+from solara.tasks import use_task
 from solara.toestand import Ref
 
 from aiidalab_qe.common.components.wizard import Wizard
@@ -13,23 +14,33 @@ from .steps import QE_WIZARD_STEPS
 @solara.component
 def QeWizard(model: solara.Reactive[QeWizardModel]):
     label = Ref(model.fields.data.label)
+    description = Ref(model.fields.data.description)
+    input_structure = Ref(model.fields.data.input_structure)
+    data = Ref(model.fields.data)
+    process = Ref(model.fields.data.process)
 
-    def submit_workflow():
-        inputs = {
-            "label": model.value.data.label,
-            "description": model.value.data.description,
-            "input_structure": model.value.data.input_structure,
-            **model.value.data.to_legacy_parameters(),
-        }
-        if process := AiiDAService.submit(inputs):
-            model.value.data.process = process.uuid
-        else:
-            print("Failed to submit the workflow.")
+    submitting = solara.use_reactive(False)
+
+    async def submit_workflow():
+        if submitting.value:
+            inputs = {
+                "label": label.value,
+                "description": description.value,
+                "input_structure": input_structure.value,
+                **data.value.to_legacy_parameters(),
+            }
+            process_uuid = await AiiDAService.submit(inputs)
+            process.set(process_uuid)
+
+    use_task(
+        submit_workflow,
+        dependencies=[submitting.value],
+    )
 
     with solara.Div(class_="qe-wizard"):
         solara.HTML("h2", label.value)
         Wizard(
             steps=QE_WIZARD_STEPS,
             model=model,
-            submit_callback=submit_workflow,
+            submit_callback=lambda: submitting.set(True),
         )
