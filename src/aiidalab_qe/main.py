@@ -3,30 +3,30 @@ from __future__ import annotations
 import solara
 
 from aiidalab_qe.components import QeNavBar
-from aiidalab_qe.config.paths import STYLES
+from aiidalab_qe.config.paths import APP_URL_ROOT, STYLES
 from aiidalab_qe.pages import CalculationHistory, Home, ResourceSetup, Workbench
 
 # from aiidalab_qe.pages.tester import Tester, TesterLayout
 
 pages = {
     "home": {
-        "link": "aiidalab-qe",
+        "link": APP_URL_ROOT,
         "component": Home,
     },
     "workbench": {
-        "link": "aiidalab-qe/workbench",
+        "link": f"{APP_URL_ROOT}/workbench",
         "component": Workbench,
     },
     "history": {
-        "link": "aiidalab-qe/history",
+        "link": f"{APP_URL_ROOT}/history",
         "component": CalculationHistory,
     },
     "resources": {
-        "link": "aiidalab-qe/resources",
+        "link": f"{APP_URL_ROOT}/resources",
         "component": ResourceSetup,
     },
     # "tester": {
-    #     "link": "aiidalab-qe/tester",
+    #     "link": f"{APP_URL_ROOT}/tester",
     #     "component": Tester,
     #     "layout": TesterLayout,
     # },
@@ -44,7 +44,7 @@ def Layout(children=[]):
 
 routes = [
     solara.Route(
-        path="aiidalab-qe",
+        path=APP_URL_ROOT,
         children=[
             solara.Route(
                 path="/" if page == "home" else page,
