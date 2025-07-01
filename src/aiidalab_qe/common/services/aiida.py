@@ -30,13 +30,11 @@ class AiiDAService:
         label = data.pop("label")
         description = data.pop("description")
         structure: orm.StructureData = data.pop("input_structure")
-        if not orm.load_node(structure):
-            structure.store()
         print(f"Submitting {label} ({description=})")
         payload = {
             "label": label,
             "description": description,
-            "structure_pk": 7183,
+            "structure_pk": structure.pk,
             "parameters": data,
         }
         print(f"Payload: {payload}")
@@ -46,6 +44,19 @@ class AiiDAService:
         )
         if response.ok:
             process_uuid = t.cast(dict, response.json()).get("process_uuid", "")
+            process_node = cls.load_process(process_uuid)
+            process_node.base.extras.set(
+                "structure",
+                structure.get_formula(),
+            )
+            process_node.base.extras.set(
+                "workchain",
+                data.get("workchain", {}),
+            )
+            process_node.base.extras.set(
+                "ui_parameters",
+                orm.utils.serialize.serialize(data),
+            )
             print(f"Process UUID: {process_uuid}")
         else:
             process_uuid = ""
