@@ -1,6 +1,9 @@
+import solara
+import solara.server
+import solara.server.fastapi
 from aiida import engine, load_profile, orm
 from aiida.calculations.arithmetic.add import ArithmeticAddCalculation
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, FastAPI, HTTPException
 from pydantic import BaseModel
 
 from aiidalab_qe.workflows.qe import QeAppWorkChain
@@ -8,6 +11,8 @@ from aiidalab_qe.workflows.qe import QeAppWorkChain
 _ = load_profile()
 
 app = FastAPI()
+
+router = APIRouter(prefix="/api/v1")
 
 
 class WorkflowInput(BaseModel):
@@ -17,17 +22,24 @@ class WorkflowInput(BaseModel):
     parameters: dict
 
 
-@app.post("/submit-calculation/test")
+@app.get("/")
+def index():
+    return {
+        "message": "Usage: /app to run Solara app; /api/v1/<endpoint> for API calls"
+    }
+
+
+@router.get("/submit-calculation/test")
 async def submit_calculation():
     try:
-        code = orm.load_code(7185)
+        code = orm.load_code("add@localhost")
         process_node = engine.submit(ArithmeticAddCalculation, x=1, y=2, code=code)
         return {"process_uuid": str(process_node.uuid)}
     except Exception as err:
         raise HTTPException(status_code=400, detail=str(err)) from err
 
 
-@app.post("/submit-workflow")
+@router.post("/submit-workflow")
 async def submit_workflow(inputs: WorkflowInput):
     try:
         codes = inputs.parameters["codes"]["global"]["codes"]
@@ -52,3 +64,8 @@ async def submit_workflow(inputs: WorkflowInput):
         return {"process_uuid": str(node.uuid)}
     except Exception as err:
         raise HTTPException(status_code=400, detail=str(err)) from err
+
+
+app.include_router(router)
+
+app.mount("/", app=solara.server.fastapi.app)

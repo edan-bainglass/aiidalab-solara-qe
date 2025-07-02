@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import os
 import typing as t
 
 import requests as req
@@ -38,8 +39,9 @@ class AiiDAService:
             "parameters": data,
         }
         print(f"Payload: {payload}")
+        port = os.environ.get("APP_PORT")
         response: req.Response = req.post(
-            "http://localhost:5000/submit-workflow/",
+            f"http://localhost:{port}/api/v1/submit-workflow",
             json=payload,
         )
         if response.ok:
