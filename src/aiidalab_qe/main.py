@@ -3,30 +3,30 @@ from __future__ import annotations
 import solara
 
 from aiidalab_qe.components import QeNavBar
-from aiidalab_qe.config.paths import APP_URL_ROOT, STYLES
+from aiidalab_qe.config.paths import STYLES
 from aiidalab_qe.pages import CalculationHistory, Home, ResourceSetup, Workbench
 
 # from aiidalab_qe.pages.tester import Tester, TesterLayout
 
 pages = {
     "home": {
-        "link": APP_URL_ROOT,
+        "link": "/",
         "component": Home,
     },
     "workbench": {
-        "link": f"{APP_URL_ROOT}/workbench",
+        "link": "workbench",
         "component": Workbench,
     },
     "history": {
-        "link": f"{APP_URL_ROOT}/history",
+        "link": "history",
         "component": CalculationHistory,
     },
     "resources": {
-        "link": f"{APP_URL_ROOT}/resources",
+        "link": "resources",
         "component": ResourceSetup,
     },
     # "tester": {
-    #     "link": f"{APP_URL_ROOT}/tester",
+    #     "link": "tester",
     #     "component": Tester,
     #     "layout": TesterLayout,
     # },
@@ -44,15 +44,9 @@ def Layout(children=[]):
 
 routes = [
     solara.Route(
-        path=APP_URL_ROOT,
-        children=[
-            solara.Route(
-                path="/" if page == "home" else page,
-                component=page_data["component"],
-                layout=page_data.get("layout"),
-            )
-            for page, page_data in pages.items()
-        ],
-        layout=Layout,
-    ),
+        path=page_data["link"],
+        component=page_data["component"],
+        layout=Layout if page == "home" else page_data.get("layout"),
+    )
+    for page, page_data in pages.items()
 ]

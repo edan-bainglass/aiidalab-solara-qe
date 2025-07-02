@@ -1,6 +1,6 @@
 import solara
 
-from aiidalab_qe.config.paths import APP_URL_ROOT, STYLES
+from aiidalab_qe.config.paths import STYLES
 
 
 @solara.component
@@ -10,7 +10,7 @@ def QeNavBar(pages: dict):
 
     with solara.v.AppBar(color="secondary", dark=True, class_="app-navbar"):
         with solara.v.ToolbarTitle(class_="toolbar"):
-            with solara.Link(APP_URL_ROOT):
+            with solara.Link("/"):
                 solara.v.Img(
                     class_="me-3",
                     src="https://aiidalab-qe.readthedocs.io/_images/icon.svg",
