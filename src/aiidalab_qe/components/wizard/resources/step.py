@@ -152,7 +152,7 @@ def PluginResourcesPanel(
     with solara.Div(
         class_=" ".join(
             [
-                "resources-panel",
+                "plugin-resources-panel",
                 *(["d-none"] if not active else []),
             ],
         ),
