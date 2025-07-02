@@ -22,11 +22,9 @@ class WorkflowInput(BaseModel):
     parameters: dict
 
 
-@app.get("/")
+@router.get("/")
 def index():
-    return {
-        "message": "Usage: /app to run Solara app; /api/v1/<endpoint> for API calls"
-    }
+    return {"message": "API is running!"}
 
 
 @router.get("/submit-calculation/test")
