@@ -1,4 +1,4 @@
-from aiidalab_qe.common.models.schema import Model
+from aiidalab_qe.common.models.utils import Model
 
 
 class PdosSettingsModel(Model):
