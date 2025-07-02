@@ -46,7 +46,7 @@ def StructureSelectionStep(
         if viewer.value:
             viewer.value.from_ase(new_structure)
         structure = orm.StructureData(ase=new_structure)
-        structure.store()
+        # structure.store()
         input_structure.set(structure)
 
     def update_state():
