@@ -5,14 +5,12 @@ from pathlib import Path
 
 import solara
 
-LogoProps = dict[str, str]
-
 
 @solara.component
-def Logo(src: t.Union[Path, str], alt: str = "", width: int = 100):
-    solara.v.Img(
-        class_="d-block mx-auto",
-        src=src.as_posix() if isinstance(src, Path) else src,
-        alt=alt,
+def Logo(src: t.Union[Path, str], alt: str = "", width: str = "100px"):
+    solara.Image(
+        image=src,
+        format="svg",
         width=width,
+        classes=["d-block", "mx-auto"],
     )

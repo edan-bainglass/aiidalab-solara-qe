@@ -4,7 +4,7 @@ import typing as t
 
 import solara
 
-from ..header import Header, LogoProps
+from ..header import Header
 from ..navbar import NavBar
 from ..navbar.types import NavItemProps
 
@@ -13,7 +13,7 @@ from ..navbar.types import NavItemProps
 def App(
     title: str,
     subtitle: str = "",
-    logo: t.Optional[LogoProps] = None,
+    logo: t.Optional[dict] = None,
     nav_items: t.Optional[list[NavItemProps]] = None,
     children: t.Optional[list[solara.Element]] = None,
 ):

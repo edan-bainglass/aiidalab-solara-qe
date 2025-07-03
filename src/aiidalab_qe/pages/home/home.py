@@ -2,7 +2,7 @@ import solara
 
 from aiidalab_qe.common.components.header import Header
 from aiidalab_qe.common.components.navbar import NavBar
-from aiidalab_qe.config.paths import STYLES
+from aiidalab_qe.config.paths import IMAGES, STYLES
 
 
 @solara.component
@@ -17,7 +17,7 @@ def Home():
             title="The AiiDAlab Quantum ESPRESSO app",
             subtitle="🎉 Happy computing 🎉",
             logo={
-                "src": "https://aiidalab-qe.readthedocs.io/_images/icon.svg",
+                "src": IMAGES / "icon.svg",
                 "alt": "AiiDAlab Quantum ESPRESSO app logo",
             },
         )

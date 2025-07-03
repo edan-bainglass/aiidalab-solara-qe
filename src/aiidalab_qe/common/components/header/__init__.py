@@ -1,8 +1,4 @@
 from .header import Header
-from .logo import Logo, LogoProps
+from .logo import Logo
 
-__all__ = [
-    "Header",
-    "Logo",
-    "LogoProps",
-]
+__all__ = ["Header", "Logo"]
