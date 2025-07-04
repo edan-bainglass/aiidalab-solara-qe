@@ -1,6 +1,7 @@
 import solara
 
-from aiidalab_qe.config.paths import BASE_URL, STYLES
+from aiidalab_qe.config.deployment import BASE_URL
+from aiidalab_qe.config.paths import STYLES
 
 
 @solara.component
