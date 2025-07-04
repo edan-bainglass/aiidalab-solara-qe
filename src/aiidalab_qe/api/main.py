@@ -23,7 +23,7 @@ class WorkflowInput(BaseModel):
 
 
 @router.get("/")
-def index():
+async def index():
     return {"message": "API is running!"}
 
 
