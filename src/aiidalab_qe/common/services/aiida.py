@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import contextlib
-import os
 import typing as t
 
 import requests as req
@@ -9,6 +8,8 @@ from aiida import load_profile, orm
 from aiida.common.exceptions import NotExistent
 from aiida_pseudo.groups.family import PseudoPotentialFamily
 from aiida_pseudo.groups.mixins import RecommendedCutoffMixin
+
+from aiidalab_qe.config.deployment import APP_PORT
 
 _ = load_profile()
 
@@ -39,9 +40,8 @@ class AiiDAService:
             "parameters": data,
         }
         print(f"Payload: {payload}")
-        port = os.environ.get("APP_PORT")
         response: req.Response = req.post(
-            f"http://localhost:{port}/api/v1/submit-workflow",
+            f"http://localhost:{APP_PORT}/api/v1/submit-workflow",
             json=payload,
         )
         if response.ok:
