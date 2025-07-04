@@ -7,7 +7,6 @@ from solara.toestand import Ref
 from aiidalab_qe.common.components.wizard import onStateChange
 from aiidalab_qe.common.models.schema import QeAppModel
 from aiidalab_qe.common.services.aiida import AiiDAService
-from aiidalab_qe.common.types import ProcessType
 from aiidalab_qe.config.paths import STYLES
 from aiidalab_qe.plugins.utils import get_plugin_results
 
