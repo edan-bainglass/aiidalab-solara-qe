@@ -3,7 +3,6 @@ from aiidalab_qe.common.models.codes import CodeModel, PwCodeModel
 from ..models import PluginResourcesModel, PluginSettingsModel
 from .bands import BandStructureSettings
 from .model import BandsSettingsModel
-from .results import BandStructureResults
 
 bands = {
     "title": "Electronic band structure",
@@ -21,5 +20,4 @@ bands = {
             ),
         },
     ),
-    "results": BandStructureResults,
 }
