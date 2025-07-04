@@ -44,7 +44,7 @@ routes = [
     solara.Route(
         path=validate_link(page_data["link"]),
         component=page_data["component"],
-        layout=Layout if page == "home" else page_data.get("layout"),
+        layout=Layout,
     )
     for page, page_data in pages.items()
 ]
