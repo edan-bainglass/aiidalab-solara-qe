@@ -43,7 +43,7 @@ bands = "aiidalab_qe.plugins.bands:bands"
 pdos = "aiidalab_qe.plugins.pdos:pdos"
 
 [project.entry-points."jupyter_serverproxy_servers"]
-"qeapp" = "aiidalab_qe.config.proxy:setup_app"
+"qe" = "aiidalab_qe.config.proxy:setup_app"
 
 [tool.flit.module]
 name = "aiidalab_qe"
