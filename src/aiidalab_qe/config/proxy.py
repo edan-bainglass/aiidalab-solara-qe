@@ -11,6 +11,8 @@ def _app_command(port):
         "0.0.0.0",
         "--port",
         str(port),
+        "--root-path",
+        "/qe",
         "--reload",
     ]
 
