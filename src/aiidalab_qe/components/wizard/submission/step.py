@@ -20,10 +20,7 @@ def SubmissionStep(
     description = Ref(model.fields.description)
     process = Ref(model.fields.process)
 
-    process_node = solara.use_memo(
-        lambda: AiiDAService.load_process(process.value),
-        [process.value],
-    )
+    process_node = AiiDAService.load_process(process.value)
 
     def update_label():
         if not process_node:

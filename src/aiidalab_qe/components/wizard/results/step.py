@@ -45,12 +45,11 @@ def ResultsStep(
 def ProcessSummary(model: solara.Reactive[QeAppModel]):
     process = Ref(model.fields.process)
 
-    process_node = solara.use_memo(
-        lambda: AiiDAService.load_process(process.value),
-        [process.value],
-    )
+    process_node = AiiDAService.load_process(process.value)
 
     with solara.Div(class_="process-panel summary-panel"):
+        print("rendering process-summary component")
+
         with solara.Column():
             solara.Text(f"pk: {process_node.pk}")
             solara.Text(f"Label: {process_node.label or 'No label'}")
@@ -59,7 +58,13 @@ def ProcessSummary(model: solara.Reactive[QeAppModel]):
 
 @solara.component
 def ProcessStatus(model: solara.Reactive[QeAppModel]):
+    process = Ref(model.fields.process)
+
+    process_node = AiiDAService.load_process(process.value)
+    
     with solara.Div(class_="process-panel status-panel"):
+        print("rendering process-status component")
+
         solara.Text("Not yet implemented")
 
 
@@ -67,12 +72,11 @@ def ProcessStatus(model: solara.Reactive[QeAppModel]):
 def ProcessResults(model: solara.Reactive[QeAppModel]):
     process = Ref(model.fields.process)
 
-    process_node = solara.use_memo(
-        lambda: AiiDAService.load_process(process.value),
-        [process.value],
-    )
+    process_node = AiiDAService.load_process(process.value)
 
     with solara.Div(class_="process-panel results-panel"):
+        print("rendering process-results component")
+
         with solara.lab.Tabs():
             for prop in sorted(
                 process_node.inputs.properties,
