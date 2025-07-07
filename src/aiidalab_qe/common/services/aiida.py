@@ -9,7 +9,7 @@ from aiida.common.exceptions import NotExistent
 from aiida_pseudo.groups.family import PseudoPotentialFamily
 from aiida_pseudo.groups.mixins import RecommendedCutoffMixin
 
-from aiidalab_qe.config.deployment import APP_PORT
+from aiidalab_qe.config.deployment import get_base_url
 
 _ = load_profile()
 
@@ -41,7 +41,7 @@ class AiiDAService:
         }
         print(f"Payload: {payload}")
         response: req.Response = req.post(
-            f"http://localhost:{APP_PORT}/api/v1/submit-workflow",
+            f"{get_base_url()}/api/v1/submit-workflow",
             json=payload,
         )
         if response.ok:

@@ -1,4 +1,9 @@
-import os
+import solara.server.settings
 
-APP_PORT = os.environ.get("APP_PORT")
-BASE_URL = os.environ.get("BASE_URL", "")
+
+def get_base_url():
+    return solara.server.settings.main.base_url.rstrip("/")
+
+
+def get_root_path():
+    return solara.server.settings.main.root_path or ""
