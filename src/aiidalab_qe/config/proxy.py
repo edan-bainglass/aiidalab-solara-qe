@@ -2,8 +2,7 @@ import os
 
 
 def _app_command(port):
-    os.environ["SOLARA_APP"] = "src/aiidalab_qe/main.py"
-    os.environ["APP_PORT"] = str(port)
+    os.environ["SOLARA_APP"] = "aiidalab_qe.main"
     return [
         "uvicorn",
         "aiidalab_qe.api.main:app",
