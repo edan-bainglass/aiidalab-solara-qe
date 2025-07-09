@@ -1,10 +1,6 @@
-import solara
-import solara.server
-import solara.server.fastapi
 from aiida import engine, load_profile, orm
 from aiida.calculations.arithmetic.add import ArithmeticAddCalculation
 from fastapi import APIRouter, FastAPI, HTTPException
-from fastapi.responses import RedirectResponse
 
 from aiidalab_qe.workflows.qe import QeAppWorkChain
 
@@ -15,11 +11,6 @@ _ = load_profile()
 app = FastAPI()
 
 router = APIRouter(prefix="/api/v1")
-
-
-@app.get("/")
-async def root():
-    return RedirectResponse(url="app")
 
 
 @router.get("/")
@@ -65,5 +56,3 @@ async def submit_workflow(inputs: WorkflowInput):
 
 
 app.include_router(router)
-
-app.mount("/app", app=solara.server.fastapi.app)

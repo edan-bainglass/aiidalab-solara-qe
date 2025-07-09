@@ -9,7 +9,7 @@ from aiida.common.exceptions import NotExistent
 from aiida_pseudo.groups.family import PseudoPotentialFamily
 from aiida_pseudo.groups.mixins import RecommendedCutoffMixin
 
-from aiidalab_qe.config.deployment import get_base_url
+from aiidalab_qe.config.deployment import get_api_url
 
 _ = load_profile()
 
@@ -36,12 +36,12 @@ class AiiDAService:
         payload = {
             "label": label,
             "description": description,
-            "structure_pk": structure.pk,
+            "structure_pk": 7262,
             "parameters": data,
         }
         print(f"Payload: {payload}")
         response: req.Response = req.post(
-            f"{get_base_url()}/api/v1/submit-workflow",
+            f"{get_api_url()}/submit-workflow",
             json=payload,
         )
         if response.ok:
