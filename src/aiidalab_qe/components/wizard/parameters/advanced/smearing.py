@@ -36,7 +36,7 @@ def SmearingSettings(active: bool, model: solara.Reactive[QeAppModel]):
         class_=" ".join(
             [
                 "control-group smearing-settings",
-                *(["d-none"] if not active else []),
+                *([] if active else ["d-none"]),
             ],
         ),
     ):
@@ -49,7 +49,6 @@ def SmearingSettings(active: bool, model: solara.Reactive[QeAppModel]):
             label="Smearing",
             values=[*SystemParametersModel.get_options("smearing")],
             value=smearing,
-            on_value=smearing.set,
             disabled=disabled,
         )
         solara.InputFloat(
