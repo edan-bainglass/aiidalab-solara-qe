@@ -22,15 +22,16 @@ def QeWizard(model: solara.Reactive[QeWizardModel]):
     submitting = solara.use_reactive(False)
 
     async def submit_workflow():
-        if submitting.value:
-            inputs = {
-                "label": label.value,
-                "description": description.value,
-                "input_structure": input_structure.value,
-                **data.value.to_legacy_parameters(),
-            }
-            process_uuid = await AiiDAService.submit(inputs)
-            process.set(process_uuid)
+        if not submitting.value:
+            return
+        inputs = {
+            "label": label.value,
+            "description": description.value,
+            "input_structure": input_structure.value,
+            **data.value.to_legacy_parameters(),
+        }
+        process_uuid = await AiiDAService.submit(inputs)
+        process.set(process_uuid)
 
     use_task(
         submit_workflow,
