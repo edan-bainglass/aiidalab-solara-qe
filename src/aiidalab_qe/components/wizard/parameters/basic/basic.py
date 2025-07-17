@@ -31,7 +31,7 @@ def BasicSettings(active: bool, model: solara.Reactive[QeAppModel]):
         print("rendering basic-settings component")
 
         ToggleButtons(
-            label="Electronic Type",
+            label="Electronic type",
             options={
                 "metal": {
                     "label": "Metal",
