@@ -10,7 +10,11 @@ from aiidalab_qe.common.models.schema import QeAppModel
 @solara.component
 def BasicSettings(active: bool, model: solara.Reactive[QeAppModel]):
     process = Ref(model.fields.process)
-    basic_settings = model.fields.calculation_parameters.basic
+    parameters = model.fields.calculation_parameters.basic
+    electronic_type = Ref(parameters.electronic_type)
+    spin_type = Ref(parameters.spin_type)
+    spin_orbit = Ref(parameters.spin_orbit)
+    protocol = Ref(parameters.protocol)
 
     disabled = solara.use_memo(
         lambda: process.value is not None,
@@ -21,7 +25,7 @@ def BasicSettings(active: bool, model: solara.Reactive[QeAppModel]):
         class_=" ".join(
             [
                 "control-group basic-settings",
-                *(["d-none"] if not active else []),
+                *([] if active else ["d-none"]),
             ],
         ),
     ):
@@ -42,7 +46,7 @@ def BasicSettings(active: bool, model: solara.Reactive[QeAppModel]):
                     "description": "Insulating system",
                 },
             },
-            value=Ref(basic_settings.electronic_type),
+            value=electronic_type,
             disabled=disabled,
         )
         ToggleButtons(
@@ -57,7 +61,7 @@ def BasicSettings(active: bool, model: solara.Reactive[QeAppModel]):
                     "description": "Non-magnetic system",
                 },
             },
-            value=Ref(basic_settings.spin_type),
+            value=spin_type,
             disabled=disabled,
         )
         ToggleButtons(
@@ -72,7 +76,7 @@ def BasicSettings(active: bool, model: solara.Reactive[QeAppModel]):
                     "description": "Include spin-orbit coupling",
                 },
             },
-            value=Ref(basic_settings.spin_orbit),
+            value=spin_orbit,
             disabled=disabled,
         )
         ToggleButtons(
@@ -91,7 +95,7 @@ def BasicSettings(active: bool, model: solara.Reactive[QeAppModel]):
                     "description": "High accuracy for demanding calculations",
                 },
             },
-            value=Ref(basic_settings.protocol),
+            value=protocol,
             disabled=disabled,
             class_="protocol-selector",
         )
