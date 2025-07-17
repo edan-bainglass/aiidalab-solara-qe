@@ -40,8 +40,10 @@ class AiiDAService:
             "parameters": data,
         }
         print(f"Payload: {payload}")
+        api_url = get_api_url()
+        print(f"API URL: {api_url}")
         response: req.Response = req.post(
-            f"{get_api_url()}/submit-workflow",
+            f"{api_url}/submit-workflow",
             json=payload,
         )
         if response.ok:
