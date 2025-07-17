@@ -44,6 +44,8 @@ def ResultsStep(
 @solara.component
 def ProcessSummary(model: solara.Reactive[QeAppModel]):
     process = Ref(model.fields.process)
+    label = Ref(model.fields.label)
+    description = Ref(model.fields.description)
 
     process_node = AiiDAService.load_process(process.value)
 
@@ -51,9 +53,18 @@ def ProcessSummary(model: solara.Reactive[QeAppModel]):
         print("rendering process-summary component")
 
         with solara.Column():
-            solara.Text(f"pk: {process_node.pk}")
-            solara.Text(f"Label: {process_node.label or 'No label'}")
-            solara.Text(f"Description: {process_node.description or 'No description'}")
+            solara.HTML(
+                "span",
+                f"<b>PK:</b> {process_node.pk}",
+            )
+            solara.HTML(
+                "span",
+                f"<b>Label:</b> {label.value or 'No label'}",
+            )
+            solara.HTML(
+                "span",
+                f"<b>Description:</b> {description.value or 'No description'}",
+            )
 
 
 @solara.component
@@ -61,7 +72,7 @@ def ProcessStatus(model: solara.Reactive[QeAppModel]):
     process = Ref(model.fields.process)
 
     process_node = AiiDAService.load_process(process.value)
-    
+
     with solara.Div(class_="process-panel status-panel"):
         print("rendering process-status component")
 
