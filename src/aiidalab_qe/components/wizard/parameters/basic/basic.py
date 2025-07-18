@@ -99,3 +99,17 @@ def BasicSettings(active: bool, model: solara.Reactive[QeAppModel]):
             disabled=disabled,
             class_="protocol-selector",
         )
+
+        with solara.Div(class_="warning-box"):
+            if spin_type.value == "collinear":
+                solara.Info(
+                    "Set the desired magnetic configuration in Advanced settings",
+                    dense=True,
+                    classes=["mb-1"],
+                )
+                if electronic_type.value == "insulator":
+                    solara.Info(
+                        "Note: only total magnetization can be set for insulators",
+                        dense=True,
+                        classes=["mb-1"],
+                    )
